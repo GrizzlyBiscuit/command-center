@@ -8,6 +8,7 @@ import subprocess
 import re
 import random
 import urllib.request
+from pathlib import Path
 from collections import deque
 from threading import Lock
 import threading
@@ -23,16 +24,27 @@ else:
     CREATE_NO_WINDOW = 0
     DETACHED_PROCESS = 0
     CREATE_NEW_PROCESS_GROUP = 0
-# ensure repo root is importable
-sys.path.insert(0, '/')
+# Support both a repository checkout (backend/app.py + frontend/) and the
+# legacy deployed layout where app.py, templates/, and static/ are siblings.
+BACKEND_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = BACKEND_ROOT.parent
+if str(BACKEND_ROOT) not in sys.path:
+    sys.path.insert(0, str(BACKEND_ROOT))
 from agent import runner, installer
 from agent.telegram_notifier import TelegramNotifier
-from web.secure_store import save_creds, load_creds
-from web.desktop_log import read_entries
+from secure_store import save_creds, load_creds
+from desktop_log import read_entries
+from music import init_music
 
-
-app = Flask(__name__)
+_repo_templates = PROJECT_ROOT / 'frontend' / 'templates'
+_repo_static = PROJECT_ROOT / 'frontend' / 'static'
+app = Flask(
+    __name__,
+    template_folder=str(_repo_templates if _repo_templates.is_dir() else BACKEND_ROOT / 'templates'),
+    static_folder=str(_repo_static if _repo_static.is_dir() else BACKEND_ROOT / 'static'),
+)
 app.config['SECRET_KEY'] = os.environ.get('UI_SECRET', 'dev-secret')
+init_music(app, scan_on_start=True)
 RELAY_TRACE_KEY = os.environ.get('RELAY_TRACE_KEY', 'cc-trace-local')
 
 stream_events = deque()
@@ -2621,5 +2633,9 @@ def api_wip_run():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('FLASK_PORT', '5000')),
-            debug=True, use_reloader=False)
+    app.run(
+        host=os.environ.get('FLASK_HOST', '0.0.0.0'),
+        port=int(os.environ.get('FLASK_PORT', '5050')),
+        debug=os.environ.get('FLASK_DEBUG') == '1',
+        use_reloader=False,
+    )

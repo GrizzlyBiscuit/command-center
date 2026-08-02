@@ -60,6 +60,15 @@ Command Center supports full-page spatial navigation with a keyboard or a standa
 - Controller: D-pad or left stick moves, A selects, B goes back, LB/RB changes panels, X opens audio, Y focuses the sidebar, View returns home, and Menu opens help.
 - Snake and 2048 capture controls only after the game area is selected; Escape/B releases them. Chess squares are directly keyboard/controller selectable.
 
+## Local music library
+
+Open **Music > Settings** and choose the folder that contains this Command Center's music. The desktop launcher provides a native **Browse** dialog; the folder path can also be entered manually in a regular browser. Saving the folder starts a background scan.
+
+- Music-only scanning with optional subfolders; video files and interview features are intentionally not included.
+- Tracks, albums, artists, search, queue, shuffle, repeat, a persistent player dock, listening stats, Media Session controls, and visualizer integration.
+- Playback and library metadata stay local to the host computer. Music read/write APIs reject unauthenticated LAN clients even when the rest of Command Center is available remotely.
+- Settings, the artwork cache, and listening stats are stored outside the repo. Set `CC_MUSIC_DATA_DIR` to override the per-user runtime-data location.
+
 ## Run on boot, minimized
 
 Use one of:
@@ -124,10 +133,18 @@ Forge named model pairs that appear in dropdowns everywhere.
 ### Relay
 Relay/bridge trace and activity view.
 
+### Music
+Local music library and player.
+
+- Choose a music folder in **Settings**, then scan it.
+- Browse tracks, albums, and artists; search, queue, shuffle, and repeat.
+- The player stays available while switching panels, and can drive the Visualizer.
+- Music access is limited to the host computer; remote/LAN clients cannot enumerate or stream the library.
+
 ### Visualizer
 Audio-reactive neon visualizer.
 
-- Driven by the titlebar audio menu.
+- Driven by the active music player or titlebar audio menu.
 - Idle until audio is playing.
 
 ### Focus
@@ -210,12 +227,19 @@ Key endpoints used by the UI:
 - `/arena/*` — model arena, maze, fusion, voting, pairing
 - `/api/chat` — local AI chat endpoint
 
+- `/api/music/settings` - local music-folder and scan preferences
+- `/api/music/library`, `/api/music/scan` - local-only catalog and scan status/actions
+- `/api/music/audio/<track-id>`, `/api/music/art/<art-id>` - local-only ID-based media delivery
+- `/api/music/stats` - local-only listening receipts and summaries
+
 ## Troubleshooting
 
 - **Hub won’t start** — make sure `.env` exists and `FLASK_PORT` is free.
 - **Ollama down** — run `ollama serve` and pull at least one model.
 - **Discord not working** — verify bot token and channel IDs in `.env`.
 - **Mobile can’t connect** — use the PC’s LAN IP, make sure firewall allows the port.
+
+- **Music folder is unavailable remotely** - by design, music configuration, metadata, and playback are host-only. Open Music on the Command Center PC.
 
 ## Project facts and runtime notes
 

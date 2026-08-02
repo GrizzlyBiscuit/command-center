@@ -306,14 +306,24 @@
 
     function stopCurrent() { if (current) { try { current.stop(); } catch (e) {} current = null; } }
 
+    function notifyAudioState() {
+      try {
+        window.dispatchEvent(new CustomEvent('cc:ambientaudiochange', { detail: { playing: playing, mode: mode } }));
+      } catch (e) {}
+    }
+
     function start() {
       if (!ensureCtx()) return;
+      if (window.CCMusic && window.CCMusic.isPlaying && window.CCMusic.isPlaying()) {
+        window.CCMusic.pause();
+      }
       if (ctx.state === 'suspended') ctx.resume();
       if (!current || current.mode !== mode) { stopCurrent(); current = (mode === 'lofi' ? LofiEngine() : HumEngine()); }
       playing = true;
       master.gain.cancelScheduledValues(ctx.currentTime);
       master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
       master.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.8);
+      notifyAudioState();
     }
     function stop() {
       playing = false;
@@ -322,6 +332,7 @@
         master.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.6);
       }
       setTimeout(function () { if (!playing) stopCurrent(); }, 700);
+      notifyAudioState();
     }
     return {
       toggle: function () { playing ? stop() : start(); return playing; },
@@ -342,6 +353,7 @@
       getVolume: function () { return vol; },
       getMode: function () { return mode; },
       isOn: function () { return playing; },
+      stop: stop,
       // expose a live AnalyserNode tapped off the master bus (for the visualizer)
       getAnalyser: function () {
         if (!ensureCtx()) return null;
