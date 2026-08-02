@@ -1,0 +1,58 @@
+<!-- Music-only local library. The player dock is intentionally outside the tab panel. -->
+<div class="tab-panel" id="tab-music" style="display:none">
+  <div class="cc-music" id="cc-music-root">
+    <header class="cc-music-head">
+      <div>
+        <h3 class="panel-h">&#9835; Music Library</h3>
+        <p class="panel-sub">Play music from a folder on this computer. Nothing is uploaded.</p>
+      </div>
+      <label class="cc-music-search-wrap" for="cc-music-search">
+        <span>Search</span>
+        <input id="cc-music-search" type="search" placeholder="Songs, albums, artists…" autocomplete="off">
+      </label>
+    </header>
+
+    <nav class="cc-music-views" aria-label="Music views">
+      <button type="button" class="btn-ghost active" data-music-view="tracks">Tracks</button>
+      <button type="button" class="btn-ghost" data-music-view="albums">Albums</button>
+      <button type="button" class="btn-ghost" data-music-view="artists">Artists</button>
+      <button type="button" class="btn-ghost" data-music-view="stats">Stats</button>
+      <button type="button" class="btn-ghost" data-music-view="settings">Settings</button>
+    </nav>
+
+    <div class="cc-music-status" id="cc-music-status" role="status" aria-live="polite"></div>
+    <div class="cc-music-content" id="cc-music-content"></div>
+  </div>
+</div>
+
+<section class="cc-music-player" id="cc-music-player" aria-label="Music player" hidden>
+  <audio id="cc-music-audio" preload="metadata"></audio>
+  <div class="cc-music-now">
+    <img id="cc-music-art" alt="" hidden>
+    <div class="cc-music-now-copy">
+      <strong id="cc-music-now-title">Nothing playing</strong>
+      <span id="cc-music-now-meta">Choose a track from Music Library</span>
+    </div>
+  </div>
+  <div class="cc-music-transport" aria-label="Playback controls">
+    <button type="button" id="cc-music-shuffle" aria-label="Shuffle" aria-pressed="false">&#128256;</button>
+    <button type="button" id="cc-music-previous" aria-label="Previous track">&#9198;</button>
+    <button type="button" id="cc-music-play" aria-label="Play">&#9654;</button>
+    <button type="button" id="cc-music-next" aria-label="Next track">&#9197;</button>
+    <button type="button" id="cc-music-repeat" aria-label="Repeat off" data-repeat="off">&#128257;</button>
+  </div>
+  <div class="cc-music-timeline">
+    <span id="cc-music-elapsed">0:00</span>
+    <input id="cc-music-progress" type="range" min="0" max="1000" value="0" aria-label="Track position">
+    <span id="cc-music-duration">0:00</span>
+  </div>
+  <div class="cc-music-player-tools">
+    <label for="cc-music-volume">Volume</label>
+    <input id="cc-music-volume" type="range" min="0" max="1" step="0.01" value="0.8">
+    <button type="button" id="cc-music-queue-toggle" aria-expanded="false" aria-controls="cc-music-queue">
+      Queue <span id="cc-music-queue-count">0</span>
+    </button>
+    <button type="button" id="cc-music-queue-clear">Clear</button>
+  </div>
+  <div class="cc-music-queue" id="cc-music-queue" hidden></div>
+</section>
