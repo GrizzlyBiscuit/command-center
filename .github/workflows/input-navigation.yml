@@ -35,8 +35,14 @@ jobs:
           node --check frontend/static/fx.js &&
           node --check frontend/static/kanban.js &&
           node --check frontend/static/visualizer.js &&
+          node --check frontend/static/media/media-session.js &&
+          node --check frontend/static/media/now-playing.js &&
           node --check frontend/static/music/music-domain.js &&
+          node --check frontend/static/music/music-remote.js &&
           node --check frontend/static/music/music-app.js &&
+          node --check frontend/static/video/video-domain.js &&
+          node --check frontend/static/video/video-remote.js &&
+          node --check frontend/static/video/video-app.js &&
           node --check frontend/static/input/controller-navigation.js &&
           node --check frontend/static/input/gamepad-controller.js &&
           node --check frontend/static/input/keyboard-controls.js &&

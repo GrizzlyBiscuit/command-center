@@ -347,6 +347,29 @@ class Api:
         folder = os.path.abspath(os.path.expanduser(folder))
         return folder if os.path.isdir(folder) else None
 
+    def choose_video_folder(self):
+        """Open the native folder picker for the local Video settings page."""
+        w = self._holder.get("w")
+        if not w:
+            return None
+        try:
+            selected = w.create_file_dialog(webview.FOLDER_DIALOG, allow_multiple=False)
+        except TypeError:
+            # Older pywebview releases do not expose allow_multiple here.
+            try:
+                selected = w.create_file_dialog(webview.FOLDER_DIALOG)
+            except Exception as exc:
+                log(f"video folder picker failed: {exc}")
+                return None
+        except Exception as exc:
+            log(f"video folder picker failed: {exc}")
+            return None
+        if not selected:
+            return None
+        folder = selected if isinstance(selected, str) else selected[0]
+        folder = os.path.abspath(os.path.expanduser(folder))
+        return folder if os.path.isdir(folder) else None
+
 
 def boot_relay_on_start():
     """On login, bring the bridge up automatically: boot Ollama if down and

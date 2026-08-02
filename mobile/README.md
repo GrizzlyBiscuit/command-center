@@ -22,6 +22,8 @@ Goal: a native-feeling Android app that connects to your local Command Center hu
 - Cleartext allowed for local domains via `network_security_config.xml`
 - External links always open in the real browser
 - In Music, **Play on > This device** plays through the phone. **Command Center PC** controls the audio element in the running desktop launcher window.
+- In Video, the same selector either streams an MP4/WebM to the phone or controls the video element in the desktop launcher. Watch progress is saved for **Continue watching**.
+- The Home **Now Playing** card follows the most recently used Music or Video player and provides quick playback controls.
 
 ## Build a release APK
 Build > Generate Signed Bundle / APK > APK > debug keystore OK for personal use.

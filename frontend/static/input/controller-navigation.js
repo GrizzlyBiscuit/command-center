@@ -213,6 +213,7 @@
         return true;
       }
       if(windowRef.CCChess?.cancelSelection?.()) return true;
+      if(windowRef.CCVideo?.handleInputAction?.("back", detail)) return true;
       if(windowRef.CCMusic?.handleInputAction?.("back", detail)) return true;
       const audio = documentRef.getElementById("tb-audio-wrap");
       if(audio?.classList.contains("open")){
@@ -251,6 +252,7 @@
       if(action === "back") return goBack(detail);
       if(activeScope() !== documentRef) return true;
       if(action === "secondaryAction"){
+        if(windowRef.CCMediaSession?.commandActive?.("toggle")) return true;
         if(windowRef.CCMusic?.handleInputAction?.(action, detail)) return true;
         documentRef.getElementById("tb-audio")?.click();
         return true;
