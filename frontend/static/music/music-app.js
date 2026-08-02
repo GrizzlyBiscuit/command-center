@@ -4,7 +4,8 @@
  *
  * DOM contract (all controls are ordinary, controller-friendly elements):
  *   Panel: #cc-music-root, #cc-music-search, #cc-music-content,
- *     #cc-music-status, and buttons [data-music-view="tracks|albums|artists|stats|settings"].
+ *     #cc-music-status, #cc-music-output, #cc-music-output-status, and
+ *     buttons [data-music-view="tracks|albums|artists|stats|settings"].
  *   Persistent dock: #cc-music-player, <audio id="cc-music-audio">,
  *     #cc-music-art, #cc-music-now-title, #cc-music-now-meta,
  *     #cc-music-previous, #cc-music-play, #cc-music-next,
@@ -14,15 +15,16 @@
  *     and optional #cc-music-queue-toggle.
  *   Settings controls are rendered into #cc-music-content by this module.
  *
- * Load music-domain.js before this file. The audio element can live outside the
- * music tab; playback intentionally continues while another Command Center
- * panel is open.
+ * Load music-domain.js and music-remote.js before this file. The audio element
+ * can live outside the music tab; playback intentionally continues while
+ * another Command Center panel is open.
  */
 
 (function (root) {
   "use strict";
 
   const Domain = root.CCMusicDomain;
+  const Remote = root.CCMusicRemote;
   const API = Object.freeze({
     settings: "/api/music/settings",
     library: "/api/music/library",
@@ -147,12 +149,15 @@
   }
 
   function createApp() {
-    if (!Domain || !root.document) return null;
+    if (!Domain || !Remote || !root.document) return null;
     const nodes = {
       root: byId("cc-music-root"),
       search: byId("cc-music-search"),
       content: byId("cc-music-content"),
       status: byId("cc-music-status"),
+      output: byId("cc-music-output"),
+      outputStatus: byId("cc-music-output-status"),
+      outputWrap: byId("cc-music-output")?.closest(".cc-music-output-wrap"),
       player: byId("cc-music-player"),
       audio: byId("cc-music-audio"),
       art: byId("cc-music-art"),
@@ -202,10 +207,36 @@
       analyser: null,
       audioContext: null,
       audioSource: null,
+      remote: Remote.normalizePlaybackState({}),
+      rendererError: "",
     };
+    let remoteBridge = null;
 
     function currentTrack() {
       return state.queueIndex >= 0 ? state.trackById.get(state.queue[state.queueIndex]) || null : null;
+    }
+
+    function usingRemoteOutput() {
+      return Boolean(remoteBridge?.isRemoteTarget());
+    }
+
+    function playbackIsPlaying() {
+      return usingRemoteOutput() ? state.remote.playing : !nodes.audio.paused && !nodes.audio.ended;
+    }
+
+    function playbackPosition() {
+      return usingRemoteOutput()
+        ? Remote.projectedPosition(state.remote)
+        : Number(nodes.audio.currentTime) || 0;
+    }
+
+    function playbackDuration() {
+      if (usingRemoteOutput()) return state.remote.duration || currentTrack()?.duration || 0;
+      return Number.isFinite(nodes.audio.duration) ? nodes.audio.duration : currentTrack()?.duration || 0;
+    }
+
+    function playbackVolume() {
+      return usingRemoteOutput() ? state.remote.volume : nodes.audio.volume;
     }
 
     function opaqueTrackId(value) {
@@ -227,6 +258,231 @@
       return track && (track.has_artwork || track.artwork_url)
         ? `/api/music/art/${encodeURIComponent(track.id)}`
         : "";
+    }
+
+    function updateOutputStatus() {
+      const target = remoteBridge?.getTarget() || Remote.OUTPUT_DEVICE;
+      if (nodes.output && nodes.output.value !== target) nodes.output.value = target;
+      if (!nodes.outputStatus || !nodes.outputWrap) return;
+      let text = "Sound plays on this device.";
+      let kind = "device";
+      if (remoteBridge?.isRenderer()) {
+        if (!remoteBridge.isRendererConnected()) {
+          text = "PC player reconnecting - phone control is not ready yet.";
+          kind = "offline";
+        } else if (state.rendererError === "interaction_required") {
+          text = "Press Play once here before starting audio from the phone.";
+          kind = "blocked";
+        } else if (state.rendererError) {
+          text = "PC playback needs attention in this window.";
+          kind = "blocked";
+        } else {
+          text = "This window is the Command Center PC player.";
+          kind = "online";
+        }
+      } else if (usingRemoteOutput()) {
+        if (!state.remote.rendererOnline) {
+          text = "PC offline - open the desktop Command Center window.";
+          kind = "offline";
+        } else if (state.remote.error === "interaction_required") {
+          text = "PC needs one local Play press before remote audio can start.";
+          kind = "blocked";
+        } else if (state.remote.error) {
+          text = "PC playback needs attention in the desktop window.";
+          kind = "blocked";
+        } else {
+          text = "PC online - controls and sound are routed there.";
+          kind = "online";
+        }
+      } else if (state.remote.rendererOnline) {
+        text = "Sound plays here; the Command Center PC is available.";
+      }
+      if (nodes.outputStatus.textContent !== text) nodes.outputStatus.textContent = text;
+      if (nodes.outputWrap.dataset.state !== kind) nodes.outputWrap.dataset.state = kind;
+    }
+
+    function knownQueueState(values, requestedIndex) {
+      return Remote.filterQueueState(values, requestedIndex, id => state.trackById.has(id));
+    }
+
+    function applyRemoteSnapshot(snapshot) {
+      state.remote = snapshot || Remote.normalizePlaybackState({});
+      updateOutputStatus();
+      if (!usingRemoteOutput()) return;
+      const known = knownQueueState(state.remote.queue, state.remote.index);
+      const nextQueue = known.queue;
+      const nextIndex = known.index;
+      const queueChanged = nextIndex !== state.queueIndex
+        || nextQueue.length !== state.queue.length
+        || nextQueue.some((id, index) => id !== state.queue[index]);
+      state.queue = nextQueue;
+      state.queueIndex = nextIndex;
+      state.repeat = state.remote.repeat;
+      state.shuffle = state.remote.shuffle;
+      if (queueChanged) renderQueue();
+      updateDock();
+    }
+
+    async function sendRemote(action, values = {}) {
+      try {
+        const response = await remoteBridge.command(action, values);
+        return response;
+      } catch (error) {
+        setStatus(error.message || "The Command Center PC could not be controlled.", "error");
+        remoteBridge.refresh().catch(() => {});
+        throw error;
+      }
+    }
+
+    function sendRemoteLoad({ autoplay = false, position = 0 } = {}) {
+      const bounded = Remote.boundQueueState(state.queue, state.queueIndex);
+      return sendRemote("load", {
+        queue: bounded.queue,
+        index: bounded.index,
+        autoplay: Boolean(autoplay),
+        position: Math.max(0, Number(position) || 0),
+        repeat: state.repeat,
+        shuffle: state.shuffle,
+      });
+    }
+
+    function clearPhoneMediaSession() {
+      if (!("mediaSession" in root.navigator)) return;
+      try {
+        root.navigator.mediaSession.metadata = null;
+        root.navigator.mediaSession.playbackState = "none";
+      } catch {}
+    }
+
+    function suspendLocalOutput() {
+      flushListening();
+      savePlayback(true, { forceLocal: true });
+      nodes.audio.pause();
+      nodes.audio.removeAttribute("src");
+      nodes.audio.load();
+      resetListening(null);
+      clearPhoneMediaSession();
+    }
+
+    function handleTargetChange(target, previous) {
+      if (target === Remote.OUTPUT_COMPUTER) {
+        if (previous === Remote.OUTPUT_DEVICE) suspendLocalOutput();
+        applyRemoteSnapshot(state.remote);
+        setStatus("Playback controls now target the Command Center PC.", "success");
+      } else {
+        state.queue = [];
+        state.queueIndex = -1;
+        restorePlayback();
+        renderQueue();
+        updateDock();
+        if (previous === Remote.OUTPUT_COMPUTER) setStatus("Playback controls now target this device.", "success");
+      }
+      updateOutputStatus();
+    }
+
+    async function chooseOutputTarget(value) {
+      const target = value === Remote.OUTPUT_COMPUTER ? Remote.OUTPUT_COMPUTER : Remote.OUTPUT_DEVICE;
+      const previous = remoteBridge.getTarget();
+      if (target === previous) return;
+      if (previous === Remote.OUTPUT_COMPUTER && target === Remote.OUTPUT_DEVICE) {
+        if (nodes.output) nodes.output.disabled = true;
+        try {
+          await remoteBridge.pauseAndUseDevice();
+        } catch {
+          // An offline PC cannot be paused, but it must not trap this browser
+          // on the remote target.
+        } finally {
+          if (nodes.output) nodes.output.disabled = remoteBridge.isRenderer();
+        }
+        return;
+      }
+      remoteBridge.setTarget(target);
+    }
+
+    function captureRendererState() {
+      const bounded = Remote.boundQueueState(state.queue, state.queueIndex);
+      return {
+        queue: bounded.queue,
+        index: bounded.index,
+        playing: !nodes.audio.paused && !nodes.audio.ended,
+        position: Number(nodes.audio.currentTime) || 0,
+        duration: Number.isFinite(nodes.audio.duration) ? nodes.audio.duration : currentTrack()?.duration || 0,
+        volume: nodes.audio.volume,
+        repeat: state.repeat,
+        shuffle: state.shuffle,
+        error: state.rendererError,
+      };
+    }
+
+    async function applyRendererCommand(command) {
+      const values = command?.args && typeof command.args === "object" ? command.args : command || {};
+      const action = String(command?.action || "").toLowerCase();
+      if (action === "load") {
+        const known = knownQueueState(values.queue, values.index ?? values.queue_index ?? 0);
+        const queue = known.queue;
+        const selectedIndex = known.index;
+        if (known.sourceLength && selectedIndex < 0) {
+          throw new Error("The PC music library is out of date. Rescan it before remote playback.");
+        }
+        const previousId = currentTrack()?.id || null;
+        state.queue = queue;
+        state.queueIndex = selectedIndex;
+        if (["off", "all", "one"].includes(values.repeat)) state.repeat = values.repeat;
+        state.shuffle = values.shuffle === true;
+        const nextId = currentTrack()?.id || null;
+        if (!nextId) {
+          stopPlayback();
+        } else if (nextId !== previousId || !nodes.audio.src) {
+          selectCurrent({ autoplay: false, resumeAt: Number(values.position) || 0 });
+        } else if (Number.isFinite(Number(values.position))) {
+          nodes.audio.currentTime = Math.max(0, Number(values.position));
+        }
+        if (values.autoplay === true) {
+          await play();
+          state.rendererError = "";
+        }
+        else pause();
+        renderQueue();
+        updateDock();
+        return;
+      }
+      if (action === "play") {
+        await play();
+        state.rendererError = "";
+        return;
+      }
+      if (action === "pause") return pause();
+      if (action === "next") return next();
+      if (action === "previous") return previous();
+      if (action === "stop") {
+        state.rendererError = "";
+        return clearQueue();
+      }
+      if (action === "seek") {
+        const position = Math.max(0, Number(values.position) || 0);
+        if (Number.isFinite(nodes.audio.duration)) nodes.audio.currentTime = Math.min(position, nodes.audio.duration);
+        state.listen.lastTime = nodes.audio.currentTime;
+        updateProgress();
+        return;
+      }
+      if (action === "volume") {
+        const volume = Number(values.volume);
+        if (!Number.isFinite(volume)) throw new Error("Remote volume is invalid.");
+        nodes.audio.volume = Math.max(0, Math.min(1, volume));
+        updateDock();
+        return;
+      }
+      if (action === "repeat" && ["off", "all", "one"].includes(values.mode)) {
+        state.repeat = values.mode;
+        updateDock();
+        savePlayback(true);
+        return;
+      }
+      if (action === "shuffle") {
+        if (state.shuffle !== (values.enabled === true)) toggleShuffle();
+        return;
+      }
+      throw new Error(`Unsupported PC playback command: ${action || "unknown"}`);
     }
 
     function updateNav() {
@@ -292,6 +548,12 @@
       renderQueue();
       updateDock();
       savePlayback(true);
+      if (usingRemoteOutput()) {
+        sendRemoteLoad({
+          autoplay: state.remote.playing,
+          position: Remote.projectedPosition(state.remote),
+        }).catch(() => {});
+      }
       setStatus(`${ids.length} track${ids.length === 1 ? "" : "s"} added to the queue.`, "success");
     }
 
@@ -569,9 +831,10 @@
         }
       }
       if (nodes.play) {
-        nodes.play.textContent = nodes.audio.paused ? "Play" : "Pause";
-        nodes.play.setAttribute("aria-label", nodes.audio.paused ? "Play music" : "Pause music");
-        nodes.play.setAttribute("aria-pressed", nodes.audio.paused ? "false" : "true");
+        const playing = playbackIsPlaying();
+        nodes.play.textContent = playing ? "Pause" : "Play";
+        nodes.play.setAttribute("aria-label", playing ? "Pause music" : "Play music");
+        nodes.play.setAttribute("aria-pressed", playing ? "true" : "false");
         nodes.play.disabled = !track;
       }
       if (nodes.previous) nodes.previous.disabled = !track;
@@ -587,13 +850,13 @@
         nodes.repeat.dataset.repeat = state.repeat;
         nodes.repeat.setAttribute("aria-pressed", state.repeat === "off" ? "false" : "true");
       }
-      if (nodes.volume && root.document.activeElement !== nodes.volume) nodes.volume.value = String(nodes.audio.volume);
+      if (nodes.volume && root.document.activeElement !== nodes.volume) nodes.volume.value = String(playbackVolume());
       updateProgress();
     }
 
     function updateProgress() {
-      const duration = Number.isFinite(nodes.audio.duration) ? nodes.audio.duration : currentTrack()?.duration || 0;
-      const current = Number.isFinite(nodes.audio.currentTime) ? nodes.audio.currentTime : 0;
+      const duration = playbackDuration();
+      const current = playbackPosition();
       if (nodes.progress && root.document.activeElement !== nodes.progress) {
         nodes.progress.value = duration > 0 ? String(Math.round(current / duration * 1000)) : "0";
         nodes.progress.setAttribute("aria-valuetext", `${Domain.formatTime(current)} of ${Domain.formatTime(duration)}`);
@@ -635,6 +898,16 @@
       const result = Domain.removeQueueItem(state.queue, state.queueIndex, index);
       state.queue = result.queue;
       state.queueIndex = state.queue.length ? result.index : -1;
+      if (usingRemoteOutput()) {
+        if (!state.queue.length) sendRemote("stop").catch(() => {});
+        else sendRemoteLoad({
+          autoplay: state.remote.playing,
+          position: before?.id === currentTrack()?.id ? Remote.projectedPosition(state.remote) : 0,
+        }).catch(() => {});
+        renderQueue();
+        updateDock();
+        return;
+      }
       if (!state.queue.length) {
         stopPlayback();
       } else if (result.removedCurrent) {
@@ -649,6 +922,14 @@
     }
 
     function clearQueue() {
+      if (usingRemoteOutput()) {
+        state.queue = [];
+        state.queueIndex = -1;
+        sendRemote("stop").catch(() => {});
+        renderQueue();
+        updateDock();
+        return;
+      }
       flushListening();
       state.queue = [];
       state.queueIndex = -1;
@@ -714,6 +995,12 @@
         updateDock();
         return;
       }
+      if (usingRemoteOutput()) {
+        renderQueue();
+        updateDock();
+        sendRemoteLoad({ autoplay, position: resumeAt }).catch(() => {});
+        return;
+      }
       if (state.listen.trackId !== null) flushListening();
       resetListening(track.id);
       nodes.audio.src = audioUrl(track);
@@ -730,7 +1017,14 @@
       renderQueue();
       updateDock();
       savePlayback(true);
-      if (autoplay) play().catch(error => setStatus(error.message || "Playback could not start.", "error"));
+      if (autoplay) play().catch(error => {
+        if (remoteBridge?.isRenderer()) {
+          const blocked = error?.name === "NotAllowedError" || /not allowed|user gesture|interact/i.test(String(error?.message || ""));
+          state.rendererError = blocked ? "interaction_required" : "playback_error";
+          updateOutputStatus();
+        }
+        setStatus(error.message || "Playback could not start.", "error");
+      });
     }
 
     async function play() {
@@ -738,8 +1032,16 @@
         if (!state.queue.length && state.tracks.length) {
           state.queue = filteredTracks().map(track => track.id);
           state.queueIndex = 0;
+          if (usingRemoteOutput()) {
+            selectCurrent({ autoplay: true });
+            return;
+          }
           selectCurrent();
         } else return;
+      }
+      if (usingRemoteOutput()) {
+        await sendRemote("play");
+        return;
       }
       root.CCAudio?.stop?.();
       if (!nodes.audio.src) selectCurrent();
@@ -753,6 +1055,10 @@
     }
 
     function pause() {
+      if (usingRemoteOutput()) {
+        sendRemote("pause").catch(() => {});
+        return;
+      }
       collectListeningTime();
       nodes.audio.pause();
       flushListening();
@@ -762,6 +1068,10 @@
 
     function previous() {
       if (!currentTrack()) return;
+      if (usingRemoteOutput()) {
+        sendRemote("previous").catch(() => {});
+        return;
+      }
       if (nodes.audio.currentTime > 4) {
         nodes.audio.currentTime = 0;
         state.listen.lastTime = 0;
@@ -784,6 +1094,10 @@
 
     function next({ ended = false } = {}) {
       if (!currentTrack()) return;
+      if (usingRemoteOutput()) {
+        if (!ended) sendRemote("next").catch(() => {});
+        return;
+      }
       let nextIndex = Domain.nextQueueIndex({
         length: state.queue.length,
         index: state.queueIndex,
@@ -802,6 +1116,12 @@
     }
 
     function toggleShuffle() {
+      if (usingRemoteOutput()) {
+        state.shuffle = !state.shuffle;
+        updateDock();
+        sendRemote("shuffle", { enabled: state.shuffle }).catch(() => {});
+        return;
+      }
       state.shuffle = !state.shuffle;
       if (state.shuffle && state.queue.length > 1) {
         const current = currentTrack();
@@ -817,10 +1137,15 @@
     function toggleRepeat() {
       state.repeat = Domain.nextRepeatMode(state.repeat);
       updateDock();
+      if (usingRemoteOutput()) {
+        sendRemote("repeat", { mode: state.repeat }).catch(() => {});
+        return;
+      }
       savePlayback(true);
     }
 
-    function savePlayback(force = false) {
+    function savePlayback(force = false, { forceLocal = false } = {}) {
+      if (usingRemoteOutput() && !forceLocal) return;
       if (!state.storageKey || !root.localStorage) return;
       const now = Date.now();
       if (!force && now - state.lastSaveAt < SAVE_INTERVAL_MS) return;
@@ -838,6 +1163,7 @@
     }
 
     function restorePlayback() {
+      if (usingRemoteOutput()) return;
       let raw = null;
       try { raw = root.localStorage?.getItem(state.storageKey); } catch {}
       const restored = Domain.parsePlaybackState(raw, state.tracks);
@@ -855,7 +1181,7 @@
     }
 
     function updateMediaSession(track) {
-      if (!track || !("mediaSession" in root.navigator)) return;
+      if (!track || usingRemoteOutput() || !("mediaSession" in root.navigator)) return;
       try {
         root.navigator.mediaSession.metadata = new root.MediaMetadata({
           title: track.title,
@@ -905,7 +1231,7 @@
     function handleInputAction(action) {
       if (action === "secondaryAction") {
         if (!currentTrack()) return false;
-        if (nodes.audio.paused) play().catch(error => setStatus(error.message, "error"));
+        if (!playbackIsPlaying()) play().catch(error => setStatus(error.message, "error"));
         else pause();
         return true;
       }
@@ -1087,7 +1413,8 @@
         state.keysById = new Map(state.tracks.map(track => [track.id, Domain.stableTrackKey(track)]));
         state.storageKey = Domain.playbackStorageKey(state.libraryId);
         if (settings.scan) state.scan = scanPayload(settings.scan);
-        if (!state.queue.length) restorePlayback();
+        if (usingRemoteOutput()) applyRemoteSnapshot(state.remote);
+        else if (!state.queue.length) restorePlayback();
         else {
           const restored = Domain.parsePlaybackState(Domain.buildPlaybackState({
             queue: state.queue,
@@ -1122,6 +1449,47 @@
       }
     }
 
+    remoteBridge = Remote.createBridge({
+      host: root,
+      storage: root.localStorage,
+      request,
+      captureRendererState,
+      applyRendererCommand,
+      onState: applyRemoteSnapshot,
+      onTargetChange: handleTargetChange,
+      onRendererChange: active => {
+        if (nodes.output) {
+          const deviceOption = nodes.output.querySelector('option[value="device"]');
+          const computerOption = nodes.output.querySelector('option[value="computer"]');
+          if (deviceOption) deviceOption.textContent = active ? "This device (Command Center PC)" : "This device";
+          if (computerOption) computerOption.disabled = active;
+        }
+        updateOutputStatus();
+      },
+      onRendererConnectionChange: updateOutputStatus,
+      onRendererError: error => {
+        const blocked = error?.name === "NotAllowedError" || /not allowed|user gesture|interact/i.test(String(error?.message || ""));
+        state.rendererError = blocked ? "interaction_required" : "playback_error";
+        updateOutputStatus();
+        setStatus(
+          blocked
+            ? "PC audio needs one local Play press in Command Center before phone control can start it."
+            : error?.message || "The PC player could not apply a remote command.",
+          "error",
+        );
+      },
+      onError: (_error, _context) => updateOutputStatus(),
+    });
+    if (nodes.output) nodes.output.value = remoteBridge.getTarget();
+    updateOutputStatus();
+
+    const sendRemoteSeek = Domain.debounce(value => {
+      sendRemote("seek", { position: value }).catch(() => {});
+    }, 120);
+    const sendRemoteVolume = Domain.debounce(value => {
+      sendRemote("volume", { volume: value }).catch(() => {});
+    }, 120);
+
     function bind() {
       nodes.root.querySelectorAll("[data-music-view]").forEach(control => {
         control.addEventListener("click", () => setView(control.dataset.musicView));
@@ -1133,7 +1501,8 @@
         }, 180);
         nodes.search.addEventListener("input", applySearch);
       }
-      nodes.play?.addEventListener("click", () => nodes.audio.paused ? play().catch(error => setStatus(error.message, "error")) : pause());
+      nodes.output?.addEventListener("change", () => chooseOutputTarget(nodes.output.value));
+      nodes.play?.addEventListener("click", () => !playbackIsPlaying() ? play().catch(error => setStatus(error.message, "error")) : pause());
       nodes.previous?.addEventListener("click", previous);
       nodes.next?.addEventListener("click", () => next());
       nodes.shuffle?.addEventListener("click", toggleShuffle);
@@ -1146,32 +1515,48 @@
         nodes.queueToggle.setAttribute("aria-expanded", opening ? "true" : "false");
       });
       nodes.progress?.addEventListener("input", () => {
+        if (usingRemoteOutput()) {
+          const duration = playbackDuration();
+          const position = duration > 0 ? Number(nodes.progress.value) / 1000 * duration : 0;
+          sendRemoteSeek(position);
+          return;
+        }
         if (!Number.isFinite(nodes.audio.duration)) return;
         nodes.audio.currentTime = Number(nodes.progress.value) / 1000 * nodes.audio.duration;
         state.listen.lastTime = nodes.audio.currentTime;
         updateProgress();
       });
       nodes.volume?.addEventListener("input", () => {
-        nodes.audio.volume = Math.max(0, Math.min(1, Number(nodes.volume.value)));
+        const volume = Math.max(0, Math.min(1, Number(nodes.volume.value)));
+        if (usingRemoteOutput()) {
+          sendRemoteVolume(volume);
+          return;
+        }
+        nodes.audio.volume = volume;
         savePlayback(true);
       });
 
       nodes.audio.addEventListener("play", () => {
+        state.rendererError = "";
         root.CCAudio?.stop?.();
         if (state.audioContext?.state === "suspended") state.audioContext.resume().catch(() => {});
         if ("mediaSession" in root.navigator) root.navigator.mediaSession.playbackState = "playing";
+        updateOutputStatus();
         updateDock();
       });
       nodes.audio.addEventListener("pause", () => {
+        if (usingRemoteOutput()) return;
         collectListeningTime();
         if ("mediaSession" in root.navigator) root.navigator.mediaSession.playbackState = "paused";
         updateDock();
       });
       nodes.audio.addEventListener("ended", () => {
+        if (usingRemoteOutput()) return;
         flushListening();
         next({ ended: true });
       });
       nodes.audio.addEventListener("timeupdate", () => {
+        if (usingRemoteOutput()) return;
         collectListeningTime();
         updateProgress();
         savePlayback();
@@ -1180,7 +1565,11 @@
       nodes.audio.addEventListener("seeking", () => { state.listen.lastTime = null; });
       nodes.audio.addEventListener("seeked", () => { state.listen.lastTime = nodes.audio.currentTime; });
       nodes.audio.addEventListener("error", () => {
-        if (nodes.audio.error) setStatus("This track could not be played. It may have moved since the last scan.", "error");
+        if (nodes.audio.error) {
+          if (remoteBridge?.isRenderer()) state.rendererError = "playback_error";
+          setStatus("This track could not be played. It may have moved since the last scan.", "error");
+          updateOutputStatus();
+        }
         updateDock();
       });
       nodes.art?.addEventListener("error", () => {
@@ -1195,6 +1584,7 @@
       root.addEventListener("pagehide", () => {
         flushListening({ keepalive: true });
         savePlayback(true);
+        remoteBridge.stop();
       });
       root.addEventListener("cc:tabchange", event => {
         if (event.detail?.name === "music") renderContent();
@@ -1205,7 +1595,7 @@
     }
 
     bind();
-    load();
+    load().finally(() => remoteBridge.start());
 
     return Object.freeze({
       getAnalyser,

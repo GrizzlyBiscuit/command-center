@@ -17,9 +17,13 @@ test("Music sidebar, panel, and scripts are wired in dependency order", () => {
   assert.match(panel, /id="tab-music"/);
   assert.match(index, /['"]music['"]/);
   const domain = base.indexOf("music/music-domain.js");
+  const remote = base.indexOf("music/music-remote.js");
   const musicApp = base.indexOf("music/music-app.js");
   const inputAdapter = base.indexOf("input/controller-navigation.js");
-  assert.ok(domain >= 0 && domain < musicApp && musicApp < inputAdapter);
+  assert.ok(domain >= 0 && domain < remote && remote < musicApp && musicApp < inputAdapter);
+  assert.match(panel, /id="cc-music-output"/);
+  assert.match(panel, /value="device"/);
+  assert.match(panel, /value="computer"/);
 });
 
 test("persistent player is a sibling outside the hidden Music panel", () => {

@@ -6,6 +6,7 @@ desktop launchers that do not install Flask.
 """
 
 from .library import LibrarySnapshot, MusicLibrary, ScanStatus, Track
+from .remote import PlaybackCoordinator
 from .service import MusicService
 from .settings import MusicSettings, SettingsStore, default_data_dir
 from .stats import ListeningStats
@@ -16,6 +17,7 @@ __all__ = [
     "MusicLibrary",
     "MusicService",
     "MusicSettings",
+    "PlaybackCoordinator",
     "ScanStatus",
     "SettingsStore",
     "Track",

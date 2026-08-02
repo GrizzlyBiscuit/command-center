@@ -179,6 +179,155 @@ class MusicBlueprintTests(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 202)
 
+    def test_pc_remote_control_is_lan_open_but_renderer_is_management_only(self) -> None:
+        remote_peer = {"REMOTE_ADDR": "192.168.1.25"}
+        headers = {"X-CSRF-Token": "known-token"}
+        status = self.client.get("/api/music/remote", environ_base=remote_peer)
+        self.assertEqual(status.status_code, 200)
+        self.assertFalse(status.json["renderer_online"])
+        self.assertTrue(status.json["epoch"])
+
+        missing_csrf = self.client.post(
+            "/api/music/remote/command",
+            json={"action": "play"},
+            environ_base=remote_peer,
+        )
+        self.assertEqual(missing_csrf.status_code, 403)
+        offline = self.client.post(
+            "/api/music/remote/command",
+            json={"action": "play"},
+            headers=headers,
+            environ_base=remote_peer,
+        )
+        self.assertEqual(offline.status_code, 409)
+
+        forbidden_renderer = self.client.post(
+            "/api/music/remote/renderer",
+            json={
+                "renderer_id": "2dd58987-dddf-42f9-bf99-e5fcfbc4f3a2",
+                "ack": 0,
+                "state": {},
+            },
+            headers={**headers, "X-Forwarded-For": "127.0.0.1"},
+            environ_base=remote_peer,
+        )
+        self.assertEqual(forbidden_renderer.status_code, 403)
+
+        missing_renderer_csrf = self.client.post(
+            "/api/music/remote/renderer",
+            json={
+                "renderer_id": "2dd58987-dddf-42f9-bf99-e5fcfbc4f3a2",
+                "ack": 0,
+                "state": {},
+            },
+        )
+        self.assertEqual(missing_renderer_csrf.status_code, 403)
+
+        renderer = self.client.post(
+            "/api/music/remote/renderer",
+            json={
+                "renderer_id": "2dd58987-dddf-42f9-bf99-e5fcfbc4f3a2",
+                "ack": 0,
+                "state": {"queue": [self.track.id], "index": 0},
+            },
+            headers=headers,
+        )
+        self.assertEqual(renderer.status_code, 200)
+        self.assertTrue(renderer.json["renderer"])
+        self.assertNotIn("queue", renderer.json["state"])
+
+        full_status = self.client.get("/api/music/remote", environ_base=remote_peer)
+        self.assertEqual(full_status.json["state"]["queue"], [self.track.id])
+        delta_status = self.client.get(
+            "/api/music/remote",
+            query_string={
+                "epoch": full_status.json["epoch"],
+                "queue_revision": full_status.json["queue_revision"],
+            },
+            environ_base=remote_peer,
+        )
+        self.assertNotIn("queue", delta_status.json["state"])
+        stale_status = self.client.get(
+            "/api/music/remote",
+            query_string={"epoch": full_status.json["epoch"], "queue_revision": -1},
+            environ_base=remote_peer,
+        )
+        self.assertEqual(stale_status.json["state"]["queue"], [self.track.id])
+
+        accepted = self.client.post(
+            "/api/music/remote/command",
+            json={"action": "play"},
+            headers=headers,
+            environ_base=remote_peer,
+        )
+        self.assertEqual(accepted.status_code, 202)
+        command_id = accepted.json["command_id"]
+        self.assertNotIn("queue", accepted.json["state"])
+        poll = self.client.post(
+            "/api/music/remote/renderer",
+            json={
+                "renderer_id": "2dd58987-dddf-42f9-bf99-e5fcfbc4f3a2",
+                "ack": 0,
+                "state": {"queue": [self.track.id], "index": 0},
+            },
+            headers=headers,
+        )
+        self.assertEqual(poll.json["commands"], [{"action": "play", "id": command_id}])
+
+    def test_renderer_state_validation_uses_catalog_snapshot_without_resolving_files(self) -> None:
+        headers = {"X-CSRF-Token": "known-token"}
+        self.track.path.unlink()
+        self.assertIsNone(self.service.track(self.track.id))
+
+        response = self.client.post(
+            "/api/music/remote/renderer",
+            json={
+                "renderer_id": "2dd58987-dddf-42f9-bf99-e5fcfbc4f3a2",
+                "ack": 0,
+                "state": {"queue": [self.track.id], "index": 0},
+            },
+            headers=headers,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.service.remote.status()["state"]["queue"], [self.track.id])
+
+    def test_remote_control_rejects_invalid_actions_ids_and_client_media_data(self) -> None:
+        headers = {"X-CSRF-Token": "known-token"}
+        renderer_id = "2dd58987-dddf-42f9-bf99-e5fcfbc4f3a2"
+        self.client.post(
+            "/api/music/remote/renderer",
+            json={"renderer_id": renderer_id, "ack": 0, "state": {}},
+            headers=headers,
+        )
+        invalid_commands = (
+            {"action": "erase"},
+            {"action": "load", "queue": ["unknown-track"], "index": 0},
+            {
+                "action": "load",
+                "queue": [self.track.id],
+                "index": 0,
+                "path": str(self.music / "song.mp3"),
+            },
+        )
+        for payload in invalid_commands:
+            with self.subTest(payload=payload):
+                response = self.client.post(
+                    "/api/music/remote/command", json=payload, headers=headers
+                )
+                self.assertEqual(response.status_code, 400)
+
+        bad_renderer_state = self.client.post(
+            "/api/music/remote/renderer",
+            json={
+                "renderer_id": renderer_id,
+                "ack": 0,
+                "state": {"queue": ["unknown-track"]},
+            },
+            headers=headers,
+        )
+        self.assertEqual(bad_renderer_state.status_code, 200)
+        self.assertEqual(self.service.remote.status()["state"]["queue"], [])
+
     def test_settings_accept_post_and_put_and_honor_recursive(self) -> None:
         for method in (self.client.post, self.client.put):
             response = method(

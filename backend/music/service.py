@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from collections.abc import Collection
 from pathlib import Path
 import threading
 from typing import Any
 
 from .library import MusicLibrary, ScanStatus, Track
+from .remote import PlaybackCoordinator
 from .settings import MusicSettings, SettingsStore
 from .stats import ListeningStats
 
@@ -30,6 +32,7 @@ class MusicService:
         self._lock = threading.RLock()
         self._settings = self.settings_store.load()
         self.library.clear(self._settings.library_id)
+        self.remote = PlaybackCoordinator(self.catalog_track_ids)
         # ``init_music`` queues this only after the extension and Blueprint are
         # registered.  Construction itself remains read-only and non-blocking.
         self.scan_on_start_requested = bool(scan_on_start)
@@ -80,6 +83,10 @@ class MusicService:
 
     def track(self, track_id: str) -> Track | None:
         return self.library.resolve_track(track_id)
+
+    def catalog_track_ids(self) -> Collection[str]:
+        """Return one atomic, stat-free view of the current catalog IDs."""
+        return self.library.snapshot().tracks_by_id.keys()
 
     def record_stats(self, payload: dict[str, Any]) -> dict[str, object]:
         track_id = str(payload.get("track_id") or "").strip()

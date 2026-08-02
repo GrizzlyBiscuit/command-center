@@ -19,6 +19,7 @@ except ImportError as exc:  # a clear error only when Flask integration is reque
 
 from .ranges import parse_range_header
 from .library import CachedArtwork
+from .remote import CommandQueueFull, InvalidRemotePayload, RendererBusy, RendererOffline
 from .service import MusicService
 
 if TYPE_CHECKING:
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
 ManagementAuthorizer = Callable[["Request"], bool]
 CsrfValidator = Callable[["Request"], bool]
 CHUNK_SIZE = 128 * 1024
+MAX_REMOTE_PAYLOAD_BYTES = 256 * 1024
 
 
 def is_local_request(request_object: "Request") -> bool:
@@ -104,6 +106,17 @@ def create_music_blueprint(
     def require_csrf() -> None:
         if not csrf_is_valid():
             abort(403)
+
+    def remote_payload() -> dict[str, Any] | None:
+        if request.content_length is not None and request.content_length > MAX_REMOTE_PAYLOAD_BYTES:
+            abort(413)
+        payload = request.get_json(silent=True)
+        return payload if isinstance(payload, dict) else None
+
+    def remote_error(exc: Exception, status: int) -> tuple[Response, int]:
+        payload = get_service().remote.compact_status()
+        payload.update({"error": str(exc), "renderer": False, "commands": []})
+        return jsonify(payload), status
 
     @blueprint.get("/settings")
     def get_settings() -> Response:
@@ -230,5 +243,52 @@ def create_music_blueprint(
             return jsonify({"error": str(exc)}), 400
         except LookupError as exc:
             return jsonify({"error": str(exc)}), 404
+
+    @blueprint.get("/remote")
+    def get_remote_playback() -> Response:
+        revision_value = request.args.get("queue_revision")
+        try:
+            queue_revision = int(revision_value) if revision_value is not None else None
+        except ValueError:
+            queue_revision = None
+        return jsonify(
+            get_service().remote.status(
+                epoch=request.args.get("epoch"),
+                queue_revision=queue_revision,
+            )
+        )
+
+    @blueprint.post("/remote/command")
+    def post_remote_command() -> tuple[Response, int] | Response:
+        # Command Center's playback UI is LAN-open like the rest of its public
+        # controls, but same-origin CSRF still prevents drive-by web requests.
+        require_csrf()
+        payload = remote_payload()
+        if payload is None:
+            return jsonify({"error": "JSON object required"}), 400
+        try:
+            return jsonify(get_service().remote.enqueue(payload)), 202
+        except RendererOffline as exc:
+            return remote_error(exc, 409)
+        except CommandQueueFull as exc:
+            return remote_error(exc, 429)
+        except InvalidRemotePayload as exc:
+            return remote_error(exc, 400)
+
+    @blueprint.post("/remote/renderer")
+    def post_remote_renderer() -> tuple[Response, int] | Response:
+        # Only the host desktop (or an explicitly authorized management client)
+        # can claim the PC renderer lease.
+        require_management()
+        require_csrf()
+        payload = remote_payload()
+        if payload is None:
+            return jsonify({"error": "JSON object required"}), 400
+        try:
+            return jsonify(get_service().remote.renderer_heartbeat(payload))
+        except RendererBusy as exc:
+            return remote_error(exc, 409)
+        except InvalidRemotePayload as exc:
+            return remote_error(exc, 400)
 
     return blueprint
