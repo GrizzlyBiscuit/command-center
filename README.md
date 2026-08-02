@@ -226,6 +226,23 @@ Key endpoints used by the UI:
 - **History exports**: exported conversation files on the desktop are read-only context. They are NOT playbooks or command sources unless the same action is also present in current memory.
 - **Tooling conventions**: patch large CSS/JS with a unique anchor. Never overwrite a live file with `write_file` to append. Use `patch`/targeted edits instead.
 
+## Unified memory
+
+This repo includes `memory/UNIFIED_MEMORY.md`. That file is the **single source of truth for long-term project context**. It exists because normal repo files only track code, not the operating facts, decisions, constraints, and runtime details that take weeks to rebuild after context loss.
+
+It captures:
+
+- current stack addresses and ports
+- model runtimes, fallbacks, and provider rules
+- local-only constraints and secrets handling
+- relay/bridge behavior and logging rules
+- UI/frontend notes that are not obvious from code alone
+- verification and confirmation rules
+- memory consolidation/compaction rules
+- durable lessons from debugging and prior fixes
+
+If you clone this repo months from now, the code still works, but `UNIFIED_MEMORY.md` is what tells you how this exact installation is meant to run.
+
 ## Docs
 
 - `docs/SETUP.md` — setup notes, ports, LAN/Tailscale access
