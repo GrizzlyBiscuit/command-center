@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Command Center</string>
+  <string name="status_connecting">Connecting…</string>
+  <string name="status_connected">Connected</string>
+</resources>

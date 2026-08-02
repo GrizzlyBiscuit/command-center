@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Bot Control{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>Command Center — Power Switches</h2>
+  <p class="notice">
+    Two independent switches. <strong>Ollama</strong> is the local brain (the model server).
+    The <strong>Discord bot / model pair</strong> is the relay that listens on your server and
+    replies in-channel. Flip each on independently — the relay needs Ollama up to think.
+  </p>
+
+  <!-- OLLAMA -->
+  <div class="switch-block">
+    <div class="switch-head">
+      <div class="switch-row">
+        <label class="switch">
+          <input type="checkbox" id="ollama-switch" {{ 'checked' if ollama else '' }}>
+          <span class="slider"></span>
+        </label>
+        <span id="ollama-label" class="power-label">{{ 'ON' if ollama else 'OFF' }}</span>
+        <span class="switch-name">Ollama — local model server</span>
+      </div>
+      <div class="status-cell compact">
+        <span class="status-dot" id="dot-ollama"></span>
+        <strong id="state-ollama">{{ 'up' if ollama else 'down' }}</strong>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button id="ollama-start" class="btn-primary" {{ 'disabled' if ollama else '' }}>Boot Ollama</button>
+      <button id="ollama-stop" class="btn-danger" {{ '' if ollama else 'disabled' }}>Shut down</button>
+    </div>
+  </div>
+
+  <!-- DISCORD RELAY / MODEL PAIR -->
+  <div class="switch-block">
+    <div class="switch-head">
+      <div class="switch-row">
+        <label class="switch">
+          <input type="checkbox" id="relay-switch" {{ 'checked' if relay else '' }}>
+          <span class="slider"></span>
+        </label>
+        <span id="relay-label" class="power-label">{{ 'ON' if relay else 'OFF' }}</span>
+        <span class="switch-name">Discord bot / model pair</span>
+      </div>
+      <div class="status-cell compact">
+        <span class="status-dot" id="dot-relay"></span>
+        <strong id="state-relay">{{ 'running' if relay else 'stopped' }}</strong>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button id="relay-start" class="btn-primary" {{ 'disabled' if relay else '' }}>Boot bridge</button>
+      <button id="relay-stop" class="btn-danger" {{ '' if relay else 'disabled' }}>Shut down</button>
+    </div>
+  </div>
+
+  <h3>Relay console</h3>
+  <pre class="relay-console" id="relay-console" aria-live="polite"></pre>
+
+  <!-- Pair status -->
+  <div class="pair-status-block">
+    <span class="switch-name">MODEL PAIR STATUS</span>
+    <span class="power-label" id="pair-label">OFFLINE</span>
+    <span class="pair-detail" id="pair-detail">Discord relay / model pair inactive</span>
+  </div>
+
+  <!-- Killswitch -->
+  <div class="killswitch-block">
+    <div class="switch-head">
+      <span class="switch-name danger">EMERGENCY KILL</span>
+      <span class="power-label danger" id="kill-label">SYSTEMS UP</span>
+    </div>
+    <div class="btn-row">
+      <button id="kill-all" class="btn-danger kill-btn">KILL ALL AI / CODE PROCESSES</button>
+      <button id="bring-all" class="btn-primary bring-btn" disabled>BRING EVERYTHING BACK</button>
+    </div>
+    <pre class="relay-console" id="kill-console" aria-live="polite"></pre>
+  </div>
+</section>
+
+<script>
+  const csrf = "{{ csrf_token() }}";
+  const dotColor = (ok) => ok ? '#39ff14' : '#ff2d55';
+
+  async function refresh() {
+    try {
+      const r = await fetch('/bot/status');
+      const s = await r.json();
+      // ollama
+      document.getElementById('state-ollama').textContent = s.ollama ? 'up' : 'down';
+      document.getElementById('dot-ollama').style.background = dotColor(s.ollama);
+      document.getElementById('ollama-switch').checked = s.ollama;
+      document.getElementById('ollama-label').textContent = s.ollama ? 'ON' : 'OFF';
+      document.getElementById('ollama-start').disabled = s.ollama;
+      document.getElementById('ollama-stop').disabled = !s.ollama;
+      // relay
+      document.getElementById('state-relay').textContent = s.relay ? 'running' : 'stopped';
+      document.getElementById('dot-relay').style.background = dotColor(s.relay);
+      document.getElementById('relay-switch').checked = s.relay;
+      document.getElementById('relay-label').textContent = s.relay ? 'ON' : 'OFF';
+      document.getElementById('relay-start').disabled = s.relay;
+      document.getElementById('relay-stop').disabled = !s.relay;
+      // pair status
+      const pairLabel = document.getElementById('pair-label');
+      const pairDetail = document.getElementById('pair-detail');
+      if (pairLabel) {
+        pairLabel.textContent = s.pair_active ? 'ONLINE' : 'OFFLINE';
+        pairLabel.style.color = s.pair_active ? '#39ff14' : '#ff2d55';
+        pairLabel.style.textShadow = s.pair_active ? '0 0 12px #39ff14' : '0 0 12px #ff2d55';
+      }
+      if (pairDetail) {
+        pairDetail.textContent = s.pair_active
+          ? 'Discord relay / model pair active'
+          : 'Discord relay / model pair inactive';
+      }
+    } catch (e) {}
+  }
+
+  async function loadLog() {
+    try {
+      const r = await fetch('/bot/log');
+      const d = await r.json();
+      const el = document.getElementById('relay-console');
+      if (el) el.textContent = d.log;
+    } catch (e) {}
+  }
+
+  async function postJSON(url) {
+    const fd = new FormData();
+    fd.append('csrf_token', csrf);
+    await fetch(url, {method: 'POST', body: fd});
+    await refresh();
+    setTimeout(loadLog, 800);
+  }
+
+  document.getElementById('ollama-start').onclick = () => postJSON('/bot/ollama/start');
+  document.getElementById('ollama-stop').onclick  = () => postJSON('/bot/ollama/stop');
+  document.getElementById('ollama-switch').onchange = (e) =>
+    postJSON(e.target.checked ? '/bot/ollama/start' : '/bot/ollama/stop');
+
+  document.getElementById('relay-start').onclick = () => postJSON('/bot/start');
+  document.getElementById('relay-stop').onclick  = () => postJSON('/bot/stop');
+  document.getElementById('relay-switch').onchange = (e) =>
+    postJSON(e.target.checked ? '/bot/start' : '/bot/stop');
+
+  refresh();
+  loadLog();
+  setInterval(refresh, 4000);
+  setInterval(loadLog, 5000);
+
+  async function killAll() {
+    const btn = document.getElementById('kill-all');
+    if (btn) { btn.disabled = true; btn.textContent = 'KILLING...'; }
+    try {
+      await postJSON('/bot/killall');
+      const k = document.getElementById('kill-label');
+      if (k) k.textContent = 'SYSTEMS DOWN';
+      if (btn) { btn.textContent = 'KILLED'; }
+      const bring = document.getElementById('bring-all');
+      if (bring) bring.disabled = false;
+    } catch (e) {}
+  }
+
+  async function bringAll() {
+    const btn = document.getElementById('bring-all');
+    if (btn) { btn.disabled = true; btn.textContent = 'BRINGING UP...'; }
+    try {
+      await postJSON('/bot/bringup');
+      const k = document.getElementById('kill-label');
+      if (k) k.textContent = 'SYSTEMS UP';
+      if (btn) { btn.textContent = 'BRING EVERYTHING BACK'; }
+      const kill = document.getElementById('kill-all');
+      if (kill) { kill.disabled = false; kill.textContent = 'KILL ALL AI / CODE PROCESSES'; }
+    } catch (e) {}
+  }
+
+  function loadKillLog() {
+    try {
+      const r = await fetch('/bot/log');
+      const d = await r.json();
+      const el = document.getElementById('kill-console');
+      if (el) el.textContent = d.log;
+    } catch (e) {}
+  }
+
+  var kbtn = document.getElementById('kill-all');
+  if (kbtn) kbtn.onclick = killAll;
+  var bbtn = document.getElementById('bring-all');
+  if (bbtn) bbtn.onclick = bringAll;
+  setTimeout(loadKillLog, 800);
+  setInterval(loadKillLog, 5000);
+</script>
+{% endblock %}

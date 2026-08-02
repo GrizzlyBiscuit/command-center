@@ -1,0 +1,406 @@
+{
+  "cards": [
+    {
+      "by": "you",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Done in-session \u2014 chess panel now lives inside Arcade alongside Snake + 2048.",
+      "id": "k1",
+      "title": "Chess moved into Arcade tab",
+      "updated": "2026-07-27 20:24"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Removed .home-hero-glyph + glyph-spin keyframe. Verified gone.",
+      "id": "k2",
+      "title": "Spinning hero glyph removed",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "5 synthwave palettes via CSS vars, persists across restarts.",
+      "id": "k3",
+      "title": "Theme Switcher",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Neon FFT bars tapping the audio engine analyser.",
+      "id": "k4",
+      "title": "Audio Visualizer",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Charging sun that detonates on completion.",
+      "id": "k5",
+      "title": "Pomodoro Focus timer",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Pin local apps as glowing tiles.",
+      "id": "k6",
+      "title": "Launchpad",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Synthwave-styled retro games.",
+      "id": "k7",
+      "title": "Arcade (Snake + 2048)",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Talks to localhost:8080 webhook; model dropdown (auto/qwen3/hunyuan/qwen2.5/deepseek).",
+      "id": "k8",
+      "title": "Local AI Chat + model profiles",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Local markdown, live preview, auto-saved.",
+      "id": "k9",
+      "title": "Notes scratchpad",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Bot/gateway status + queue a message to a channel.",
+      "id": "k10",
+      "title": "Discord Console",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Live neon clock + 5 timezones.",
+      "id": "k11",
+      "title": "Clock tab",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Local /api/incoming live event view.",
+      "id": "k12",
+      "title": "Webhook Catcher",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "This board \u2014 you + agent add cards, column steers priority.",
+      "id": "k13",
+      "title": "Kanban shared board",
+      "updated": "2026-07-27 05:06"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "The idle-flicker CSS/canvas fix (cached sprite, filter anims removed) was never re-verified in a real browser. Should confirm it actually stopped flickering.",
+      "id": "k14",
+      "title": "Flicker mitigation \u2014 browser re-verify",
+      "updated": "2026-07-27 05:18"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "COMMAND CENTER gradient text fill added but never visually confirmed.",
+      "id": "k15",
+      "title": "Verify hero gradient color in-browser",
+      "updated": "2026-07-27 05:18"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 05:06",
+      "desc": "Confirm idle particle canvas + sun/grid bloom look right and don't flicker on the real pywebview surface.",
+      "id": "k16",
+      "title": "Idle FX background verify",
+      "updated": "2026-07-27 05:18"
+    },
+    {
+      "by": "you",
+      "column": "completed",
+      "created": "2026-07-27 05:31",
+      "desc": "give the columns a shorter body and eliminate the scroll of the page itself. Add individual scrolls to each column",
+      "id": "k17",
+      "title": "kanban edit (scroll)",
+      "updated": "2026-07-27 06:14"
+    },
+    {
+      "by": "you",
+      "column": "completed",
+      "created": "2026-07-27 06:18",
+      "desc": "Added Edit/Save per card; PUT writes title+desc without touching WIP.",
+      "id": "k18",
+      "red": true,
+      "title": "kanban task edits",
+      "updated": "2026-07-28 17:59"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 18:20",
+      "desc": "npm route to spin up Camofox (Docker daemon was wedged; npm i -g camofox-browser + fetch Camoufox binary + run server on :9377). Lets me visually verify CC web UIs instead of guessing.",
+      "id": "k19",
+      "title": "Save Camofox browser-verification skill",
+      "updated": "2026-07-28 04:03"
+    },
+    {
+      "by": "agent",
+      "column": "completed",
+      "created": "2026-07-27 18:20",
+      "desc": "Relay currently launched as a manual background process I spawn; if it crashes nothing revives it. Hook it under the hub _relay_watchdog (bot/start with CSRF, or create the missing discord_relay_launcher.bat) so @Nyx + model pair survive crashes and reconnect.",
+      "id": "k20",
+      "title": "Wire Discord relay under hub watchdog",
+      "updated": "2026-07-28 04:03"
+    },
+    {
+      "by": "you",
+      "column": "completed",
+      "created": "2026-07-27 20:25",
+      "desc": "add an edit button to the  tasks",
+      "id": "k21",
+      "title": "kanban edit",
+      "updated": "2026-07-28 00:04"
+    },
+    {
+      "by": "you",
+      "column": "completed",
+      "created": "2026-07-27 22:50",
+      "desc": "make the letters in \"DARK MODE\" on the dark mode tab, and the letters on the homepage \"COMMAND CENTER\" POP in neon blue when dark mode is on. Like they were a neon sign that gets turned on at night.",
+      "id": "k22",
+      "title": "dark mode edit",
+      "updated": "2026-07-28 04:03"
+    },
+    {
+      "by": "you",
+      "column": "completed",
+      "created": "2026-07-29 15:39",
+      "desc": "The chess game isn't formatted visually, the game board clips into the UI. We need the game board to scale accordingly with what is actually visible without scrolling.",
+      "id": "k23",
+      "title": "Chess game formatting",
+      "updated": "2026-07-29 20:25"
+    },
+    {
+      "by": "you",
+      "column": "completed",
+      "created": "2026-07-29 20:27",
+      "desc": "Make it so if  anything was going to clip into something else, the thing that would clip just reduces in size to fit the window/sidebar position. do this with every page and all pages going forward.",
+      "id": "k24",
+      "title": "General UI issue",
+      "updated": "2026-08-01 18:30"
+    },
+    {
+      "by": "you",
+      "column": "completed",
+      "created": "2026-08-01 11:37",
+      "desc": "Get rid of all idle features so it can free up some  processing power. make sure there's nothing in the code about idle process that  is running as a zombie.",
+      "id": "k25",
+      "title": "no idle",
+      "updated": "2026-08-01 18:30"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k26",
+      "title": "Hardening",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k27",
+      "title": "Hardening",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k28",
+      "title": "Secret hardening",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k29",
+      "title": "Silent exception audit",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k30",
+      "title": "CORS headers",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k31",
+      "title": "Rate limiting",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k32",
+      "title": "Auth killswitch",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k33",
+      "title": "Ollama timeout audit",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k34",
+      "title": "HTTP helper",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k35",
+      "title": "Startup hooks",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k36",
+      "title": "Structured logging",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k37",
+      "title": "Health endpoint",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k38",
+      "title": "Metrics endpoint",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k39",
+      "title": "Activity timeline",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k40",
+      "title": "Quick Actions bar",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k41",
+      "title": "Resource alerts",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k42",
+      "title": "Startup sanity check",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k43",
+      "title": "Config validation",
+      "updated": "2026-08-01 19:15"
+    },
+    {
+      "by": "you",
+      "column": "backlog",
+      "created": "2026-08-01 19:15",
+      "desc": "",
+      "id": "k44",
+      "title": "Session hardening",
+      "updated": "2026-08-01 19:15"
+    }
+  ],
+  "columns": [
+    "backlog",
+    "wip",
+    "completed"
+  ]
+}

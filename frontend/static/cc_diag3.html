@@ -1,0 +1,40 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="/static/synthwave.css">
+<style>#o{color:#0f0;font-family:monospace;padding:12px;white-space:pre-wrap;position:fixed;top:0;left:0;right:0;max-height:100vh;overflow:auto;z-index:99999;background:rgba(0,0,0,0.85);font-size:13px}</style>
+</head><body>
+<pre id="o"></pre>
+<div id="holder"></div>
+<script>
+window.__errs=[];
+window.addEventListener('error',function(e){window.__errs.push((e.filename||'')+':'+(e.lineno||'')+' '+(e.message||''));},true);
+function log(x){document.getElementById('o').textContent+=x+'\n';}
+fetch('/').then(function(r){return r.text();}).then(function(html){
+  var doc=new DOMParser().parseFromString(html,'text/html');
+  document.getElementById('holder').innerHTML = doc.body.innerHTML;  // scripts stripped, DOM kept, #o preserved
+  var srcs=[].map.call(doc.querySelectorAll('script[src]'),function(s){return s.src;}).filter(function(u){return u.indexOf('idlefx')<0;});
+  var i=0;
+  (function next(){
+    if(i<srcs.length){ var s=document.createElement('script'); s.src=srcs[i++]; s.onload=next; s.onerror=function(){window.__errs.push('LOADFAIL '+s.src);next();}; document.head.appendChild(s); }
+    else {
+      var inlines=[].map.call(doc.querySelectorAll('script:not([src])'),function(s){return s.textContent;});
+      inlines.forEach(function(code){ try{ (0,eval)(code); }catch(e){ window.__errs.push('INLINE ERR: '+e.message); } });
+      setTimeout(test,500);
+    }
+  })();
+}).catch(function(e){ log('FETCH ERR '+e.message); });
+function test(){
+  var sb=document.getElementById('cc-sidebar');
+  var tog=document.getElementById('cc-side-toggle');
+  var shell=document.querySelector('.app-shell');
+  log('sidebar: '+!!sb+' toggle: '+!!tog+' tabBtns: '+document.querySelectorAll('.tab-btn').length);
+  try{ tog.click(); }catch(e){ log('toggle click err: '+e.message); }
+  log('after toggle -> shell.collapsed='+(shell&&shell.classList.contains('sidebar-collapsed'))+' sb.collapsed='+(sb&&sb.classList.contains('collapsed')));
+  var sysBtn=[].slice.call(document.querySelectorAll('.tab-btn')).filter(function(b){return b.dataset.tab==='sys';})[0];
+  try{ sysBtn.click(); }catch(e){ log('tab click err: '+e.message); }
+  log('after System click -> tab-sys display='+getComputedStyle(document.getElementById('tab-sys')).display+' activeBtn='+(document.querySelector('.tab-btn.active')?document.querySelector('.tab-btn.active').dataset.tab:'none'));
+  log('CCFX: '+typeof window.CCFX+'  showTab: '+typeof window.showTab);
+  log('ERRORS('+window.__errs.length+'):'); window.__errs.forEach(function(e){log('  '+e);});
+  log('DONE');
+}
+</script>
+</body></html>

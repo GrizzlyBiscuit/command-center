@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Log Viewer{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>Decrypted Desktop Log</h2>
+  <p class="notice">Review recent secure events from the local encrypted log.</p>
+  {% if entries %}
+    <ul class="agent-list">
+      {% for entry in entries %}
+        <li class="agent-card">
+          <div>
+            <strong>{{ entry.timestamp }}</strong>
+            <div>{{ entry.actor }} · {{ entry.action }}</div>
+            <p>{{ entry.notes }}</p>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No log entries found.</p>
+  {% endif %}
+  <p><a href="/admin/settings">Admin Settings</a> | <a href="/">Back to Agents</a></p>
+</section>
+{% endblock %}
