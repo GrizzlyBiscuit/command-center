@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Login{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>Admin Access</h2>
+  <p class="notice">Enter the administrator password to access secure settings and encrypted logs.</p>
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Password:</label>
+    <input type="password" name="password" placeholder="Admin password" aria-describedby="password-error">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <p id="password-error" class="form-error">Get fucked</p>
+      {% endif %}
+    {% endwith %}
+    <button type="submit">Login</button>
+  </form>
+  <p><a href="/">Back to Agents</a></p>
+</section>
+{% endblock %}

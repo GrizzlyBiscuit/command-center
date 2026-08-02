@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Settings{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>Secure Settings</h2>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class="flash-list">
+        {% for m in messages %}
+          <li>{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Telegram Bot Token:</label>
+    <input type="text" name="bot_token" value="{{ creds.bot_token if creds else '' }}" placeholder="123456:ABC-DEF...">
+    <label>Telegram Chat ID:</label>
+    <input type="text" name="chat_id" value="{{ creds.chat_id if creds else '' }}" placeholder="@channel or chat id">
+    <button type="submit">Save Settings</button>
+  </form>
+
+  <p><a href="/admin/log">View Decrypted Log</a></p>
+  <p><a href="/">Back to Agents</a> | <a href="/admin/logout">Logout</a></p>
+</section>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Agent {{ name }}{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>Agent Overview</h2>
+  <p class="notice">Inspect the agent manifest and execute this agent with custom JSON context.</p>
+  <pre>{{ manifest }}</pre>
+</section>
+
+<section class="panel">
+  <h2>Run Agent</h2>
+  <form method="post" action="/run">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="name" value="{{ name }}">
+    <label>Context (JSON):</label>
+    <textarea name="context">{}</textarea>
+    <label><input type="checkbox" name="notify"> Notify via Telegram (if configured)</label>
+    <button type="submit">Execute Agent</button>
+  </form>
+  <p><a href="/">Back to Agents</a></p>
+</section>
+{% endblock %}

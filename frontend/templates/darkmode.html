@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Dark Mode — Command Center{% endblock %}
+
+{% block content %}
+<section class="panel darkmode-panel">
+  <div class="tab-panel" id="tab-darkmode" style="display:block">
+    <header class="cc-hero">
+      <h1 class="home-hero-title">DARK MODE</h1>
+      <p class="home-hero-sub">Two synthwave looks — pick your night.</p>
+      <nav class="cc-hero-nav" aria-label="Dark Mode">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('darkmode') }}" class="active">Dark Mode</a>
+      </nav>
+    </header>
+
+    <div class="dm-wrap">
+      <div class="dm-cards">
+        <button class="dm-card" data-theme="midnight">
+          <span class="dm-swatch" style="--sw1:#7b3fff;--sw2:#ff2d95"></span>
+          <span class="dm-name">Midnight</span>
+          <span class="dm-desc">Deep, dim, low-glow. Easy on the eyes at 3am.</span>
+          <span class="dm-check">&#10003; active</span>
+        </button>
+        <button class="dm-card" data-theme="neon">
+          <span class="dm-swatch" style="--sw1:#35f0ff;--sw2:#ff2d95"></span>
+          <span class="dm-name">Neon</span>
+          <span class="dm-desc">Bright, saturated, max glow. Turn it up.</span>
+          <span class="dm-check">&#10003; active</span>
+        </button>
+      </div>
+      <p class="dm-note">Setting persists across restarts (saved to this browser).
+        The same palette is also available in <a href="/#settings">Themes</a>.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+(function () {
+  var cards = document.querySelectorAll('.dm-card');
+  function sync() {
+    var cur = null;
+    try { cur = localStorage.getItem('cc_theme'); } catch (e) {}
+    cards.forEach(function (c) {
+      var on = (c.dataset.theme === cur) || (!cur && c.dataset.theme === 'midnight');
+      c.classList.toggle('active', on);
+    });
+  }
+  cards.forEach(function (c) {
+    c.addEventListener('click', function () {
+      if (window.CCTheme) window.CCTheme.apply(c.dataset.theme);
+      sync();
+    });
+  });
+  // theme.js applies the saved theme on load; reflect after a tick
+  setTimeout(sync, 60);
+})();
+</script>
+
+<style>
+.darkmode-panel { padding: 0; }
+.dm-wrap { padding: 26px 30px 40px; }
+.dm-cards { display: flex; gap: 22px; flex-wrap: wrap; }
+.dm-card {
+  flex: 1 1 240px; max-width: 320px; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 14px; padding: 22px; text-align: left; color: var(--text);
+  display: flex; flex-direction: column; gap: 10px;
+  box-shadow: var(--shadow); transition: transform .15s, border-color .15s, box-shadow .15s;
+}
+.dm-card:hover { transform: translateY(-3px); }
+.dm-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
+.dm-swatch {
+  width: 100%; height: 64px; border-radius: 10px;
+  background: linear-gradient(120deg, var(--sw1), var(--sw2));
+  box-shadow: 0 0 22px rgba(255,45,149,0.4); margin-bottom: 4px;
+}
+.dm-name { font-family: 'Orbitron', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: .04em; }
+.dm-desc { font-size: .85rem; color: var(--muted); line-height: 1.4; }
+.dm-check { font-size: .78rem; color: var(--accent); opacity: 0; transition: opacity .15s; }
+.dm-card.active .dm-check { opacity: 1; }
+.dm-note { margin-top: 22px; font-size: .82rem; color: var(--muted); }
+.dm-note a { color: var(--accent); }
+</style>
+{% endblock %}

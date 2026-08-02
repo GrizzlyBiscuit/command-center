@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="108dp"
+  android:height="108dp"
+  android:viewportWidth="108"
+  android:viewportHeight="108">
+  <group android:name="outerGlow">
+    <path
+      android:fillColor="#7000FF"
+      android:pathData="M54,18a36,36 0,1 1,-0 0.01a36,36 0,1 1,0 -0.01"
+      android:strokeColor="#00E5FF"
+      android:strokeWidth="4"
+      android:strokeAlpha="0.15"/>
+  </group>
+  <group android:name="orbitRing">
+    <path
+      android:fillColor="#00000000"
+      android:pathData="M54,22a32,32 0,1 1,-0 0.01a32,32 0,1 1,0 -0.01"
+      android:strokeColor="#00E5FF"
+      android:strokeWidth="2"
+      android:strokeAlpha="0.85"/>
+  </group>
+  <group android:name="orbitArcs">
+    <path
+      android:fillColor="#00000000"
+      android:pathData="M54,22a32,32 0,0 1,0 60"
+      android:strokeColor="#FF26D0"
+      android:strokeWidth="3"
+      android:strokeAlpha="0.9"/>
+    <path
+      android:fillColor="#00000000"
+      android:pathData="M54,22a32,32 0,0 1,0 -60"
+      android:strokeColor="#FF26D0"
+      android:strokeWidth="3"
+      android:strokeAlpha="0.9"/>
+  </group>
+  <group android:name="satellites">
+    <path android:fillColor="#FF26D0" android:pathData="M86,54m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0"/>
+    <path android:fillColor="#00E5FF" android:pathData="M22,54m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0"/>
+    <path android:fillColor="#FF26D0" android:pathData="M54,86m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0"/>
+    <path android:fillColor="#00E5FF" android:pathData="M54,22m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0"/>
+  </group>
+  <group android:name="spokes">
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.0" android:strokeColor="#B9F6CA" android:strokeAlpha="0.35" android:strokeWidth="1.5"
+      android:pathData="M54,30l18,24"/>
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.0" android:strokeColor="#B9F6CA" android:strokeAlpha="0.35" android:strokeWidth="1.5"
+      android:pathData="M54,30l-18,24"/>
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.0" android:strokeColor="#B9F6CA" android:strokeAlpha="0.35" android:strokeWidth="1.5"
+      android:pathData="M54,78l18,-24"/>
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.0" android:strokeColor="#B9F6CA" android:strokeAlpha="0.35" android:strokeWidth="1.5"
+      android:pathData="M54,78l-18,-24"/>
+  </group>
+  <group android:name="innerCore">
+    <path android:fillColor="#FF26D0" android:pathData="M54,54m-7,0a7,7 0,1 1,14 0a7,7 0,1 1,-14 0"/>
+    <path android:fillColor="#0B0014" android:pathData="M54,54m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0"/>
+  </group>
+</vector>

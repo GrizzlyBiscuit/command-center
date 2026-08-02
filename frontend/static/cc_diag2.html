@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="/static/synthwave.css">
+<style>#o{color:#0f0;font-family:monospace;padding:12px;white-space:pre-wrap;position:relative;z-index:999;font-size:13px}</style>
+</head><body>
+<pre id="o"></pre>
+<script>
+window.__errs=[];
+window.onerror=function(m,s,l,c,e){window.__errs.push((s||'')+':'+l+' '+(e&&e.message||m));};
+window.addEventListener('error',function(ev){window.__errs.push((ev.filename||'')+':'+(ev.lineno||'')+' '+(ev.message||''));},true);
+function log(x){document.getElementById('o').textContent+=x+'\n';}
+function load(src,cb){var s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=function(){window.__errs.push('LOAD FAIL '+src);cb();};document.head.appendChild(s);}
+// NOTE: idlefx.js excluded (its canvas rAF hangs headless screenshots)
+var scripts=['/static/fx.js','/static/banner.js','/static/chess.js','/static/sysmon.js','/static/arena.js','/static/control.js','/static/relaytrace.js','/static/main.js'];
+var i=0;
+(function next(){ if(i<scripts.length){load(scripts[i++],next);} else { setTimeout(done,300); } })();
+function done(){
+  log('CCFX: '+typeof window.CCFX+(window.CCFX?(' keys='+Object.keys(window.CCFX).join(',')):''));
+  log('CCAudio: '+typeof window.CCAudio);
+  log('CCIdleFX: '+typeof window.CCIdleFX);
+  log('ERRORS('+window.__errs.length+'):');
+  window.__errs.forEach(function(e){log('  '+e);});
+  log('DONE');
+}
+</script>
+</body></html>

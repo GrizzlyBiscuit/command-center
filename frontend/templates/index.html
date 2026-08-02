@@ -1,0 +1,888 @@
+{% extends "base.html" %}
+
+{% block title %}Command Center{% endblock %}
+
+{% block content %}
+<section class="panel home-panel">
+
+  <!-- HERO — only visible on the Home tab (lives inside #tab-home) -->
+  <div class="tab-panel" id="tab-home">
+    <header class="cc-hero" id="cc-hero">
+      <h1 class="home-hero-title">COMMAND CENTER</h1>
+      <p class="home-hero-sub">Pick a panel to begin</p>
+      <nav class="cc-hero-nav" aria-label="Primary">
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('darkmode') }}">Dark Mode</a>
+        <a href="{{ url_for('instructions') }}">Setup</a>
+        {% if session.admin %}
+          <a href="{{ url_for('admin_settings') }}">Admin</a>
+          <a href="{{ url_for('admin_log') }}">Logs</a>
+          <a href="{{ url_for('admin_logout') }}">Logout</a>
+        {% else %}
+          <a href="{{ url_for('admin_login') }}">Admin Login</a>
+        {% endif %}
+      </nav>
+    </header>
+
+    <div class="home-hero">
+      <div class="fire-widget" id="fire-widget">
+        <div class="fire-flame-wrap">
+          <svg id="fire-flame" class="fire-flame" viewBox="0 0 100 120" aria-label="Fire danger level">
+            <defs>
+              <radialGradient id="flameGrad" cx="50%" cy="70%" r="60%">
+                <stop offset="0%" stop-color="#fff6d5"/>
+                <stop offset="35%" stop-color="#ffd23f"/>
+                <stop offset="70%" stop-color="#ff7b00"/>
+                <stop offset="100%" stop-color="#c1121f"/>
+              </radialGradient>
+            </defs>
+            <path id="flame-path" d="M50 110 C20 90 18 55 38 38 C44 32 40 22 50 8 C62 24 60 34 64 40 C82 54 82 90 50 110 Z"
+                  fill="url(#flameGrad)"/>
+          </svg>
+          <div class="fire-stage-label" id="fire-stage-label">Low</div>
+        </div>
+        <div class="fire-meta">
+          <div class="fire-region" id="fire-region">—</div>
+          <div class="fire-sources" id="fire-sources"></div>
+        </div>
+        <div class="fire-evac">
+          <div class="fire-evac-title">EVAC STATUS</div>
+          <div class="evac-lights" id="evac-lights">
+            <span class="evac-light" data-stage="0"><i></i>None</span>
+            <span class="evac-light" data-stage="1"><i></i>Advisory</span>
+            <span class="evac-light" data-stage="2"><i></i>Get Ready</span>
+            <span class="evac-light" data-stage="3"><i></i>Evacuate</span>
+            <span class="evac-light" data-stage="4"><i></i>Mandatory</span>
+          </div>
+          <div class="fire-evac-name" id="fire-evac-name">None</div>
+        </div>
+      </div>
+      <p class="home-hero-sub home-hero-welcome">Choose a panel from the sidebar to get started.</p>
+
+      <!-- Hub dashboard -->
+      <div class="hub-dash" id="hub-dash">
+        <div class="hub-head">
+          <div>
+            <div class="hub-title">HUB STATUS</div>
+            <div class="hub-meta" id="hub-meta">PID {{ hub.pid if hub else '—' }} · {{ 'UP' if (hub and (hub.relay or hub.ollama)) else 'IDLE' }}</div>
+          </div>
+          <div class="hub-head-actions">
+            <button id="hub-refresh" class="btn-ghost" data-tip="Refresh hub state now">Refresh</button>
+            <button id="hub-kill" class="btn-danger" data-tip="Stop the hub process">Kill hub</button>
+          </div>
+        </div>
+        <div class="hub-grid">
+          <div class="hub-card">
+            <div class="hub-card-title">Hub process</div>
+            <div class="hub-indicator-row">
+              <span class="status-dot" id="dot-hub"></span>
+              <strong id="state-hub">running</strong>
+            </div>
+            <div class="hub-sub" id="hub-python">{{ hub.python if hub else '' }}</div>
+            <div class="hub-sub" id="hub-uptime">uptime: checking…</div>
+          </div>
+          <div class="hub-card">
+            <div class="hub-card-title">Relay</div>
+            <div class="hub-indicator-row">
+              <span class="status-dot" id="dot-relay-home"></span>
+              <strong id="state-relay-home">{{ 'running' if (hub and hub.relay) else 'stopped' }}</strong>
+            </div>
+            <div class="hub-sub">Discord bot/model pair</div>
+          </div>
+          <div class="hub-card">
+            <div class="hub-card-title">Ollama</div>
+            <div class="hub-indicator-row">
+              <span class="status-dot" id="dot-ollama-home"></span>
+              <strong id="state-ollama-home">{{ 'up' if (hub and hub.ollama) else 'down' }}</strong>
+            </div>
+            <div class="hub-sub">Local model server</div>
+          </div>
+          <div class="hub-card">
+            <div class="hub-card-title">Cron</div>
+            <div class="hub-sub" id="hub-cron">{{ (hub.cron|length) if hub and hub.cron else 0 }} active</div>
+            <div class="hub-sub" id="hub-cron-list">{% if hub and hub.cron %}{% for c in hub.cron %}<div>{{ c }}</div>{% endfor %}{% endif %}</div>
+          </div>
+        </div>
+        <details class="hub-details">
+          <summary>Script viewer — active endpoints</summary>
+          <pre class="hub-script" id="hub-routes">{% if hub and hub.routes %}{% for r in hub.routes %}{{ r }}
+{% endfor %}{% endif %}</pre>
+        </details>
+      </div>
+
+      <!-- Stale runner watcher -->
+      <div class="stale-watcher" id="stale-watcher">
+        <div class="stale-head">
+          <div>
+            <div class="stale-title">STALE RUNNERS</div>
+            <div class="stale-sub">Detects duplicate hubs and orphaned terminal wrappers</div>
+          </div>
+          <div class="stale-badge" id="stale-badge">0</div>
+        </div>
+        <div class="stale-feed" id="stale-feed">Scanning…</div>
+      </div>
+
+      <!-- Fire Watch -->
+      <div class="fire-watch-widget" id="fire-watch-widget">
+        <div class="fire-watch-head">
+          <span class="fire-watch-title">FIRE WATCH</span>
+          <span class="fire-watch-badge" id="fire-watch-badge">LIVE</span>
+        </div>
+        <div class="fire-watch-body" id="fire-watch-body">Checking…</div>
+      </div>
+    </div>
+    <div class="home-version" id="home-version">V2.34.14</div>
+    <div class="home-clock">
+      <span class="home-clock-time" id="clock-main">--:--:--</span>
+      <span class="home-clock-date" id="clock-date"></span>
+    </div>
+  </div>
+
+  <!-- TAB 1: Power Switches (Ollama + Discord bot/model pair) -->
+  <div class="tab-panel" id="tab-switches" style="display:none">
+    <div class="switch-block">
+      <div class="switch-head">
+        <div class="switch-row">
+          <label class="switch">
+            <input type="checkbox" id="ollama-switch" {{ 'checked' if ollama else '' }}>
+            <span class="slider"></span>
+          </label>
+          <span id="ollama-label" class="power-label">{{ 'ON' if ollama else 'OFF' }}</span>
+          <span class="switch-name">Ollama — local model server</span>
+        </div>
+        <div class="status-cell compact">
+          <span class="status-dot" id="dot-ollama"></span>
+          <strong id="state-ollama">{{ 'up' if ollama else 'down' }}</strong>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="ollama-start" class="btn-primary" data-tip="Start the local model server" {{ 'disabled' if ollama else '' }}>Boot Ollama</button>
+        <button id="ollama-stop" class="btn-danger" data-tip="Stop the local model server" {{ '' if ollama else 'disabled' }}>Shut down</button>
+      </div>
+    </div>
+
+    <div class="switch-block">
+      <div class="switch-head">
+        <div class="switch-row">
+          <label class="switch">
+            <input type="checkbox" id="relay-switch" {{ 'checked' if relay else '' }}>
+            <span class="slider"></span>
+          </label>
+          <span id="relay-label" class="power-label">{{ 'ON' if relay else 'OFF' }}</span>
+          <span class="switch-name">Discord bot / model pair</span>
+        </div>
+        <div class="status-cell compact">
+          <span class="status-dot" id="dot-relay"></span>
+          <strong id="state-relay">{{ 'running' if relay else 'stopped' }}</strong>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="relay-start" class="btn-primary" data-tip="Start the Discord bot / model pair" {{ 'disabled' if relay else '' }}>Start bot</button>
+        <button id="relay-stop" class="btn-danger" data-tip="Stop the Discord bot / model pair" {{ '' if relay else 'disabled' }}>Stop bot</button>
+      </div>
+    </div>
+
+    <div class="switch-block">
+      <div class="switch-head">
+        <div class="switch-row">
+          <label class="switch">
+            <input type="checkbox" id="readiness-switch">
+            <span class="slider"></span>
+          </label>
+          <span id="readiness-label" class="power-label">OFF</span>
+          <span class="switch-name">Daily local-AI readiness report</span>
+        </div>
+        <div class="status-cell compact">
+          <span class="status-dot" id="dot-readiness"></span>
+          <strong id="state-readiness">off</strong>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button id="readiness-run" class="btn-primary" data-tip="Run the readiness check now">Run now</button>
+        <span id="readiness-last" class="readiness-last"></span>
+      </div>
+    </div>
+
+    <h3>Relay console</h3>
+    <pre class="relay-console" id="relay-console" aria-live="polite"><canvas></canvas>
+  </div>
+
+  <!-- TAB 2: Control Panel (the original agent dashboard) -->
+  <div class="tab-panel" id="tab-control" style="display:none">
+    <h3>Agent Manager</h3>
+    <ul class="agent-list">
+      {% for a in agents %}
+        <li class="agent-card">
+          <span class="agent-name">{{ a }}</span>
+          <span class="agent-actions">
+            <button class="agent-run" data-agent="{{ a }}" data-tip="Run this agent in the console">Run</button>
+            <a class="agent-open" href="{{ url_for('agent_page', name=a) }}">Open</a>
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+    <form method="post" action="/install">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <label>ZIP URL or path:</label>
+      <input type="text" name="url" placeholder="https://... or C:\path\agent.zip">
+      <label>Name (optional):</label>
+      <input type="text" name="name" placeholder="Agent name">
+      <button type="submit">Install Agent</button>
+    </form>
+
+    <aside class="panel terminal-panel" id="terminal" aria-label="System console">
+      <h3>System Console</h3>
+      <div class="terminal-output" id="terminal-output" aria-live="polite" role="log"></div>
+      <div class="terminal-input-row">
+        <input id="terminal-input" placeholder="&gt; run agent" autocomplete="off" aria-label="Terminal command input">
+        <button type="button" id="terminal-send">Send</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- TAB 3: Games moved into the Arcade panel below -->
+
+
+  <div class="tab-panel" id="tab-sys" style="display:none">
+    <div class="sys-wrap">
+      <div class="sys-head">
+        <h3>System Monitor</h3>
+        <label class="switch">
+          <input type="checkbox" id="sys-toggle">
+          <span class="slider"></span>
+        </label>
+        <span id="sys-state" class="power-label">OFF</span>
+        <span class="sys-ollama" id="sys-ollama">Ollama: ?</span>
+      </div>
+      <div id="sys-body" class="sys-body" style="display:none">
+        <div class="sys-grid">
+          <div class="sys-card">
+            <div class="sys-card-title">CPU <span id="sys-cpu-val">–%</span></div>
+            <div class="sys-bar"><div class="sys-bar-fill" id="sys-cpu-bar"></div></div>
+            <canvas class="sys-spark" id="sys-cpu-spark" height="36"></canvas>
+            <div class="sys-sub" id="sys-cpu-cores"></div>
+          </div>
+          <div class="sys-card">
+            <div class="sys-card-title">RAM <span id="sys-ram-val">–%</span></div>
+            <div class="sys-bar"><div class="sys-bar-fill" id="sys-ram-bar"></div></div>
+            <div class="sys-sub" id="sys-ram-sub">– / – GB</div>
+          </div>
+          <div class="sys-card">
+            <div class="sys-card-title">Disk (C:) <span id="sys-disk-val">–%</span></div>
+            <div class="sys-bar"><div class="sys-bar-fill" id="sys-disk-bar"></div></div>
+            <div class="sys-sub" id="sys-disk-sub">– / – GB</div>
+          </div>
+          <div class="sys-card">
+            <div class="sys-card-title">Net</div>
+            <div class="sys-sub" id="sys-net-sub">↑ – ↓ –</div>
+          </div>
+        </div>
+        <h4 class="sys-gpu-h">GPU</h4>
+        <div class="sys-gpus" id="sys-gpus"></div>
+      </div>
+      <p class="sys-off-note" id="sys-off-note">Monitor is off — flip the switch to start polling (the GPU query spawns a PowerShell counter sweep, so it only runs while ON).</p>
+    </div>
+  </div>
+
+  <!-- TAB 6: Model Arena (pit two local Ollama models) -->
+    <div class="tab-panel" id="tab-arena" style="display:none">
+      <div class="arena">
+        <h3 class="panel-h">&#9876; Model Arena</h3>
+      <p class="panel-sub">Same prompt to two local models. Pick a winner. See who actually earns its VRAM.</p>
+
+      <!-- FUSION FORGE — at the top of the pairing space -->
+      <div class="forge-top">
+        <div class="forge-top-left">
+          <div class="forge-top-h">&#9883; Forge a Fusion Pair</div>
+          <p class="forge-top-sub">Pair two LOCAL models (A drafts &rarr; B finishes). Saved pairs appear in every model dropdown &mdash; Arena debates, Maze, Chat.</p>
+          <div class="forge-row">
+            <input id="forge-name" class="fusion-input" placeholder="Pair name (e.g. MindSmith)" maxlength="40">
+          </div>
+          <div class="forge-row">
+            <label>Model A (draft)
+              <select id="forge-a" class="arena-sel"></select>
+            </label>
+            <label>Model B (finish)
+              <select id="forge-b" class="arena-sel"></select>
+            </label>
+          </div>
+          <div class="forge-row">
+            <button id="forge-btn" class="btn-primary">&#9883; Forge Pair</button>
+            <span id="forge-status" class="arena-status"></span>
+          </div>
+          <div id="forge-confirm" class="forge-confirm" style="display:none"></div>
+        </div>
+        <div class="forge-top-right">
+          <canvas id="forge-evo-canvas" width="300" height="220" class="forge-evo-canvas"></canvas>
+        </div>
+      </div>
+
+      <div class="arena-mode">
+        <button class="arena-mode-btn active" data-mode="fight">&#9876; Fight (A vs B)</button>
+        <button class="arena-mode-btn" data-mode="pair">&#128293; Pair (fuse A&#8594;B)</button>
+      </div>
+      <p class="arena-mode-note" id="arena-mode-note">Each model answers the prompt; you judge the winner.</p>
+
+      <div class="arena-controls">
+        <label>Model A
+          <select id="arena-a" class="arena-sel"></select>
+        </label>
+        <label>Model B
+          <select id="arena-b" class="arena-sel"></select>
+        </label>
+        <button id="arena-swap" class="btn-ghost" data-tip="Swap A and B">&#8644; Swap</button>
+      </div>
+
+      <textarea id="arena-prompt" class="arena-prompt" rows="3"
+        placeholder="Enter a challenge for both models…">Explain what a GPU VRAM fragment is, in one short paragraph.</textarea>
+
+      <div class="arena-actions">
+        <button id="arena-fight" class="btn-primary">&#9876; Fight!</button>
+        <button id="arena-pair" class="btn-primary" style="display:none">&#128293; Fuse Pair</button>
+        <span id="arena-status" class="arena-status"></span>
+      </div>
+
+      <div class="arena-ring">
+        <div class="arena-card" id="arena-card-a">
+          <div class="arena-card-h">
+            <span class="arena-tag">A</span>
+            <span id="arena-name-a" class="arena-name">—</span>
+          </div>
+          <pre id="arena-out-a" class="arena-out">Idle.</pre>
+          <div class="arena-meta" id="arena-meta-a"></div>
+          <button class="btn-win" data-win="a">This one wins</button>
+        </div>
+
+        <div class="arena-vs">VS</div>
+
+        <div class="arena-card" id="arena-card-b">
+          <div class="arena-card-h">
+            <span class="arena-tag">B</span>
+            <span id="arena-name-b" class="arena-name">—</span>
+          </div>
+          <pre id="arena-out-b" class="arena-out">Idle.</pre>
+          <div class="arena-meta" id="arena-meta-b"></div>
+          <button class="btn-win" data-win="b">This one wins</button>
+        </div>
+      </div>
+
+      <div class="arena-foot">
+        <button id="arena-draw" class="btn-ghost">Tie / both dumber</button>
+        <button id="arena-clear" class="btn-ghost">Clear scores</button>
+      </div>
+      <div id="arena-pair-out" class="arena-pair-out" style="display:none">
+        <div class="arena-pair-head">&#128293; Fused Pair Output <span id="arena-pair-name"></span></div>
+        <div class="arena-pair-sub" id="arena-pair-draft-wrap">DRAFT (A): <pre id="arena-pair-draft" class="arena-out"></pre></div>
+        <div class="arena-pair-sub">FINAL (B): <pre id="arena-pair-final" class="arena-out"></pre></div>
+        <div class="arena-meta" id="arena-pair-meta"></div>
+      </div>
+      <div id="arena-score" class="arena-score"></div>
+    </div>
+  </div>
+  <!-- TAB 7b: Maze (watch local models solve a maze, live) -->
+  <div class="tab-panel" id="tab-maze" style="display:none">
+    <div class="maze-wrap">
+      <h3 class="panel-h">&#128373; Maze Run</h3>
+      <p class="panel-sub">Local models navigate a maze turn-by-turn — you watch them move. Same maze for both = a fair race.</p>
+
+      <div class="maze-controls">
+        <label>Agent A
+          <select id="maze-a" class="arena-sel"></select>
+        </label>
+        <label>Agent B <span class="muted">(optional)</span>
+          <select id="maze-b" class="arena-sel"></select>
+        </label>
+        <label>Size
+          <select id="maze-size" class="arena-sel">
+            <option value="9">9×9</option>
+            <option value="13" selected>13×13</option>
+            <option value="17">17×17</option>
+            <option value="21">21×21</option>
+          </select>
+        </label>
+        <button id="maze-run" class="btn-primary">&#9654; Run (live)</button>
+        <button id="maze-replay" class="btn-ghost" data-tip="Re-solve fast and animate the replay">&#8635; Replay</button>
+        <span id="maze-status" class="arena-status"></span>
+      </div>
+
+      <div class="maze-stage">
+        <canvas id="maze-canvas" width="520" height="520" class="maze-canvas"></canvas>
+        <div class="maze-side">
+          <div id="maze-board" class="maze-board"></div>
+          <div id="maze-score" class="maze-score"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 7c: Fusion Core (forge named model pairs) -->
+  <div class="tab-panel" id="tab-fusion" style="display:none">
+    <div class="fusion">
+      <h3 class="panel-h">&#9883; Fusion Core</h3>
+      <p class="panel-sub">Forge a named pair of two local models. They fuse &mdash; A drafts, B finishes &mdash; exactly like the Discord model pair. Saved pairs appear in EVERY model dropdown (Arena, Maze, Chat) so you can run them through the gauntlet.</p>
+
+      <div class="fusion-create">
+        <input id="fusion-name" class="fusion-input" placeholder="Pair name (e.g. 'MindSmith')" maxlength="40">
+        <label>Model A (draft)
+          <select id="fusion-a" class="arena-sel"></select>
+        </label>
+        <label>Model B (finish)
+          <select id="fusion-b" class="arena-sel"></select>
+        </label>
+        <button id="fusion-forge" class="btn-primary">&#9883; Forge Pair</button>
+      </div>
+
+      <div class="fusion-evolve" id="fusion-evolve" style="display:none">
+        <canvas id="fusion-evo-canvas" width="320" height="200"></canvas>
+        <div class="fusion-evolve-name" id="fusion-evolve-name"></div>
+      </div>
+
+      <div class="fusion-list" id="fusion-list"></div>
+    </div>
+  </div>
+
+  <!-- TAB 8: Visualizer (audio-reactive neon) -->
+  <div class="tab-panel" id="tab-visualizer" style="display:none">
+    <div class="viz-wrap">
+      <h3 class="panel-h">&#127911; Audio Visualizer</h3>
+      <p class="panel-sub">Neon bars + scope driven by whatever's playing. Hit play on the audio menu (top-right) to feed it.</p>
+      <canvas id="viz-canvas" class="viz-canvas"></canvas>
+      <div class="viz-foot" id="viz-foot">Idle — start the hum or lo-fi to see it move.</div>
+    </div>
+  </div>
+
+  <!-- TAB 9: Pomodoro / Focus Timer -->
+  <div class="tab-panel" id="tab-pomodoro" style="display:none">
+    <div class="pomo-wrap">
+      <h3 class="panel-h">&#9202; Focus Timer</h3>
+      <p class="panel-sub">The sun charges as the session burns down. When it hits zero, it explodes.</p>
+      <div class="pomo-sun" id="pomo-sun"><div class="pomo-core"></div></div>
+      <div class="pomo-time" id="pomo-time">25:00</div>
+      <div class="pomo-modes">
+        <button class="pomo-mode active" data-min="25">Focus 25</button>
+        <button class="pomo-mode" data-min="5">Break 5</button>
+        <button class="pomo-mode" data-min="15">Long 15</button>
+      </div>
+      <div class="pomo-btns">
+        <button id="pomo-start" class="btn-primary">Start</button>
+        <button id="pomo-pause" class="btn-secondary">Pause</button>
+        <button id="pomo-reset" class="btn-ghost">Reset</button>
+      </div>
+      <div class="pomo-count" id="pomo-count">Sessions today: 0</div>
+    </div>
+  </div>
+
+  <!-- TAB 10: Launchpad -->
+  <div class="tab-panel" id="tab-launchpad" style="display:none">
+    <div class="lp-wrap">
+      <h3 class="panel-h">&#128640; Launchpad</h3>
+      <p class="panel-sub">Pin apps and open them with one click. Stored locally.</p>
+      <form id="lp-add" class="lp-add">
+        <input id="lp-name" placeholder="Label (e.g. Discord)" required>
+        <input id="lp-path" placeholder="Path or command (e.g. C:\Program Files\Discord\Discord.exe)">
+        <button class="btn-primary" type="submit">Pin</button>
+      </form>
+      <div class="lp-grid" id="lp-grid"></div>
+    </div>
+  </div>
+
+  <!-- TAB 11: Arcade (Snake + 2048 + Chess) -->
+  <div class="tab-panel" id="tab-arcade" style="display:none">
+    <div class="arc-wrap">
+      <h3 class="panel-h">&#127918; Arcade</h3>
+      <p class="panel-sub">Synthwave Snake, 2048 &amp; Chess. Arrow keys (or WASD) to play.</p>
+      <div class="arc-tabs">
+        <button class="arc-tab active" data-game="snake">&#128013; Snake</button>
+        <button class="arc-tab" data-game="2048">&#128292; 2048</button>
+        <button class="arc-tab" data-game="chess">&#9822; Chess</button>
+      </div>
+      <div class="arc-stage" id="arc-stage"></div>
+      <div class="arc-score" id="arc-score">Score: 0</div>
+
+      <!-- Chess lives inside Arcade too -->
+      <div class="cc-chess-wrap" id="arc-chess" style="display:none">
+        <div class="cc-chess-side">
+          <h3>Synthwave Chess</h3>
+          <div class="cc-status" id="cc-status">White to move</div>
+          <div class="cc-controls">
+            <button class="btn-primary" id="cc-new" data-tip="Start a fresh game">New Game</button>
+            <button class="btn-secondary" id="cc-flip" data-tip="Flip the board">Flip</button>
+          </div>
+          <div class="cc-opt">
+            <label class="cc-opt-row">
+              <span>Difficulty</span>
+              <input type="range" id="cc-level" min="1" max="10" value="10">
+              <output id="cc-level-out">10</output>
+            </label>
+            <label class="cc-opt-row cc-toggle">
+              <input type="checkbox" id="cc-vsmodel">
+              <span>Play vs Local Model pair</span>
+            </label>
+            <p class="cc-hint">You play <strong>White</strong>. Off = built-in engine (fast, level 1–10). On = your local Ollama model picks moves (validated; falls back to the engine if it stalls).</p>
+          </div>
+        </div>
+        <div class="cc-board" id="cc-board" aria-label="Chess board"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 12: Local AI Chat -->
+  <div class="tab-panel" id="tab-chat" style="display:none">
+    <div class="chat-wrap">
+      <h3 class="panel-h">&#128172; Local AI Chat</h3>
+      <p class="panel-sub">Talks to your local model over the offline webhook. Nothing leaves the machine.</p>
+      <div class="chat-model-row">
+        <span class="chat-model-label">Model</span>
+        <select id="chat-model" class="chat-model-sel">
+          <option value="auto">auto (webhook default)</option>
+        </select>
+      </div>
+      <div class="chat-log" id="chat-log"></div>
+      <form id="chat-form" class="chat-form">
+        <input id="chat-input" placeholder="Message your local model…" autocomplete="off">
+        <button class="btn-primary" type="submit">Send</button>
+      </form>
+      <div class="chat-status" id="chat-status">endpoint: checking…</div>
+    </div>
+  </div>
+
+  <!-- TAB 13: Notes / Scratchpad -->
+  <div class="tab-panel" id="tab-notes" style="display:none">
+    <div class="notes-wrap">
+      <h3 class="panel-h">&#128221; Notes</h3>
+      <p class="panel-sub">Local markdown scratchpad. Auto-saved.</p>
+      <textarea id="notes-area" class="notes-area" placeholder="# Notes&#10;&#10;Type here…"></textarea>
+      <div class="notes-preview" id="notes-preview"></div>
+    </div>
+  </div>
+
+  <!-- TAB 14: Discord Console -->
+  <div class="tab-panel" id="tab-discord" style="display:none">
+    <div class="dc-wrap">
+      <h3 class="panel-h">&#128483; Discord Console</h3>
+      <p class="panel-sub">Bot + gateway status, and a way to fire a message to a channel.</p>
+      <div class="dc-status" id="dc-status">checking…</div>
+      <form id="dc-send" class="dc-send">
+        <input id="dc-channel" placeholder="channel id or #name">
+        <input id="dc-msg" placeholder="message">
+        <button class="btn-primary" type="submit">Send</button>
+      </form>
+      <pre class="dc-log" id="dc-log"></pre>
+    </div>
+  </div>
+
+  <!-- TAB 17: Webhook Catcher -->
+  <div class="tab-panel" id="tab-webhooks" style="display:none">
+    <div class="wh-wrap">
+      <h3 class="panel-h">&#128225; Webhook Catcher</h3>
+      <p class="panel-sub">Receives <strong>local</strong> POSTs to <code>http://127.0.0.1:5050/api/incoming?source=NAME</code>. Point n8n / your relay / any local tool here. Nothing leaves the box.</p>
+      <div class="wh-bar">
+        <button class="btn-primary" id="wh-clear" data-tip="Clear the live view">Clear</button>
+        <button class="btn-ghost" id="wh-test" data-tip="Fire a test event at yourself">Send test event</button>
+        <span class="wh-count" id="wh-count">0 events</span>
+      </div>
+      <div class="wh-log" id="wh-log"></div>
+    </div>
+  </div>
+
+  <!-- TAB 18: Kanban (shared task board) -->
+  <div class="tab-panel" id="tab-kanban" style="display:none">
+    <div class="kb-wrap">
+      <h3 class="panel-h">&#128221; Kanban</h3>
+      <p class="panel-sub">Shared board — you and the agent both add here. Column steers priority: <strong>Backlog</strong> = backlog, <strong>WIP</strong> = active, <strong>Completed</strong> = closed. No WIP limit (yet).</p>
+      <div class="kb-bar">
+        <button class="btn-primary" id="kb-add" data-tip="Add a task (the agent sees it too)">+ Add task</button>
+        <span class="kb-count" id="kb-count"></span>
+      </div>
+      <div class="kb-board" id="kb-board">
+        <div class="kb-col" data-col="backlog">
+          <div class="kb-col-h">&#9744; Backlog</div>
+          <div class="kb-cards" id="kb-backlog"></div>
+        </div>
+        <div class="kb-col" data-col="wip">
+          <div class="kb-col-h">&#128260; WIP</div>
+          <div class="kb-cards" id="kb-wip"></div>
+        </div>
+        <div class="kb-col" data-col="completed">
+          <div class="kb-col-h">&#9989; Completed</div>
+          <div class="kb-cards" id="kb-completed"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WIP caution modal: shown when a task is moved INTO In Progress -->
+    <div class="kb-pop" id="kb-wip-caution" style="display:none">
+      <div class="kb-pop-box" style="max-width:440px">
+        <h4>Start this task?</h4>
+        <p class="kb-wip-text">Moving <strong id="kb-wip-msg"></strong> to <strong>In Progress</strong> will tell the agent to begin working on it.</p>
+        <div class="kb-pop-acts">
+          <button class="btn-ghost" id="kb-wip-no">No — keep it here</button>
+          <button class="btn-primary" id="kb-wip-yes">Yes — start it</button>
+        </div>
+      </div>
+    </div>
+    <!-- transient confirmation flash after starting -->
+    <div class="kb-wip-flash" id="kb-wip-flash"></div>
+  </div>
+
+    <!-- Add-task mini popover -->
+    <div class="kb-pop" id="kb-pop" style="display:none">
+      <div class="kb-pop-box">
+        <h4>New task</h4>
+        <input id="kb-title" class="kb-title" placeholder="Title" autocomplete="off">
+        <textarea id="kb-desc" class="kb-desc" placeholder="Description (optional) — a little package the agent can open"></textarea>
+        <div class="kb-pop-acts">
+          <button class="btn-primary" id="kb-save">Add</button>
+          <button class="btn-ghost" id="kb-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 15: Themes -->
+  <div class="tab-panel" id="tab-settings" style="display:none">
+    <div class="theme-wrap">
+      <h3 class="panel-h">&#9881; Themes</h3>
+      <p class="panel-sub">Pick a synthwave palette. Your choice sticks across restarts.</p>
+      <div class="theme-swatches" id="theme-swatches"></div>
+      <div class="theme-current-line">Active: <strong id="theme-current">Outrun</strong></div>
+    </div>
+  </div>
+
+
+</section>
+
+<script>
+  // ---- tab switching (no tab is active on a fresh open) ----
+  var _lastTab = null;
+  function showTab(name) {
+    if (name === _lastTab) return;
+    // tell the outgoing tab to stop (visualizer, pomodoro, arcade, chat)
+    if (_lastTab === 'visualizer' && window.CCViz) window.CCViz.onHide();
+    if (_lastTab === 'pomodoro' && window.CCPomo) window.CCPomo.onHide();
+    if (_lastTab === 'arcade' && window.CCArcade) window.CCArcade.onHide();
+    if (_lastTab === 'chat' && window.CCChat) window.CCChat.onHide();
+    if (_lastTab === 'discord' && window.CCDiscord) window.CCDiscord.onHide();
+    _lastTab = name;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    ['home','switches','control','sys','arena','maze','fusion','relay','visualizer','pomodoro','launchpad','arcade','chat','notes','discord','webhooks','kanban','settings'].forEach(function (t) {
+      var el = document.getElementById('tab-' + t);
+      if (el) el.style.display = (name === t) ? '' : 'none';
+    });
+    if (window.CCFX && window.CCFX.whoosh) window.CCFX.whoosh();
+    if (name === 'sys') window.CCSys && window.CCSys.onShow();
+    if (name === 'arena' && window.CCArena) window.CCArena.mount();
+    if (name === 'maze' && window.CCMaze) window.CCMaze.mount();
+    if (name === 'fusion' && window.CCFusion) window.CCFusion.mount();
+    if (name === 'control' && window.CCControl) window.CCControl.mount();
+    if (name === 'relay' && window.CCRelayTrace) window.CCRelayTrace.mount();
+    if (name === 'visualizer' && window.CCViz) window.CCViz.onShow();
+    if (name === 'pomodoro' && window.CCPomo) window.CCPomo.onShow();
+    if (name === 'launchpad' && window.CCLaunch) window.CCLaunch.onShow();
+    if (name === 'arcade' && window.CCArcade) window.CCArcade.onShow();
+    if (name === 'chat' && window.CCChat) window.CCChat.onShow();
+    if (name === 'notes' && window.CCNotes) window.CCNotes.onShow();
+    if (name === 'discord' && window.CCDiscord) window.CCDiscord.onShow();
+    if (name === 'clock' && window.CCClock) window.CCClock.onShow();
+    if (name === 'webhooks' && window.CCWebhooks) window.CCWebhooks.onShow();
+    if (name === 'kanban' && window.CCKanban) window.CCKanban.onShow();
+    if (name === 'settings' && window.CCTheme) window.CCTheme.apply((function(){try{return localStorage.getItem('cc_theme')||'outrun';}catch(e){return 'outrun';}})());
+  }
+  document.querySelectorAll('.hero-chip').forEach(c => {
+    c.onclick = () => showTab(c.dataset.goto);
+  });
+  // start on the tab named in the URL hash (e.g. /#sys), else BLANK
+  var startTab = (location.hash || '').replace('#', '') || 'home';
+  showTab(startTab);
+
+  // ---- live-reload ping: when the agent edits the app it bumps the
+  // version; this tab reloads itself within ~2s and reopens the same tab.
+  // No manual refresh, no close/reopen needed. Also keeps the Home
+  // version stamp current. ----
+  var CC_VER = null;
+  function ccLiveCheck() {
+    fetch('/api/version').then(function (r) { return r.json(); }).then(function (d) {
+      var vEl = document.getElementById('home-version');
+      if (vEl) vEl.textContent = d.string || ('V?' + d.version);
+      if (CC_VER === null) { CC_VER = d.version; return; }
+      if (d.version !== CC_VER) {
+        try { location.hash = '#' + (window._ccCurrentTab || 'home'); } catch (e) {}
+        location.reload();
+      }
+    }).catch(function () {});
+  }
+  // remember which tab is active so a reload reopens it
+  var _ccShow = window.showTab;
+  window._ccCurrentTab = startTab;
+  window.showTab = function (name) { window._ccCurrentTab = name; return _ccShow(name); };
+  setInterval(ccLiveCheck, 2000);
+
+  // ---- power switch logic ----
+  const csrf = "{{ csrf_token() }}";
+  const dotColor = (ok) => ok ? '#39ff14' : '#ff2d55';
+  async function refresh() {
+    try {
+      const r = await fetch('/bot/status');
+      const s = await r.json();
+      document.getElementById('state-ollama').textContent = s.ollama ? 'up' : 'down';
+      document.getElementById('dot-ollama').style.background = dotColor(s.ollama);
+      const osw = document.getElementById('ollama-switch'); if (osw) osw.checked = s.ollama;
+      const ol = document.getElementById('ollama-label'); if (ol) ol.textContent = s.ollama ? 'ON' : 'OFF';
+      const ob = document.getElementById('ollama-start'); if (ob) ob.disabled = s.ollama;
+      const ob2 = document.getElementById('ollama-stop'); if (ob2) ob2.disabled = !s.ollama;
+      document.getElementById('state-relay').textContent = s.relay ? 'running' : 'stopped';
+      document.getElementById('dot-relay').style.background = dotColor(s.relay);
+      const rsw = document.getElementById('relay-switch'); if (rsw) rsw.checked = s.relay;
+      const rl2 = document.getElementById('relay-label'); if (rl2) rl2.textContent = s.relay ? 'ON' : 'OFF';
+      const rb = document.getElementById('relay-start'); if (rb) rb.disabled = s.relay;
+      const rb2 = document.getElementById('relay-stop'); if (rb2) rb2.disabled = !s.relay;
+      // readiness state (fetched separately; degrade gracefully if route missing)
+      try {
+        const rr = await fetch('/readiness/status'); const rs = await rr.json();
+        const rsw = document.getElementById('readiness-switch'); if (rsw) rsw.checked = !!rs.on;
+        document.getElementById('readiness-label').textContent = rs.on ? 'ON' : 'OFF';
+        document.getElementById('state-readiness').textContent = rs.on ? 'on' : 'off';
+        document.getElementById('dot-readiness').style.background = dotColor(rs.on);
+        document.getElementById('readiness-last').textContent = rs.ts ? ('last: ' + rs.ts) : '';
+      } catch (e) {}
+    } catch (e) {}
+  }
+  async function postReadiness(url, extra) {
+    const fd = new FormData(); fd.append('csrf_token', csrf);
+    if (extra) fd.append(extra.k, extra.v);
+    await fetch(url, {method: 'POST', body: fd});
+    await refresh();
+  }
+  const b_rdy = document.getElementById('readiness-run'); if (b_rdy) b_rdy.onclick = () => postReadiness('/readiness/run');
+  const b_rdysw = document.getElementById('readiness-switch');
+  if (b_rdysw) b_rdysw.onchange = (e) => postReadiness('/readiness/toggle', {k:'on', v: e.target.checked ? 'true' : 'false'});
+  async function loadLog() {
+    try {
+      const r = await fetch('/bot/log');
+      const d = await r.json();
+      const el = document.getElementById('relay-console'); if (el) el.textContent = d.log;
+    } catch (e) {}
+  }
+  function postJSON(url, body) {
+    const fd = new FormData();
+    fd.append('csrf_token', csrf);
+    if (body) fd.append('payload', JSON.stringify(body));
+    return fetch(url, { method: 'POST', body: fd }).then(r => r.json());
+  }
+  const b_os = document.getElementById('ollama-start'); if (b_os) b_os.onclick = () => postJSON('/bot/ollama/start');
+  const b_ost = document.getElementById('ollama-stop'); if (b_ost) b_ost.onclick = () => postJSON('/bot/ollama/stop');
+  const b_osw = document.getElementById('ollama-switch'); if (b_osw) b_osw.onchange = (e) => postJSON(e.target.checked ? '/bot/ollama/start' : '/bot/ollama/stop');
+  const b_rs = document.getElementById('relay-start'); if (b_rs) b_rs.onclick = () => postJSON('/bot/start');
+  const b_rst = document.getElementById('relay-stop'); if (b_rst) b_rst.onclick = () => postJSON('/bot/stop');
+  const b_rsw = document.getElementById('relay-switch'); if (b_rsw) b_rsw.onchange = (e) => postJSON(e.target.checked ? '/bot/start' : '/bot/stop');
+  // ---- FIRE DANGER WIDGET ----
+  const FIRE_COLORS = { 1: '#39ff14', 2: '#ffe600', 3: '#ff9f1c', 4: '#ff2d55', 5: '#c1121f' };
+  function fireUpdate() {
+    fetch('/api/fire/status').then(r => r.json()).then(d => {
+      const lvl = d.danger_level || 1;
+      const fl = document.getElementById('flame-path');
+      if (fl) fl.setAttribute('fill', FIRE_COLORS[lvl] || '#39ff14');
+      const lbl = document.getElementById('fire-stage-label');
+      if (lbl) { lbl.textContent = d.danger_name || ('Stage ' + lvl); lbl.style.color = FIRE_COLORS[lvl] || '#39ff14'; }
+      const reg = document.getElementById('fire-region');
+      if (reg) reg.textContent = d.region || '';
+      const src = document.getElementById('fire-sources');
+      if (src) src.innerHTML = (d.sources || []).map(s => '<div>• ' + s + '</div>').join('') + (d.notes ? '<div class="fire-note">⚑ ' + d.notes + '</div>' : '');
+      const en = document.getElementById('fire-evac-name');
+      if (en) en.textContent = d.evac_name || 'None';
+      document.querySelectorAll('.evac-light').forEach(el => {
+        const st = parseInt(el.getAttribute('data-stage'), 10);
+        el.classList.toggle('on', st === (d.evac_stage || 0));
+      });
+    }).catch(() => {});
+  }
+  fireUpdate();
+  setInterval(fireUpdate, 30000);
+
+  refresh(); loadLog();
+  setInterval(refresh, 4000);
+  setInterval(loadLog, 5000);
+
+  // ---- Hub Dashboard ----
+  async function refreshHub() {
+    try {
+      const r = await fetch('/api/hub/status');
+      const s = await r.json();
+      const dot = (ok) => ok ? '#39ff14' : '#ff2d55';
+      const setText = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+      const setDot = (id, ok) => { const el = document.getElementById(id); if (el) el.style.background = dot(!!ok); };
+      setDot('dot-hub', true);
+      setText('state-hub', 'running');
+      setText('hub-python', s.python || '');
+      setText('hub-meta', 'PID ' + s.pid + ' · UP · ' + (s.ts || ''));
+      setText('hub-uptime', 'uptime: ' + (s.uptime_sec || 0) + 's');
+      setDot('dot-relay-home', s.relay);
+      setText('state-relay-home', s.relay ? 'running' : 'stopped');
+      setDot('dot-ollama-home', s.ollama);
+      setText('state-ollama-home', s.ollama ? 'up' : 'down');
+      setText('hub-cron', (s.cron && s.cron.length ? s.cron.length : 0) + ' active');
+      const cl = document.getElementById('hub-cron-list'); if (cl) cl.innerHTML = (s.cron || []).map(c => '<div>' + c + '</div>').join('');
+      const routes = document.getElementById('hub-routes'); if (routes && s.routes) routes.textContent = s.routes.join('\n');
+    } catch (e) {}
+  }
+  refreshHub();
+  setInterval(refreshHub, 4000);
+  const hubRefresh = document.getElementById('hub-refresh'); if (hubRefresh) hubRefresh.onclick = refreshHub;
+
+  const killModal = document.getElementById('kill-confirm');
+  const hubKill = document.getElementById('hub-kill');
+  if (hubKill) hubKill.onclick = () => { if (killModal) killModal.classList.add('on'); };
+  const killNo = document.getElementById('kill-no'); if (killNo) killNo.onclick = () => { if (killModal) killModal.classList.remove('on'); };
+  const killYes = document.getElementById('kill-yes');
+  if (killYes) killYes.onclick = async () => {
+    killYes.disabled = true; killYes.textContent = 'Killing…';
+    try { await fetch('/api/hub/kill', {method:'POST'}); } catch (e) {}
+    setTimeout(() => { document.body.innerHTML = '<div style="padding:30px;font-family:monospace;color:#ff2d55;">Hub killed. Restart it from <strong>C:\\web\\app.py</strong>.</div>'; }, 1000);
+  };
+
+  // ---- Fire Watch widget ----
+  function fireWatchUpdate() {
+    fetch('/api/fire/status').then(r => r.json()).then(d => {
+      const body = document.getElementById('fire-watch-body');
+      if (!body) return;
+      const items = [
+        { label: 'DANGER', value: d.danger_name || ('Stage ' + (d.danger_level || '—')) },
+        { label: 'REGION', value: d.region || '—' },
+        { label: 'EVAC', value: d.evac_name || 'None' },
+        { label: 'EVAC STAGE', value: (['None','Advisory','Get Ready','Evacuate','Mandatory'])[d.evac_stage || 0] },
+        { label: 'SOURCES', value: ((d.sources || []).slice(0,3) || ['—']).join(', ') },
+        { label: 'NOTE', value: d.notes || '—' },
+      ];
+      body.innerHTML = items.map(x => '<div class="fw-item"><div class="fw-label">' + x.label + '</div><div class="fw-value">' + x.value + '</div></div>').join('');
+      const badge = document.getElementById('fire-watch-badge');
+      if (badge) badge.textContent = d.danger_name ? 'ACTIVE' : 'LIVE';
+    }).catch(() => {});
+  }
+  fireWatchUpdate();
+  setInterval(fireWatchUpdate, 15000);
+  // ---- Stale runner watcher ----
+  function staleUpdate() {
+    fetch('/api/hub/stale').then(function(r){ return r.json(); }).then(function(d) {
+      var badge = document.getElementById('stale-badge');
+      var feed = document.getElementById('stale-feed');
+      if (badge) badge.textContent = String(d.count || 0);
+      if (!feed) return;
+      if (!d.items || !d.items.length) {
+        feed.innerHTML = '<div class="stale-empty">No stale runners detected</div>';
+        return;
+      }
+      feed.innerHTML = d.items.map(function(x) {
+        return '<div class="stale-item">' +
+          '<div class="stale-item-row">' +
+            '<div class="stale-reason">' + (x.reason || 'stale') + '</div>' +
+            '<div class="stale-age">' + (x.age_sec || 0) + 's</div>' +
+          '</div>' +
+          '<div class="stale-cmd">PID ' + (x.pid || '?') + ' · ' + (x.cmd || '').replace(/</g,'&lt;') + '</div>' +
+        '</div>';
+      }).join('');
+    }).catch(function(){});
+  }
+  staleUpdate();
+  setInterval(staleUpdate, 8000);
+</script>
+{% endblock %}

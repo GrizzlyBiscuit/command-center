@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Command Center — Changelog{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>Command Center — Changelog</h2>
+  <p class="notice">One-line overview + bullet changes, sectioned by topic.</p>
+
+  {% for entry in entries %}
+  <div class="cl-section">
+    <div class="cl-section-title">{{ entry.section }}</div>
+    <div class="cl-summary">{{ entry.summary }}</div>
+    <ul class="cl-bullets">
+      {% for b in entry.bullets %}
+      <li>{{ b }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endfor %}
+
+  <div class="cl-footer">Build {{ string if string else version }} · auto-generated from deployed hub state</div>
+</section>
+{% endblock %}

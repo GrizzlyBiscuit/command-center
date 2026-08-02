@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+*.egg-info/
+
+# Node
+frontend/static/node_modules/
+package-lock.json
+
+# Android build
+mobile/app/build/
+mobile/app/.gradle/
+mobile/*.iml
+local.properties
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+*.tmp
+
+# IDE
+.idea/
+.vscode/
+
+# Hermes/cache
+*.pyc

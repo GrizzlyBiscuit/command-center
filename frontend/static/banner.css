@@ -1,0 +1,104 @@
+/* Neon animated banner styles for Command Center */
+:root{
+  --bg:#0b0b12; /* deep background */
+  --neon-1:#00f0ff;
+  --neon-2:#ff00d0;
+  --accent:#9a00ff;
+}
+/* Banner container */
+.neon-banner{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:2.25rem 1rem;
+  color:var(--neon-1);
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.neon-banner .title{
+  font-family: 'Orbitron', 'Segoe UI', sans-serif;
+  font-size:2.25rem;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  text-shadow:
+    0 0 8px rgba(0,240,255,0.35),
+    0 0 20px rgba(154,0,255,0.20),
+    0 8px 30px rgba(0,0,0,0.6);
+  line-height:1;
+  margin:0 0 .5rem 0;
+  filter: drop-shadow(0 0 6px rgba(0,240,255,0.25));
+  animation: neon-flicker 3s infinite ease-in-out;
+}
+.neon-banner .subtitle{
+  color:#d7c6ff;
+  font-size:1rem;
+  opacity:0.9;
+  margin:0;
+  text-shadow: 0 0 8px rgba(255,0,208,0.06);
+}
+/* scanning bar */
+.neon-banner::before{
+  content:'';
+  position:absolute;
+  left:-30%;
+  top:0;
+  height:100%;
+  width:30%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+  transform:skewX(-15deg);
+  animation: scan 4s linear infinite;
+  pointer-events:none;
+}
+/* subtle overlay noise */
+.neon-banner::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:radial-gradient(rgba(255,255,255,0.01) 0.5px, transparent 0.5px);
+  background-size:6px 6px;
+  opacity:0.12;
+  mix-blend-mode:overlay;
+  pointer-events:none;
+}
+
+@keyframes scan{
+  0%{ left:-40%; }
+  100%{ left:120%; }
+}
+
+@keyframes neon-flicker{
+  0%,10%,100%{ filter:brightness(1.05) hue-rotate(0deg); text-shadow:0 0 30px rgba(0,240,255,0.35); }
+  50%{ filter:brightness(0.9) hue-rotate(10deg); text-shadow:0 0 18px rgba(154,0,255,0.28); }
+}
+
+/* Responsive scaling */
+@media(min-width:900px){
+  .neon-banner .title{ font-size:3rem; }
+  .neon-banner{ padding:3rem 1rem; }
+}
+
+/* small shimmer glint for characters */
+.neon-glint{
+  position:relative;
+  display:inline-block;
+}
+.neon-glint::after{
+  content:'';
+  position:absolute;
+  left:-10%;
+  top:0;
+  height:100%;
+  width:15%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+  transform:skewX(-15deg) translateX(-120%);
+  animation: glint 3.6s ease-in-out infinite;
+  opacity:0.85;
+}
+
+@keyframes glint{
+  0%{ transform:skewX(-15deg) translateX(-120%); opacity:0 }
+  45%{ transform:skewX(-15deg) translateX(10%); opacity:1 }
+  100%{ transform:skewX(-15deg) translateX(110%); opacity:0 }
+}

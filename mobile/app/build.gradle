@@ -1,0 +1,52 @@
+plugins {
+  id 'com.android.application'
+}
+android {
+  namespace 'com.commandcenter.app'
+  compileSdk 35
+  defaultConfig {
+    applicationId 'com.commandcenter.app'
+    minSdk 29
+    targetSdk 35
+    versionCode 2
+    versionName '1.1.0'
+  }
+  signingConfigs {
+    release {
+      storeFile file(System.getenv('CC_RELEASE_KEYSTORE') ?: new File(System.properties['user.home'], '.cc-release.jks'))
+      storePassword System.getenv('CC_RELEASE_KEY_PASSWORD') ?: 'android'
+      keyAlias System.getenv('CC_RELEASE_KEY_ALIAS') ?: 'cc'
+      keyPassword System.getenv('CC_RELEASE_KEY_PASSWORD') ?: 'android'
+    }
+  }
+  buildTypes {
+    release {
+      minifyEnabled true
+      shrinkResources true
+      proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+      signingConfig signingConfigs.release
+    }
+    debug {
+      debuggable true
+      minifyEnabled false
+    }
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+  java {
+    toolchain {
+      languageVersion.set(JavaLanguageVersion.of(17))
+    }
+  }
+  buildFeatures {
+    viewBinding true
+  }
+}
+
+dependencies {
+  implementation 'androidx.appcompat:appcompat:1.7.0'
+  implementation 'com.google.android.material:material:1.12.0'
+  implementation 'androidx.webkit:webkit:1.11.0'
+}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Setup & Installation{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>Quick Setup — LLMs & Agents</h2>
+  <p class="notice">This page collects common commands and one-click helpers to get local models and agents running.</p>
+
+  <h3>Install an Agent (ZIP)</h3>
+  <form method="post" action="/install">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>ZIP URL or local path:</label>
+    <input type="text" name="url" placeholder="https://.../agent.zip or C:\\path\\agent.zip">
+    <label>Name (optional):</label>
+    <input type="text" name="name" placeholder="friendly-agent-name">
+    <button type="submit">Install Agent</button>
+  </form>
+
+  <h3>Install Local LLMs</h3>
+  <p>Common options for running models locally:</p>
+  <ul>
+    <li><strong>Ollama:</strong> <code>ollama pull <em>model-name</em></code> — then use that model with local runners.</li>
+    <li><strong>Docker (container):</strong> <code>docker run -p 5000:5000 my-llm-image</code></li>
+    <li><strong>HF Transformers:</strong> install Python packages and run a small server: <code>pip install transformers accelerate</code></li>
+  </ul>
+
+  <section class="panel install-wizard" aria-labelledby="wizard-title">
+    <h3 id="wizard-title">LLM Install Wizard</h3>
+    <p class="notice">Generate a safe install command for common local model setups.</p>
+    <form id="llm-install-form" method="post" action="/install-llm">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <fieldset>
+        <legend>Choose a backend</legend>
+        <label><input type="radio" name="backend" value="ollama" checked> Ollama</label>
+        <label><input type="radio" name="backend" value="docker"> Docker</label>
+        <label><input type="radio" name="backend" value="transformers"> Transformers</label>
+      </fieldset>
+      <label for="model-name">Model name or image</label>
+      <input id="model-name" name="model" type="text" placeholder="e.g. llama2:latest or gh/user/model" required>
+      <label for="target-name">Optional container name</label>
+      <input id="target-name" name="target" type="text" placeholder="friendly-container-name">
+      <button type="submit">Generate Command</button>
+    </form>
+    <div class="command-preview" aria-live="polite">
+      <p class="preview-label">Generated command</p>
+      <pre id="install-command-preview" class="preview-box">Submit the form to see a generated command.</pre>
+      <button id="copy-command" type="button">Copy command</button>
+    </div>
+  </section>
+
+  <h3>Available Agents</h3>
+  {% if agents %}
+    <ul class="agent-list">
+      {% for a in agents %}
+        <li class="agent-card">
+          <span>{{ a }}</span>
+          <div>
+            <a href="{{ url_for('agent_page', name=a) }}">Open</a>
+            <form method="post" action="/run" style="display:inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="name" value="{{ a }}">
+              <button type="submit">Run</button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No agents installed yet.</p>
+  {% endif %}
+
+  <h3>Troubleshooting & Tips</h3>
+  <ul>
+    <li>Use `python -m pip install -r requirements.txt` in the project folder to ensure dependencies are installed.</li>
+    <li>If the UI cannot connect to a model, check the model server's host/port and set environment variables accordingly.</li>
+    <li>For Windows, use the desktop shortcut to launch the app and open the UI automatically.</li>
+  </ul>
+</section>
+{% endblock %}

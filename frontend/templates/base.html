@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Agent UI{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='synthwave.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='banner.css') }}">
+  </head>
+  <body>
+    <div class="synth-sun"></div>
+    <div class="synth-stars"></div>
+    <div class="synth-horizon"></div>
+    <div class="synth-grid"></div>
+    <div class="app-shell">
+      <!-- Global sidebar overlay: present on EVERY page, collapses out of the way -->
+      <button class="cc-side-reopen" id="cc-side-reopen" data-tip="Show the panel list">&#187;</button>
+      <aside class="cc-sidebar" id="cc-sidebar">
+        <div class="cc-side-head">
+          <div class="cc-side-brand">Sidebar</div>
+        </div>
+        <nav class="cc-side-nav" role="tablist">
+          <button class="tab-btn" data-tab="home" role="tab" data-tip="Blank landing — pick a panel"><span class="glyph">&#8962;</span> <span class="label">Home</span></button>
+          <button class="tab-btn" data-tab="switches" role="tab" data-tip="On/off switches for Ollama &amp; the Discord bridge"><span class="glyph">&#9889;</span> <span class="label">Power Switches</span></button>
+          <button class="tab-btn" data-tab="control" role="tab" data-tip="The original agent dashboard &amp; console"><span class="glyph">&#128421;</span> <span class="label">Control Panel</span></button>
+          <button class="tab-btn" data-tab="sys" role="tab" data-tip="Live CPU / RAM / GPU / VRAM / disk / net monitor"><span class="glyph">&#9881;&#65039;</span> <span class="label">System</span></button>
+          <button class="tab-btn" data-tab="arena" role="tab" data-tip="Pit two local models against each other"><span class="glyph">&#9876;</span> <span class="label">Model Arena</span></button>
+          <button class="tab-btn" data-tab="maze" role="tab" data-tip="Watch local models solve a maze, live"><span class="glyph">&#128373;</span> <span class="label">Maze</span></button>
+          <button class="tab-btn" data-tab="fusion" role="tab" data-tip="Forge named model pairs you can call anywhere"><span class="glyph">&#9883;</span> <span class="label">Fusion Core</span></button>
+          <button class="tab-btn" data-tab="relay" r
+          <button class="tab-btn" data-tab="visualizer" role="tab" data-tip="Audio-reactive neon visualizer"><span class="glyph">&#127911;</span> <span class="label">Visualizer</span></button>
+          <button class="tab-btn" data-tab="pomodoro" role="tab" data-tip="Focus timer with a charging sun"><span class="glyph">&#9202;</span> <span class="label">Focus</span></button>
+          <button class="tab-btn" data-tab="launchpad" role="tab" data-tip="Pin your favorite apps"><span class="glyph">&#128640;</span> <span class="label">Launchpad</span></button>
+          <button class="tab-btn" data-tab="arcade" role="tab" data-tip="Retro synthwave games"><span class="glyph">&#127918;</span> <span class="label">Arcade</span></button>
+          <button class="tab-btn" data-tab="chat" role="tab" data-tip="Talk to your local model (offline)"><span class="glyph">&#128172;</span> <span class="label">AI Chat</span></button>
+          <button class="tab-btn" data-tab="notes" role="tab" data-tip="Local markdown scratchpad"><span class="glyph">&#128221;</span> <span class="label">Notes</span></button>
+          <button class="tab-btn" data-tab="discord" role="tab" data-tip="Discord bot &amp; gateway console"><span class="glyph">&#128483;</span> <span class="label">Discord</span></button>
+          <button class="tab-btn" data-tab="webhooks" role="tab" data-tip="Catch incoming local webhooks live"><span class="glyph">&#128225;</span> <span class="label">Webhooks</span></button>
+          <button class="tab-btn" data-tab="kanban" role="tab" data-tip="Shared task board (you + agent)"><span class="glyph">&#128221;</span> <span class="label">Kanban</span></button>
+          <button class="tab-btn" data-tab="settings" role="tab" data-tip="Swap the synthwave palette"><span class="glyph">&#9881;</span> <span class="label">Themes</span></button>
+          <a href="/changelog" class="tab-btn" data-tab="changelog" role="tab" data-tip="Full change history by topic"><span class="glyph">&#128197;</span> <span class="label">Changelog</span></a>
+        </nav>
+      </aside>
+      <button class="cc-side-toggle cc-side-toggle-outside" id="cc-side-toggle" data-tip="Hide the panel list">&#171;</button>
+      <div class="bg-overlay"></div>
+      <div class="app-titlebar" id="app-titlebar">
+        <div class="tb-drag pywebview-drag-region">
+          <span class="tb-title">COMMAND CENTER</span>
+        </div>
+        <div class="tb-controls">
+        <div class="tb-audio-wrap" id="tb-audio-wrap">
+          <button class="tb-btn" id="tb-audio" data-tip="Audio — hum / lo-fi synthwave">&#128266;</button>
+          <div class="tb-audio-menu" id="tb-audio-menu">
+            <button class="tb-audio-opt" data-audio="hum" data-tip="Warm synthwave hum pad">&#9835; Hum</button>
+            <button class="tb-audio-opt" data-audio="lofi" data-tip="Chill generated lo-fi synthwave loop">&#127925; Lo-Fi Synthwave</button>
+            <div class="tb-audio-vol" id="tb-audio-vol">
+              <span class="tb-vol-ico">&#128264;</span>
+              <input type="range" id="tb-vol" min="0" max="100" value="35" aria-label="Volume">
+            </div>
+          </div>
+        </div>
+          <button class="tb-btn" id="tb-refresh" data-tip="Reload — see latest changes">&#10227;</button>
+          <button class="tb-btn" id="tb-min" data-tip="Minimize — tuck it away">&#8211;</button>
+          <button class="tb-btn" id="tb-max" data-tip="Fullscreen — go big">&#9633;</button>
+          <button class="tb-btn tb-close" id="tb-close" data-tip="Exit — blow it up">&#10005;</button>
+        </div>
+      </div>
+
+      <main class="app-main">
+        {% block content %}{% endblock %}
+      </main>
+
+      <footer class="app-footer">
+        <span>Command Center</span>
+        <span>Local • Encrypted logging • Synthwave theme</span>
+      </footer>
+    </div>
+    <script src="{{ url_for('static', filename='fx.js') }}"></script>
+    <script src="{{ url_for('static', filename='banner.js') }}"></script>
+    <script src="{{ url_for('static', filename='chess.js') }}"></script>
+    <script src="{{ url_for('static', filename='sysmon.js') }}"></script>
+    <script src="{{ url_for('static', filename='arena.js') }}"></script>
+    <script src="{{ url_for('static', filename='maze.js') }}"></script>
+    <script src="{{ url_for('static', filename='fusion.js') }}"></script>
+    <script src="{{ url_for('static', filename='control.js') }}"></script>
+    <script src="{{ url_for('static', filename='relaytrace.js') }}"></script>
+    <script src="{{ url_for('static', filename='theme.js') }}"></script>
+    <script src="{{ url_for('static', filename='visualizer.js') }}"></script>
+    <script src="{{ url_for('static', filename='pomodoro.js') }}"></script>
+    <script src="{{ url_for('static', filename='launchpad.js') }}"></script>
+    <script src="{{ url_for('static', filename='arcade.js') }}"></script>
+    <script src="{{ url_for('static', filename='chat.js') }}"></script>
+    <script src="{{ url_for('static', filename='notes.js') }}"></script>
+    <script src="{{ url_for('static', filename='discord.js') }}"></script>
+    <script src="{{ url_for('static', filename='clock.js') }}"></script>
+    <script src="{{ url_for('static', filename='webhooks.js') }}"></script>
+    <script src="{{ url_for('static', filename='kanban.js') }}"></script>
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script>
+      // Custom frameless titlebar -> pywebview window controls + FX
+      (function () {
+        function bind(id, fn) {
+          var el = document.getElementById(id);
+          if (el) el.onclick = fn;
+        }
+        function api() { return (window.pywebview && window.pywebview.api) ? window.pywebview.api : null; }
+
+        bind('tb-refresh', function () {
+          // FULL restart: reboot the hub server, then reload once it's back.
+          var btn = document.getElementById('tb-refresh');
+          if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; }
+          var fd = new FormData();
+          fd.append('csrf_token', "{{ csrf_token() }}");
+          fetch('/app/restart', { method: 'POST', body: fd }).catch(function(){});
+          // poll until the new hub answers, then hard reload (cache-bust)
+          var tries = 0;
+          var iv = setInterval(function () {
+            tries++;
+            fetch('/', { method: 'HEAD', cache: 'no-store' }).then(function (r) {
+              if (r.ok) { clearInterval(iv); window.location.replace('/?_r=' + Date.now()); }
+            }).catch(function () {});
+            if (tries > 60) { clearInterval(iv); window.location.replace('/?_r=' + Date.now()); }
+          }, 500);
+        });
+        bind('tb-min', function () {
+          var a = api();
+          if (a && window.CCFX) window.CCFX.minimize(function () { a.minimize(); });
+          else if (a) a.minimize();
+        });
+        bind('tb-max', function () {
+          var a = api();
+          if (a && window.CCFX) window.CCFX.resize(function () { a.toggle_max(); });
+          else if (a) a.toggle_max();
+        });
+        bind('tb-close', function () {
+          var a = api();
+          if (a && window.CCFX) window.CCFX.exit(function () { a.close(); });
+          else if (a) a.close();
+          else window.close();
+        });
+
+        // ---- Synthwave audio: icon toggles the current mode; the hover
+        // dropdown lets you pick Hum or Lo-Fi Synthwave, plus a volume slider
+        // that only appears while audio is playing (mute=false). ----
+        function markAudioActive() {
+          var btn = document.getElementById('tb-audio');
+          if (btn && window.CCAudio) btn.classList.toggle('active', window.CCAudio.isOn());
+          document.querySelectorAll('.tb-audio-opt').forEach(function (o) {
+            if (window.CCAudio) o.classList.toggle('active', o.dataset.audio === window.CCAudio.getMode());
+          });
+          // volume slider visible only when playing
+          var vol = document.getElementById('tb-audio-vol');
+          if (vol && window.CCAudio) vol.classList.toggle('show', window.CCAudio.isOn());
+        }
+        bind('tb-audio', function () {
+          if (!window.CCAudio) return;
+          var on = window.CCAudio.toggle();
+          try { localStorage.setItem('cc_audio_on', on ? '1' : '0'); } catch (e) {}
+          markAudioActive();
+        });
+        // option clicks: switch mode (and start playing if off)
+        document.querySelectorAll('.tb-audio-opt').forEach(function (opt) {
+          opt.addEventListener('click', function () {
+            if (!window.CCAudio) return;
+            var m = opt.dataset.audio;
+            window.CCAudio.setMode(m);
+            if (!window.CCAudio.isOn()) window.CCAudio.toggle();
+            try { localStorage.setItem('cc_audio_mode', m); } catch (e) {}
+            markAudioActive();
+          });
+        });
+        // volume slider
+        var volEl = document.getElementById('tb-vol');
+        if (volEl) {
+          if (window.CCAudio) volEl.value = Math.round(window.CCAudio.getVolume() * 100);
+          volEl.addEventListener('input', function () {
+            if (!window.CCAudio) return;
+            window.CCAudio.setVolume(volEl.value / 100);
+          });
+          // keep slider usable without the wrapper hover stealing it
+          volEl.addEventListener('click', function (e) { e.stopPropagation(); });
+        }
+        // hover-intent for the audio dropdown: keep it open while the pointer is
+        // over the button OR the menu, and only close after a short grace period
+        // when the pointer truly leaves (so moving into the menu never snaps it shut).
+        (function () {
+          var wrap = document.getElementById('tb-audio-wrap');
+          var menu = document.getElementById('tb-audio-menu');
+          if (!wrap || !menu) return;
+          var closeTimer = null;
+          function open() { if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; } wrap.classList.add('open'); }
+          function scheduleClose() { if (closeTimer) clearTimeout(closeTimer); closeTimer = setTimeout(function () { wrap.classList.remove('open'); }, 220); }
+          wrap.addEventListener('mouseenter', open);
+          wrap.addEventListener('mouseleave', scheduleClose);
+          menu.addEventListener('mouseenter', open);
+          menu.addEventListener('mouseleave', scheduleClose);
+          // clicking an option shouldn't close until the pointer leaves
+          menu.addEventListener('click', function (e) { e.stopPropagation(); });
+        })();
+        // restore previous mode (button highlight only; sound still needs a click)
+        try {
+          var savedMode = localStorage.getItem('cc_audio_mode');
+          if (savedMode === 'lofi' && window.CCAudio) window.CCAudio.setMode('lofi');
+          markAudioActive();
+        } catch (e) {}
+
+        // Hero banner acts as "Home" -> reset to the blank page.
+        var brand = document.getElementById('cc-hero');
+        if (brand) brand.onclick = function (e) {
+          if (e.target.closest('a, button')) return; // let nav links / buttons work
+          if (window.showTab) window.showTab('home');
+        };
+
+        // ---- collapsible sidebar (global: lives in base.html now) ----
+        (function () {
+          var shell = document.querySelector('.app-shell');
+          var sb = document.getElementById('cc-sidebar');
+          var tog = document.getElementById('cc-side-toggle');
+          var reo = document.getElementById('cc-side-reopen');
+          if (!shell || !sb) return;
+          function apply(collapsed) {
+            shell.classList.toggle('sidebar-collapsed', collapsed);
+            sb.classList.toggle('collapsed', collapsed);
+            // clear any inline display set by the idle auto-collapse so the
+            // CSS class rule (.app-shell.sidebar-collapsed .cc-side-reopen)
+            // fully governs visibility.
+            var reo = document.getElementById('cc-side-reopen');
+            if (reo) reo.style.display = '';
+          }
+          // Fresh start (no saved pref) => default CLOSED. Only an explicit '0' keeps it open.
+          var saved = localStorage.getItem('cc_sidebar_collapsed');
+          try { apply(saved !== '0'); } catch (e) {}
+          function flip() {
+            var c = !shell.classList.contains('sidebar-collapsed');
+            apply(c);
+            try { localStorage.setItem('cc_sidebar_collapsed', c ? '1' : '0'); } catch (e) {}
+          }
+          if (tog) tog.onclick = flip;
+          if (reo) reo.onclick = flip;
+        })();
+
+        // Sidebar tabs work on EVERY page: switch here if the SPA is loaded,
+        // otherwise jump to the home page with the tab in the URL hash.
+        document.querySelectorAll('.tab-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            if (typeof window.showTab === 'function') window.showTab(btn.dataset.tab);
+            else window.location.href = '/#' + btn.dataset.tab;
+          });
+        });
+        })();
+        </script>
+    <div class="kill-confirm" id="kill-confirm">
+    <div class="kill-box">
+      <h3>Kill hub?</h3>
+      <p>This stops the Command Center backend process. Restart it from the Startup shortcut or `C:\web\app.py`.</p>
+      <div class="kill-acts">
+        <button class="btn-ghost" id="kill-no">Cancel</button>
+        <button class="btn-danger" id="kill-yes">Kill hub</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
