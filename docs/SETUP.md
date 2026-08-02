@@ -52,7 +52,9 @@ Open:
 
 - Double-click `launcher/launch_cc.vbs`
 - Or place a shortcut to `pythonw.exe backend\app.py` in the Startup folder with `WindowStyle=7`
-- The full `launcher/synth_launcher.py` desktop window is the music renderer used by **Play on > Command Center PC**. Keep that window open or minimized when controlling PC playback from a phone; running Flask alone cannot output audio.
+- The full `launcher/synth_launcher.py` desktop window is the music/video renderer used by **Play on > Command Center PC**. Keep that window open or minimized when controlling playback from a phone; running Flask alone cannot produce PC media playback.
+- Configure the music and video folders separately from their **Settings** views. Only the host can choose folders or start manual scans; LAN/private-VPN clients can browse, stream, and control playback.
+- Direct video playback supports MP4 and WebM in this first version. Codec support still depends on the destination browser, and Command Center does not transcode files.
 
 ## Hub routes
 

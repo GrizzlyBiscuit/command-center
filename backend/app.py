@@ -35,6 +35,7 @@ from agent.telegram_notifier import TelegramNotifier
 from secure_store import save_creds, load_creds
 from desktop_log import read_entries
 from music import init_music
+from video import init_video
 
 _repo_templates = PROJECT_ROOT / 'frontend' / 'templates'
 _repo_static = PROJECT_ROOT / 'frontend' / 'static'
@@ -45,6 +46,7 @@ app = Flask(
 )
 app.config['SECRET_KEY'] = os.environ.get('UI_SECRET', 'dev-secret')
 init_music(app, scan_on_start=True)
+init_video(app, scan_on_start=True)
 RELAY_TRACE_KEY = os.environ.get('RELAY_TRACE_KEY', 'cc-trace-local')
 
 stream_events = deque()

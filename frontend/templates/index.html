@@ -59,6 +59,8 @@
       </div>
       <p class="home-hero-sub home-hero-welcome">Choose a panel from the sidebar to get started.</p>
 
+      {% include "_now_playing_card.html" %}
+
       <!-- Hub dashboard -->
       <div class="hub-dash" id="hub-dash">
         <div class="hub-head">
@@ -586,6 +588,7 @@
   </div>
 
   {% include "_music_panel.html" %}
+  {% include "_video_panel.html" %}
 
   <!-- TAB 18: Kanban (shared task board) -->
   <div class="tab-panel" id="tab-kanban" style="display:none">
@@ -656,7 +659,7 @@
 <script>
   // ---- tab switching (no tab is active on a fresh open) ----
   var _lastTab = null;
-  var _ccTabs = ['home','switches','control','sys','arena','maze','fusion','music','visualizer','pomodoro','launchpad','arcade','chat','notes','discord','webhooks','kanban','settings'];
+  var _ccTabs = ['home','switches','control','sys','arena','maze','fusion','music','video','visualizer','pomodoro','launchpad','arcade','chat','notes','discord','webhooks','kanban','settings'];
   function showTab(name) {
     if (_ccTabs.indexOf(name) < 0) name = 'home';
     if (name === _lastTab) return;
@@ -693,6 +696,7 @@
     if (name === 'fusion' && window.CCFusion) window.CCFusion.mount();
     if (name === 'control' && window.CCControl) window.CCControl.mount();
     if (name === 'music' && window.CCMusic) window.CCMusic.onShow();
+    if (name === 'video' && window.CCVideo) window.CCVideo.onShow();
     if (name === 'visualizer' && window.CCViz) window.CCViz.onShow();
     if (name === 'pomodoro' && window.CCPomo) window.CCPomo.onShow();
     if (name === 'launchpad' && window.CCLaunch) window.CCLaunch.onShow();

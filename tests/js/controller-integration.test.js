@@ -8,7 +8,8 @@ const read = relativePath => fs.readFileSync(path.join(root, relativePath), "utf
 const base = read("frontend/templates/base.html");
 const index = read("frontend/templates/index.html");
 const musicPanel = read("frontend/templates/_music_panel.html");
-const indexMarkup = `${index}\n${musicPanel}`;
+const videoPanel = read("frontend/templates/_video_panel.html");
+const indexMarkup = `${index}\n${musicPanel}\n${videoPanel}`;
 const arcade = read("frontend/static/arcade.js");
 const chess = read("frontend/static/chess.js");
 
@@ -25,6 +26,24 @@ test("input scripts load in dependency order", () => {
     assert.ok(position > cursor, `${script} should load after its dependencies`);
     cursor = position;
   }
+});
+
+test("the secondary shortcut prefers the active shared media player", () => {
+  const navigation = read("frontend/static/input/controller-navigation.js");
+  assert.match(navigation, /CCMediaSession\?\.commandActive\?\.\("toggle"\)/);
+  assert.ok(
+    navigation.indexOf('CCMediaSession?.commandActive?.("toggle")')
+      < navigation.indexOf('CCMusic?.handleInputAction?.(action, detail)'),
+  );
+});
+
+test("Back gives the Video player a chance to exit fullscreen", () => {
+  const navigation = read("frontend/static/input/controller-navigation.js");
+  assert.match(navigation, /CCVideo\?\.handleInputAction\?\.\("back", detail\)/);
+  assert.ok(
+    navigation.indexOf('CCVideo?.handleInputAction?.("back", detail)')
+      < navigation.indexOf('CCMusic?.handleInputAction?.("back", detail)'),
+  );
 });
 
 test("every sidebar tab button has a matching panel", () => {

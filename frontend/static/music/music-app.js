@@ -209,6 +209,7 @@
       audioSource: null,
       remote: Remote.normalizePlaybackState({}),
       rendererError: "",
+      sharedCommandUnsubscribe: null,
     };
     let remoteBridge = null;
 
@@ -237,6 +238,44 @@
 
     function playbackVolume() {
       return usingRemoteOutput() ? state.remote.volume : nodes.audio.volume;
+    }
+
+    function getPlaybackState() {
+      const track = currentTrack();
+      const targetId = remoteBridge?.getTarget() || Remote.OUTPUT_DEVICE;
+      return Object.freeze({
+        source: "music",
+        kind: "music",
+        active: Boolean(track),
+        itemId: track?.id || "",
+        title: track?.title || "Nothing playing",
+        subtitle: track ? `${track.artist} · ${track.album}` : "Choose a track from Music",
+        artwork: artUrl(track),
+        playing: Boolean(track && playbackIsPlaying()),
+        position: track ? playbackPosition() : 0,
+        duration: track ? playbackDuration() : 0,
+        volume: playbackVolume(),
+        target: {
+          id: targetId,
+          label: targetId === Remote.OUTPUT_COMPUTER ? "Command Center PC" : "This device",
+          online: targetId === Remote.OUTPUT_COMPUTER ? Boolean(state.remote.rendererOnline) : true,
+        },
+        capabilities: {
+          playPause: Boolean(track),
+          previous: Boolean(track),
+          next: Boolean(track),
+          seek: Boolean(track),
+          volume: true,
+        },
+      });
+    }
+
+    function publishPlayback() {
+      const detail = getPlaybackState();
+      if (typeof root.CustomEvent === "function") {
+        root.dispatchEvent?.(new root.CustomEvent("cc:musicplaybackchange", { detail }));
+      }
+      root.CCMediaSession?.publish?.(root, detail);
     }
 
     function opaqueTrackId(value) {
@@ -863,6 +902,7 @@
       }
       if (nodes.elapsed) nodes.elapsed.textContent = Domain.formatTime(current);
       if (nodes.duration) nodes.duration.textContent = Domain.formatTime(duration);
+      publishPlayback();
     }
 
     function renderQueue() {
@@ -1194,15 +1234,48 @@
 
     function setupMediaSession() {
       if (!("mediaSession" in root.navigator)) return;
+      const activeCommand = (action, value, fallback) =>
+        root.CCMediaSession?.commandActive?.(action, value) || fallback();
       const handlers = {
-        play: () => play(),
-        pause,
-        previoustrack: previous,
-        nexttrack: () => next(),
+        play: () => activeCommand("play", undefined, () => play()),
+        pause: () => activeCommand("pause", undefined, pause),
+        previoustrack: () => activeCommand("previous", undefined, previous),
+        nexttrack: () => activeCommand("next", undefined, () => next()),
       };
       Object.entries(handlers).forEach(([name, handler]) => {
         try { root.navigator.mediaSession.setActionHandler(name, handler); } catch {}
       });
+    }
+
+    function setupSharedMediaSession() {
+      state.sharedCommandUnsubscribe?.();
+      state.sharedCommandUnsubscribe = root.CCMediaSession?.onCommand?.(root, "music", command => {
+        const action = String(command?.action || "");
+        if (action === "play") play().catch(error => setStatus(error.message, "error"));
+        if (action === "pause") pause();
+        if (action === "previous") previous();
+        if (action === "next") next();
+        if (action === "seek") {
+          const position = Math.max(0, Number(command.value) || 0);
+          if (usingRemoteOutput()) sendRemote("seek", { position }).catch(() => {});
+          else {
+            const duration = Number(nodes.audio.duration);
+            nodes.audio.currentTime = Number.isFinite(duration) ? Math.min(position, duration) : position;
+            state.listen.lastTime = nodes.audio.currentTime;
+            updateProgress();
+            savePlayback(true);
+          }
+        }
+        if (action === "volume") {
+          const volume = Math.max(0, Math.min(1, Number(command.value) || 0));
+          if (usingRemoteOutput()) sendRemote("volume", { volume }).catch(() => {});
+          else {
+            nodes.audio.volume = volume;
+            updateDock();
+            savePlayback(true);
+          }
+        }
+      }) || null;
     }
 
     function getAnalyser() {
@@ -1584,6 +1657,7 @@
       root.addEventListener("pagehide", () => {
         flushListening({ keepalive: true });
         savePlayback(true);
+        state.sharedCommandUnsubscribe?.();
         remoteBridge.stop();
       });
       root.addEventListener("cc:tabchange", event => {
@@ -1592,6 +1666,7 @@
       root.addEventListener("cc:ambientaudiochange", syncAmbientControls);
       syncAmbientControls();
       setupMediaSession();
+      setupSharedMediaSession();
     }
 
     bind();
@@ -1599,6 +1674,7 @@
 
     return Object.freeze({
       getAnalyser,
+      getPlaybackState,
       handleInputAction,
       isPlaying: () => !nodes.audio.paused && !nodes.audio.ended,
       next: () => next(),
@@ -1612,6 +1688,7 @@
 
   const publicApi = {
     getAnalyser() { return app?.getAnalyser() || null; },
+    getPlaybackState() { return app?.getPlaybackState() || null; },
     handleInputAction(action, detail) { return app?.handleInputAction(action, detail) || false; },
     isPlaying() { return app?.isPlaying() || false; },
     next() { return app?.next(); },
