@@ -6,10 +6,20 @@
         <h3 class="panel-h">&#9835; Music Library</h3>
         <p class="panel-sub">Play music from a folder on this computer. Nothing is uploaded.</p>
       </div>
-      <label class="cc-music-search-wrap" for="cc-music-search">
-        <span>Search</span>
-        <input id="cc-music-search" type="search" placeholder="Songs, albums, artists…" autocomplete="off">
-      </label>
+      <div class="cc-music-head-tools">
+        <label class="cc-music-output-wrap" for="cc-music-output">
+          <span>Play on</span>
+          <select id="cc-music-output">
+            <option value="device">This device</option>
+            <option value="computer">Command Center PC</option>
+          </select>
+          <small id="cc-music-output-status" role="status" aria-live="polite">Checking PC player...</small>
+        </label>
+        <label class="cc-music-search-wrap" for="cc-music-search">
+          <span>Search</span>
+          <input id="cc-music-search" type="search" placeholder="Songs, albums, artists…" autocomplete="off">
+        </label>
+      </div>
     </header>
 
     <nav class="cc-music-views" aria-label="Music views">

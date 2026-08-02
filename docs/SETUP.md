@@ -52,6 +52,7 @@ Open:
 
 - Double-click `launcher/launch_cc.vbs`
 - Or place a shortcut to `pythonw.exe backend\app.py` in the Startup folder with `WindowStyle=7`
+- The full `launcher/synth_launcher.py` desktop window is the music renderer used by **Play on > Command Center PC**. Keep that window open or minimized when controlling PC playback from a phone; running Flask alone cannot output audio.
 
 ## Hub routes
 

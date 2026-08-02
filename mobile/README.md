@@ -21,6 +21,7 @@ Goal: a native-feeling Android app that connects to your local Command Center hu
 - Then direct IP: `http://192.168.1.88:5050`
 - Cleartext allowed for local domains via `network_security_config.xml`
 - External links always open in the real browser
+- In Music, **Play on > This device** plays through the phone. **Command Center PC** controls the audio element in the running desktop launcher window.
 
 ## Build a release APK
 Build > Generate Signed Bundle / APK > APK > debug keystore OK for personal use.
