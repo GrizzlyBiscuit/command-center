@@ -1,255 +1,130 @@
-# Command Center Kanban Backlog
+# Kanban Backlog
 
-Total cards: 44
+- k1: **Chess moved into Arcade tab** [completed] by you
+  - Done in-session — chess panel now lives inside Arcade alongside Snake + 2048.
 
-## Backlog (19)
+- k2: **Spinning hero glyph removed** [completed] by agent
+  - Removed .home-hero-glyph + glyph-spin keyframe. Verified gone.
 
-### k26 Hardening
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k3: **Theme Switcher** [completed] by agent
+  - 5 synthwave palettes via CSS vars, persists across restarts.
 
-### k27 Hardening
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k4: **Audio Visualizer** [completed] by agent
+  - Neon FFT bars tapping the audio engine analyser.
 
-### k28 Secret hardening
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k5: **Pomodoro Focus timer** [completed] by agent
+  - Charging sun that detonates on completion.
 
-### k29 Silent exception audit
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k6: **Launchpad** [completed] by agent
+  - Pin local apps as glowing tiles.
 
-### k30 CORS headers
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k7: **Arcade (Snake + 2048)** [completed] by agent
+  - Synthwave-styled retro games.
 
-### k31 Rate limiting
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k8: **Local AI Chat + model profiles** [completed] by agent
+  - Talks to localhost:8080 webhook; model dropdown (auto/qwen3/hunyuan/qwen2.5/deepseek).
 
-### k32 Auth killswitch
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k9: **Notes scratchpad** [completed] by agent
+  - Local markdown, live preview, auto-saved.
 
-### k33 Ollama timeout audit
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k10: **Discord Console** [completed] by agent
+  - Bot/gateway status + queue a message to a channel.
 
-### k34 HTTP helper
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k11: **Clock tab** [completed] by agent
+  - Live neon clock + 5 timezones.
 
-### k35 Startup hooks
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k12: **Webhook Catcher** [completed] by agent
+  - Local /api/incoming live event view.
 
-### k36 Structured logging
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k13: **Kanban shared board** [completed] by agent
+  - This board — you + agent add cards, column steers priority.
 
-### k37 Health endpoint
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k14: **Flicker mitigation — browser re-verify** [completed] by agent
+  - The idle-flicker CSS/canvas fix (cached sprite, filter anims removed) was never re-verified in a real browser. Should confirm it actually stopped flickering.
 
-### k38 Metrics endpoint
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k15: **Verify hero gradient color in-browser** [completed] by agent
+  - COMMAND CENTER gradient text fill added but never visually confirmed.
 
-### k39 Activity timeline
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k16: **Idle FX background verify** [completed] by agent
+  - Confirm idle particle canvas + sun/grid bloom look right and don't flicker on the real pywebview surface.
 
-### k40 Quick Actions bar
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k17: **kanban edit (scroll)** [completed] by you
+  - give the columns a shorter body and eliminate the scroll of the page itself. Add individual scrolls to each column
 
-### k41 Resource alerts
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k18: **kanban task edits** [completed] by you
+  - Added Edit/Save per card; PUT writes title+desc without touching WIP.
 
-### k42 Startup sanity check
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k19: **Save Camofox browser-verification skill** [completed] by agent
+  - npm route to spin up Camofox (Docker daemon was wedged; npm i -g camofox-browser + fetch Camoufox binary + run server on :9377). Lets me visually verify CC web UIs instead of guessing.
 
-### k43 Config validation
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k20: **Wire Discord relay under hub watchdog** [completed] by agent
+  - Relay currently launched as a manual background process I spawn; if it crashes nothing revives it. Hook it under the hub _relay_watchdog (bot/start with CSRF, or create the missing discord_relay_launcher.bat) so @Nyx + model pair survive crashes and reconnect.
 
-### k44 Session hardening
-- **Created**: 2026-08-01 19:15
-- **Updated**: 2026-08-01 19:15
-- **By**: you
+- k21: **kanban edit** [completed] by you
+  - add an edit button to the  tasks
 
-## Wip (0)
+- k22: **dark mode edit** [completed] by you
+  - make the letters in "DARK MODE" on the dark mode tab, and the letters on the homepage "COMMAND CENTER" POP in neon blue when dark mode is on. Like they were a neon sign that gets turned on at night.
 
-## Completed (25)
+- k23: **Chess game formatting** [completed] by you
+  - The chess game isn't formatted visually, the game board clips into the UI. We need the game board to scale accordingly with what is actually visible without scrolling.
 
-### k1 Chess moved into Arcade tab
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 20:24
-- **By**: you
-- **Description**: Done in-session — chess panel now lives inside Arcade alongside Snake + 2048.
+- k24: **General UI issue** [completed] by you
+  - Make it so if  anything was going to clip into something else, the thing that would clip just reduces in size to fit the window/sidebar position. do this with every page and all pages going forward.
 
-### k2 Spinning hero glyph removed
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: Removed .home-hero-glyph + glyph-spin keyframe. Verified gone.
+- k25: **no idle** [completed] by you
+  - Get rid of all idle features so it can free up some  processing power. make sure there's nothing in the code about idle process that  is running as a zombie.
 
-### k3 Theme Switcher
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: 5 synthwave palettes via CSS vars, persists across restarts.
+- k27: **Hardening** [backlog] by you
+  - General app hardening pass: tighten request handling, remove dead paths, and verify error boundaries.
 
-### k4 Audio Visualizer
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: Neon FFT bars tapping the audio engine analyser.
+- k28: **Secret hardening** [backlog] by you
+  - Audit secrets handling and redaction paths. Ensure no credentials leak into logs, templates, or API responses.
 
-### k5 Pomodoro Focus timer
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: Charging sun that detonates on completion.
+- k29: **Silent exception audit** [backlog] by you
+  - Find bare except/except Exception blocks that swallow errors; add logging or explicit handling.
 
-### k6 Launchpad
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: Pin local apps as glowing tiles.
+- k30: **CORS headers** [backlog] by you
+  - Add CORS headers for allowed origins or disable cross-origin access where not needed.
 
-### k7 Arcade (Snake + 2048)
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: Synthwave-styled retro games.
+- k31: **Rate limiting** [backlog] by you
+  - Add rate limiting on public endpoints to prevent abuse and accidental self-DoS from polling loops.
 
-### k8 Local AI Chat + model profiles
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: Talks to localhost:8080 webhook; model dropdown (auto/qwen3/hunyuan/qwen2.5/deepseek).
+- k32: **Auth killswitch** [backlog] by you
+  - Require auth or CSRF-gated confirmation for destructive actions like /api/hub/kill and admin routes.
 
-### k9 Notes scratchpad
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: Local markdown, live preview, auto-saved.
+- k33: **Ollama timeout audit** [backlog] by you
+  - Audit Ollama HTTP timeouts and retry behavior; set sane read/connect timeouts and fallback behavior.
 
-### k10 Discord Console
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: Bot/gateway status + queue a message to a channel.
+- k34: **HTTP helper** [backlog] by you
+  - Centralize HTTP requests into one helper with consistent timeouts, headers, and error handling.
 
-### k11 Clock tab
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: Live neon clock + 5 timezones.
+- k35: **Startup hooks** [backlog] by you
+  - Review startup/shutdown hooks and ensure background workers/threads start cleanly and stop without orphans.
 
-### k12 Webhook Catcher
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: Local /api/incoming live event view.
+- k36: **Structured logging** [backlog] by you
+  - Replace ad-hoc prints with structured logging; include timestamps, levels, and request context.
 
-### k13 Kanban shared board
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:06
-- **By**: agent
-- **Description**: This board — you + agent add cards, column steers priority.
+- k37: **Health endpoint** [backlog] by you
+  - Add /health with minimal readiness checks and fast response for load balancers and watchdogs.
 
-### k14 Flicker mitigation — browser re-verify
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:18
-- **By**: agent
-- **Description**: The idle-flicker CSS/canvas fix (cached sprite, filter anims removed) was never re-verified in a real browser. Should confirm it actually stopped flickering.
+- k38: **Metrics endpoint** [backlog] by you
+  - Add /metrics-style endpoint for route counts, active processes, relay/ollama state, and uptime.
 
-### k15 Verify hero gradient color in-browser
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:18
-- **By**: agent
-- **Description**: COMMAND CENTER gradient text fill added but never visually confirmed.
+- k39: **Activity timeline** [backlog] by you
+  - Add an activity timeline or recent-events feed to the hub UI for ops visibility.
 
-### k16 Idle FX background verify
-- **Created**: 2026-07-27 05:06
-- **Updated**: 2026-07-27 05:18
-- **By**: agent
-- **Description**: Confirm idle particle canvas + sun/grid bloom look right and don't flicker on the real pywebview surface.
+- k40: **Quick Actions bar** [backlog] by you
+  - Add a quick actions bar on the home UI for common hub/relay/ollama actions.
 
-### k17 kanban edit (scroll)
-- **Created**: 2026-07-27 05:31
-- **Updated**: 2026-07-27 06:14
-- **By**: you
-- **Description**: give the columns a shorter body and eliminate the scroll of the page itself. Add individual scrolls to each column
+- k41: **Resource alerts** [backlog] by you
+  - Add resource alerts for CPU/RAM/disk thresholds with UI notification and optional webhook/log output.
 
-### k18 kanban task edits
-- **Created**: 2026-07-27 06:18
-- **Updated**: 2026-07-28 17:59
-- **By**: you
-- **Description**: Added Edit/Save per card; PUT writes title+desc without touching WIP.
+- k42: **Startup sanity check** [backlog] by you
+  - Run a startup sanity check on boot: verify required paths, ports, dependencies, and config before serving UI.
 
-### k19 Save Camofox browser-verification skill
-- **Created**: 2026-07-27 18:20
-- **Updated**: 2026-07-28 04:03
-- **By**: agent
-- **Description**: npm route to spin up Camofox (Docker daemon was wedged; npm i -g camofox-browser + fetch Camoufox binary + run server on :9377). Lets me visually verify CC web UIs instead of guessing.
+- k43: **Config validation** [backlog] by you
+  - Validate config on startup and on /admin settings save; fail fast with actionable messages.
 
-### k20 Wire Discord relay under hub watchdog
-- **Created**: 2026-07-27 18:20
-- **Updated**: 2026-07-28 04:03
-- **By**: agent
-- **Description**: Relay currently launched as a manual background process I spawn; if it crashes nothing revives it. Hook it under the hub _relay_watchdog (bot/start with CSRF, or create the missing discord_relay_launcher.bat) so @Nyx + model pair survive crashes and reconnect.
-
-### k21 kanban edit
-- **Created**: 2026-07-27 20:25
-- **Updated**: 2026-07-28 00:04
-- **By**: you
-- **Description**: add an edit button to the  tasks
-
-### k22 dark mode edit
-- **Created**: 2026-07-27 22:50
-- **Updated**: 2026-07-28 04:03
-- **By**: you
-- **Description**: make the letters in "DARK MODE" on the dark mode tab, and the letters on the homepage "COMMAND CENTER" POP in neon blue when dark mode is on. Like they were a neon sign that gets turned on at night.
-
-### k23 Chess game formatting
-- **Created**: 2026-07-29 15:39
-- **Updated**: 2026-07-29 20:25
-- **By**: you
-- **Description**: The chess game isn't formatted visually, the game board clips into the UI. We need the game board to scale accordingly with what is actually visible without scrolling.
-
-### k24 General UI issue
-- **Created**: 2026-07-29 20:27
-- **Updated**: 2026-08-01 18:30
-- **By**: you
-- **Description**: Make it so if  anything was going to clip into something else, the thing that would clip just reduces in size to fit the window/sidebar position. do this with every page and all pages going forward.
-
-### k25 no idle
-- **Created**: 2026-08-01 11:37
-- **Updated**: 2026-08-01 18:30
-- **By**: you
-- **Description**: Get rid of all idle features so it can free up some  processing power. make sure there's nothing in the code about idle process that  is running as a zombie.
-
+- k44: **Session hardening** [backlog] by you
+  - Session hardening: review session cookie/token handling, expiration, and regeneration on auth changes.

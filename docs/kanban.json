@@ -4,7 +4,7 @@
       "by": "you",
       "column": "completed",
       "created": "2026-07-27 05:06",
-      "desc": "Done in-session \u2014 chess panel now lives inside Arcade alongside Snake + 2048.",
+      "desc": "Done in-session — chess panel now lives inside Arcade alongside Snake + 2048.",
       "id": "k1",
       "title": "Chess moved into Arcade tab",
       "updated": "2026-07-27 20:24"
@@ -112,7 +112,7 @@
       "by": "agent",
       "column": "completed",
       "created": "2026-07-27 05:06",
-      "desc": "This board \u2014 you + agent add cards, column steers priority.",
+      "desc": "This board — you + agent add cards, column steers priority.",
       "id": "k13",
       "title": "Kanban shared board",
       "updated": "2026-07-27 05:06"
@@ -123,7 +123,7 @@
       "created": "2026-07-27 05:06",
       "desc": "The idle-flicker CSS/canvas fix (cached sprite, filter anims removed) was never re-verified in a real browser. Should confirm it actually stopped flickering.",
       "id": "k14",
-      "title": "Flicker mitigation \u2014 browser re-verify",
+      "title": "Flicker mitigation — browser re-verify",
       "updated": "2026-07-27 05:18"
     },
     {
@@ -230,172 +230,163 @@
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
-      "id": "k26",
-      "title": "Hardening",
-      "updated": "2026-08-01 19:15"
-    },
-    {
-      "by": "you",
-      "column": "backlog",
-      "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "General app hardening pass: tighten request handling, remove dead paths, and verify error boundaries.",
       "id": "k27",
       "title": "Hardening",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Audit secrets handling and redaction paths. Ensure no credentials leak into logs, templates, or API responses.",
       "id": "k28",
       "title": "Secret hardening",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Find bare except/except Exception blocks that swallow errors; add logging or explicit handling.",
       "id": "k29",
       "title": "Silent exception audit",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Add CORS headers for allowed origins or disable cross-origin access where not needed.",
       "id": "k30",
       "title": "CORS headers",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Add rate limiting on public endpoints to prevent abuse and accidental self-DoS from polling loops.",
       "id": "k31",
       "title": "Rate limiting",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Require auth or CSRF-gated confirmation for destructive actions like /api/hub/kill and admin routes.",
       "id": "k32",
       "title": "Auth killswitch",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Audit Ollama HTTP timeouts and retry behavior; set sane read/connect timeouts and fallback behavior.",
       "id": "k33",
       "title": "Ollama timeout audit",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Centralize HTTP requests into one helper with consistent timeouts, headers, and error handling.",
       "id": "k34",
       "title": "HTTP helper",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Review startup/shutdown hooks and ensure background workers/threads start cleanly and stop without orphans.",
       "id": "k35",
       "title": "Startup hooks",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Replace ad-hoc prints with structured logging; include timestamps, levels, and request context.",
       "id": "k36",
       "title": "Structured logging",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Add /health with minimal readiness checks and fast response for load balancers and watchdogs.",
       "id": "k37",
       "title": "Health endpoint",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Add /metrics-style endpoint for route counts, active processes, relay/ollama state, and uptime.",
       "id": "k38",
       "title": "Metrics endpoint",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Add an activity timeline or recent-events feed to the hub UI for ops visibility.",
       "id": "k39",
       "title": "Activity timeline",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Add a quick actions bar on the home UI for common hub/relay/ollama actions.",
       "id": "k40",
       "title": "Quick Actions bar",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Add resource alerts for CPU/RAM/disk thresholds with UI notification and optional webhook/log output.",
       "id": "k41",
       "title": "Resource alerts",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Run a startup sanity check on boot: verify required paths, ports, dependencies, and config before serving UI.",
       "id": "k42",
       "title": "Startup sanity check",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Validate config on startup and on /admin settings save; fail fast with actionable messages.",
       "id": "k43",
       "title": "Config validation",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     },
     {
       "by": "you",
       "column": "backlog",
       "created": "2026-08-01 19:15",
-      "desc": "",
+      "desc": "Session hardening: review session cookie/token handling, expiration, and regeneration on auth changes.",
       "id": "k44",
       "title": "Session hardening",
-      "updated": "2026-08-01 19:15"
+      "updated": "2026-08-01 23:24"
     }
   ],
   "columns": [
