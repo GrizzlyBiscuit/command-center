@@ -1,0 +1,159 @@
+/* Keyboard and controller focus is visual only: never resize or zoom controls. */
+body[data-input-mode="keyboard"] :focus-visible,
+body[data-input-mode="gamepad"] :focus {
+  outline: 3px solid var(--accent-3, #35c4ff);
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 5px rgba(53, 196, 255, 0.2),
+    0 0 24px rgba(53, 196, 255, 0.65);
+}
+
+.arc-stage[data-input-captured="true"] {
+  outline: 3px solid var(--accent-3, #35c4ff);
+  outline-offset: 3px;
+  box-shadow: 0 0 26px rgba(53, 196, 255, 0.6);
+}
+
+.cc-controller-status {
+  position: fixed;
+  z-index: 1200;
+  top: 48px;
+  left: 50%;
+  max-width: min(520px, calc(100vw - 28px));
+  padding: 9px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(10, 1, 24, 0.96);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.48);
+  color: var(--text);
+  font-size: 0.84rem;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  text-align: center;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.cc-controller-status.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.cc-input-help[hidden] {
+  display: none;
+}
+
+.cc-input-help {
+  position: fixed;
+  z-index: 1300;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(3, 0, 12, 0.76);
+  backdrop-filter: blur(9px);
+}
+
+.cc-input-help-panel {
+  width: min(760px, 100%);
+  max-height: min(720px, calc(100dvh - 48px));
+  overflow: auto;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(18, 4, 38, 0.98);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.58);
+}
+
+.cc-input-help-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.cc-input-help h2,
+.cc-input-help h3,
+.cc-input-help p {
+  margin-top: 0;
+}
+
+.cc-input-help-head p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.cc-input-help-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.cc-input-help-grid > section {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.cc-input-help dl {
+  margin: 0;
+}
+
+.cc-input-help dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.cc-input-help dl > div:first-child {
+  border-top: 0;
+}
+
+.cc-input-help dt {
+  color: var(--muted);
+}
+
+.cc-input-help dd {
+  margin: 0;
+  font-weight: 700;
+  text-align: right;
+}
+
+.cc-input-help kbd {
+  display: inline-block;
+  min-width: 1.8em;
+  padding: 2px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.42);
+  color: var(--text);
+  font: inherit;
+  text-align: center;
+}
+
+@media (max-width: 680px) {
+  .cc-input-help {
+    padding: 10px;
+  }
+
+  .cc-input-help-panel {
+    max-height: calc(100dvh - 20px);
+    padding: 16px;
+  }
+
+  .cc-input-help-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-controller-status {
+    transition: none;
+  }
+}
