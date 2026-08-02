@@ -1,39 +1,217 @@
 # Command Center
 
-Synthwave Command Center hub + launcher + mobile app + kanban backlog.
+Local-first, synthwave Command Center hub for Windows. It gives you a single home dashboard, a sidebar app launcher, local model controls, live monitoring, model competitions, automation tools, and optional mobile/LAN access.
 
-## Repo layout
+## What this repo is
 
 - `backend/` — Flask hub, API, agents, webhooks, game servers, kanban routes
-- `frontend/` — templates + static assets (JS, CSS)
+- `frontend/` — templates + static assets
 - `launcher/` — Windows minimized auto-launch scripts
-- `mobile/` — Android WebView app source (`cc-mobile-app/`)
-- `docs/` — kanban export, setup, changelog
+- `mobile/` — Android WebView app source
+- `docs/` — setup, development, kanban backlog
 
-## Quickstart (Windows)
+## What you need installed
 
-1. Install Python 3.11+.
-2. Install Ollama and start `ollama serve`.
-3. Clone repo.
-4. Create virtualenv: `python -m venv .venv`
-5. Activate: `.venv\Scripts\activate`
-6. Install deps: `pip install -r requirements.txt`
-7. Copy `.env.example` to `.env` and fill secrets.
-8. Run hub: `python backend/app.py`
-9. Open `http://localhost:5050` (or `http://0.0.0.0:5050` for LAN).
+1. **Windows 10/11**
+2. **Python 3.11+** available as `python` or `pythonw`
+3. **Git**
+4. **Ollama** — local model runtime
+   - Install Ollama
+   - Start it with `ollama serve`
+   - Pull the models you want, for example:
+     - `ollama pull llama3`
+     - `ollama pull codellama`
+     - `ollama pull mistral`
+5. **Optional: Discord bot token** if you want the Discord relay/bridge
+6. **Optional: Telegram token** if you want Telegram support
+7. **Optional: Node.js / Gradle / Android SDK** only if you edit frontend tooling or build the mobile APK
 
-## Optional launcher (Windows auto-start minimized)
+## Clone and install
 
-- `launcher/launch_cc.vbs` — starts hub minimized on login.
-- `launcher/synth_launcher.py` — launcher helper, patched for hidden console windows.
+```
+git clone https://github.com/<your-user>/command-center.git
+cd command-center
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+copy .env.example .env
+```
 
-## Mobile
+Edit `.env` for your machine:
+- `FLASK_PORT=5050`
+- `OLLAMA_BASE_URL=http://localhost:11434/v1`
+- Add bot tokens if needed
 
-See `mobile/cc-mobile-app/` for Android build instructions.
+## Run the hub
+
+```
+python backend\app.py
+```
+
+Then open:
+- `http://localhost:5050`
+- `http://<this-pc-ip>:5050` from another device on the same network
+
+## Run on boot, minimized
+
+Use one of:
+- `launcher/launch_cc.vbs`
+- A Startup shortcut pointing to `pythonw.exe backend\app.py` with `WindowStyle=7`
+
+## Sidebar — every panel and what it does
+
+### Home
+Landing screen. Shows the **Hub Status** cards, **Stale Runners** watcher, **Fire Watch** widget, and app version/clock.
+
+- **Hub Status** — whether the hub process, relay pair, Ollama, and cron jobs are alive.
+- **Stale Runners** — detects duplicate or orphaned hub/terminal wrappers.
+- **Fire Watch** — live fire danger stage, region, sources, and evac status.
+
+### Power Switches
+On/off controls for the main subsystems.
+
+- **Ollama** — start/stop the local model server from the UI.
+- **Discord bot / model pair** — start/stop the local bot/model pair.
+- **Daily readiness** — toggle or run the local-AI readiness report.
+- **Relay console** — live log output from the relay/bridge.
+
+### Control Panel
+Original agent dashboard and system console.
+
+- **Agent Manager** — list installed agents, run them, or open their page.
+- **Install Agent** — install from a ZIP URL or local path.
+- **System Console** — command input that talks to the backend.
+
+### System
+Live resource monitor. Toggle it on to poll.
+
+- **CPU** — usage, bar, sparkline, core count.
+- **RAM** — usage and used/total GB.
+- **Disk (C:)** — usage and used/total GB.
+- **Net** — upload/download summary.
+- **GPU** — per-GPU stats when available.
+
+### Model Arena
+Pit two local Ollama models against each other.
+
+- **Fight mode** — same prompt to both models; you pick the winner.
+- **Pair mode** — model A drafts, model B finishes.
+- **Swap** — swap A and B instantly.
+- **Score tracking** — see who wins more over time.
+
+### Maze
+Watch local models solve a maze turn-by-turn.
+
+- Choose model A and optional model B.
+- Pick maze size.
+- Run live or replay after completion.
+
+### Fusion Core
+Forge named model pairs that appear in dropdowns everywhere.
+
+- **Forge Pair** — save a draft/finish pair by name.
+- **Reuse** — fused pairs show up in Arena, Maze, and Chat.
+- **Evolve canvas** — visual feedback while forging.
+
+### Relay
+Relay/bridge trace and activity view.
+
+### Visualizer
+Audio-reactive neon visualizer.
+
+- Driven by the titlebar audio menu.
+- Idle until audio is playing.
+
+### Focus
+Pomodoro-style focus timer with a charging sun.
+
+- Focus 25 / Break 5 / Long 15.
+- Explosion effect when the session ends.
+
+### Launchpad
+Pin apps and open them with one click.
+
+- Add label + path/command.
+- Stored locally.
+
+### Arcade
+Retro synthwave games in one tab.
+
+- Snake
+- 2048
+- Chess — built-in engine or play against a local model pair
+
+### AI Chat
+Local offline chat panel.
+
+- Talks to your local model through the local webhook path.
+- Nothing leaves the machine.
+
+### Notes
+Local markdown scratchpad.
+
+- Auto-saved.
+
+### Discord
+Discord bot and gateway console.
+
+- Bot status
+- Send a message to a channel
+- Live log output
+
+### Webhooks
+Local webhook catcher.
+
+- Receives POSTs to `http://127.0.0.1:5050/api/incoming?source=NAME`
+- Good for n8n, relay events, or local tooling
+
+### Kanban
+Shared task board for you and the agent.
+
+- Backlog / WIP / Completed
+- Add tasks with title + description
+- Move tasks between columns
+
+### Themes
+Synthwave palette switcher.
+
+- Pick a theme.
+- Persists across restarts.
+
+### Changelog
+Full change history by topic.
+
+## Hub routes and APIs
+
+Key endpoints used by the UI:
+
+- `/` — home dashboard
+- `/changelog` — changelog page
+- `/api/hub/status` — hub/relay/ollama/cron/routes status
+- `/api/hub/stale` — stale runner detection
+- `/api/hub/kill` — stop the hub process
+- `/api/version` — current version
+- `/api/version/bump` — bump build version
+- `/api/kanban` — kanban board CRUD
+- `/api/fire/status` — fire watch data
+- `/bot/status` — ollama + relay status
+- `/bot/start`, `/bot/stop`, `/bot/killall` — bot controls
+- `/bot/ollama/start`, `/bot/ollama/stop` — ollama controls
+- `/readiness/run`, `/readiness/status`, `/readiness/toggle` — readiness report
+- `/api/incoming` — local webhook receiver
+- `/arena/*` — model arena, maze, fusion, voting, pairing
+- `/api/chat` — local AI chat endpoint
+
+## Troubleshooting
+
+- **Hub won’t start** — make sure `.env` exists and `FLASK_PORT` is free.
+- **Ollama down** — run `ollama serve` and pull at least one model.
+- **Discord not working** — verify bot token and channel IDs in `.env`.
+- **Mobile can’t connect** — use the PC’s LAN IP, make sure firewall allows the port.
 
 ## Docs
 
-- `docs/SETUP.md` — full setup notes, ports, Tailscale/LAN access
+- `docs/SETUP.md` — setup notes, ports, LAN/Tailscale access
 - `docs/DEVELOPMENT.md` — local dev workflow
 - `docs/kanban.md` — readable backlog
 - `docs/kanban.json` — machine-readable kanban cards
