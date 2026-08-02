@@ -52,6 +52,14 @@ Then open:
 - `http://localhost:5050`
 - `http://<this-pc-ip>:5050` from another device on the same network
 
+## Keyboard and controller navigation
+
+Command Center supports full-page spatial navigation with a keyboard or a standard Gamepad API controller. Press `?` or the titlebar help button to see the shortcuts in the app.
+
+- Keyboard: arrows or WASD move, Enter/Space selects, Escape goes back, Q/E changes panels, X opens audio, Y focuses the sidebar, and Home returns home.
+- Controller: D-pad or left stick moves, A selects, B goes back, LB/RB changes panels, X opens audio, Y focuses the sidebar, View returns home, and Menu opens help.
+- Snake and 2048 capture controls only after the game area is selected; Escape/B releases them. Chess squares are directly keyboard/controller selectable.
+
 ## Run on boot, minimized
 
 Use one of:

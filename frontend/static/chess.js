@@ -9,6 +9,7 @@
   const VAL = { P: 100, N: 320, B: 330, R: 500, Q: 900, K: 20000 };
   const GLYPH = { wK:'♔',wQ:'♕',wR:'♖',wB:'♗',wN:'♘',wP:'♙',
                   bK:'♚',bQ:'♛',bR:'♜',bB:'♝',bN:'♞',bP:'♟' };
+  const PIECE_NAME = { K:'king', Q:'queen', R:'rook', B:'bishop', N:'knight', P:'pawn' };
 
   function newBoard() {
     const b = Array.from({ length: 8 }, () => Array(8).fill(null));
@@ -224,6 +225,7 @@
 
   // ---- UI ----
   let sel = null, legalForSel = [], flipped = false, thinking = false;
+  let cursor = [7, 0];
   let vsModel = false;
 
   function el(id) { return document.getElementById(id); }
@@ -231,28 +233,45 @@
   function render() {
     const boardEl = el('cc-board');
     if (!boardEl) return;
+    const restoreFocus = boardEl.contains(document.activeElement);
     boardEl.innerHTML = '';
     const rows = flipped ? [...Array(8).keys()].reverse() : [...Array(8).keys()];
     const cols = flipped ? [...Array(8).keys()].reverse() : [...Array(8).keys()];
     for (const r of rows) {
       for (const c of cols) {
-        const sq = document.createElement('div');
+        const sq = document.createElement('button');
+        sq.type = 'button';
+        sq.setAttribute('role', 'gridcell');
         sq.className = 'cc-sq ' + ((r + c) % 2 === 0 ? 'light' : 'dark');
         sq.dataset.r = r; sq.dataset.c = c;
+        sq.dataset.spatialKey = 'chess-' + r + '-' + c;
+        sq.tabIndex = eq(cursor, [r, c]) ? 0 : -1;
         if (S.last && (eq(S.last.from,[r,c]) || eq(S.last.to,[r,c]))) sq.classList.add('lastmove');
         if (sel && eq(sel,[r,c])) sq.classList.add('sel');
         const isTarget = legalForSel.some(m => eq(m.to, [r,c]));
         if (isTarget) sq.classList.add(S.board[r][c] ? 'cap' : 'move');
         const p = S.board[r][c];
+        const state = p ? (color(p) === 'w' ? 'white ' : 'black ') + PIECE_NAME[p[1]] : 'empty';
+        const targetState = isTarget ? (p ? ', available capture' : ', available move') : '';
+        sq.setAttribute('aria-label', sqName([r, c]) + ', ' + state + targetState);
+        sq.setAttribute('aria-selected', sel && eq(sel, [r, c]) ? 'true' : 'false');
         if (p) { const g = document.createElement('span'); g.className='cc-pc '+(color(p)==='w'?'w':'b'); g.textContent = GLYPH[p]; sq.appendChild(g); }
         // coord labels on edge squares
         if ((flipped ? c===7 : c===0)) { const l=document.createElement('span'); l.className='cc-rank'; l.textContent=8-r; sq.appendChild(l); }
         if ((flipped ? r===0 : r===7)) { const l=document.createElement('span'); l.className='cc-file'; l.textContent='abcdefgh'[c]; sq.appendChild(l); }
         sq.onclick = () => onSquare(r, c);
+        sq.onfocus = () => {
+          cursor = [r, c];
+          boardEl.querySelectorAll('.cc-sq').forEach(node => { node.tabIndex = node === sq ? 0 : -1; });
+        };
         boardEl.appendChild(sq);
       }
     }
     updateStatus();
+    if (restoreFocus) {
+      const active = boardEl.querySelector('[data-r="' + cursor[0] + '"][data-c="' + cursor[1] + '"]');
+      if (active) { try { active.focus({ preventScroll: true }); } catch (e) { active.focus(); } }
+    }
   }
 
   function updateStatus() {
@@ -266,6 +285,7 @@
 
   function onSquare(r, c) {
     if (thinking || S.over) return;
+    cursor = [r, c];
     const p = S.board[r][c];
     if (sel) {
       const moves = legalForSel.filter(m => eq(m.to, [r, c]));
@@ -340,9 +360,16 @@
     return out + '  abcdefgh';
   }
 
-  function newGame() { initState(); sel=null; legalForSel=[]; thinking=false; render(); }
+  function newGame() { initState(); sel=null; legalForSel=[]; thinking=false; cursor=[7,0]; render(); }
 
   window.CCChess = {
+    cancelSelection() {
+      if (!sel) return false;
+      sel = null; legalForSel = []; render();
+      const square = el('cc-board') && el('cc-board').querySelector('[data-r="' + cursor[0] + '"][data-c="' + cursor[1] + '"]');
+      if (square) { try { square.focus({ preventScroll: true }); } catch (e) { square.focus(); } }
+      return true;
+    },
     mount() {
       if (!S) initState();
       render();
