@@ -66,7 +66,7 @@ Open **Music > Settings** and choose the folder that contains this Command Cente
 
 - Music-only scanning with optional subfolders; video files and interview features are intentionally not included.
 - Tracks, albums, artists, search, queue, shuffle, repeat, a persistent player dock, listening stats, Media Session controls, and visualizer integration.
-- Playback and library metadata stay local to the host computer. Music read/write APIs reject unauthenticated LAN clients even when the rest of Command Center is available remotely.
+- Phones and other clients that can reach Command Center over the LAN or a private VPN can browse and stream the music library. Folder configuration and manual rescans stay on the host computer.
 - Settings, the artwork cache, and listening stats are stored outside the repo. Set `CC_MUSIC_DATA_DIR` to override the per-user runtime-data location.
 
 ## Run on boot, minimized
@@ -139,7 +139,7 @@ Local music library and player.
 - Choose a music folder in **Settings**, then scan it.
 - Browse tracks, albums, and artists; search, queue, shuffle, and repeat.
 - The player stays available while switching panels, and can drive the Visualizer.
-- Music access is limited to the host computer; remote/LAN clients cannot enumerate or stream the library.
+- Music browsing and playback work from phones and other LAN/private-VPN clients. Choose the server's music folder and start manual rescans on the host computer.
 
 ### Visualizer
 Audio-reactive neon visualizer.
@@ -227,10 +227,10 @@ Key endpoints used by the UI:
 - `/arena/*` — model arena, maze, fusion, voting, pairing
 - `/api/chat` — local AI chat endpoint
 
-- `/api/music/settings` - local music-folder and scan preferences
-- `/api/music/library`, `/api/music/scan` - local-only catalog and scan status/actions
-- `/api/music/audio/<track-id>`, `/api/music/art/<art-id>` - local-only ID-based media delivery
-- `/api/music/stats` - local-only listening receipts and summaries
+- `/api/music/library`, `GET /api/music/scan` - LAN-accessible catalog and scan status
+- `/api/music/audio/<track-id>`, `/api/music/art/<track-id>` - LAN-accessible ID-based media delivery
+- `/api/music/stats` - LAN-accessible listening receipts and summaries; writes require CSRF
+- `/api/music/settings`, `POST /api/music/scan`, `/api/music/refresh` - host-only folder management and manual scan actions
 
 ## Troubleshooting
 
@@ -239,7 +239,7 @@ Key endpoints used by the UI:
 - **Discord not working** — verify bot token and channel IDs in `.env`.
 - **Mobile can’t connect** — use the PC’s LAN IP, make sure firewall allows the port.
 
-- **Music folder is unavailable remotely** - by design, music configuration, metadata, and playback are host-only. Open Music on the Command Center PC.
+- **Music won’t load remotely** - use the PC's direct LAN or private-VPN address and make sure the firewall allows the Command Center port. Folder management remains available only on the host computer; that boundary assumes Command Center is not hidden behind a same-host reverse proxy. Do not expose the port directly to the public internet.
 
 ## Project facts and runtime notes
 

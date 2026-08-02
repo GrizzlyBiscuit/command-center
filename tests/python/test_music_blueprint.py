@@ -71,7 +71,7 @@ class MusicBlueprintTests(unittest.TestCase):
         )
         self.assertEqual(forbidden.status_code, 403)
 
-    def test_injected_admin_authorizer_can_grant_remote_access(self) -> None:
+    def test_injected_admin_authorizer_can_grant_remote_management(self) -> None:
         admin_app = Flask("music-admin-test")
         admin_app.secret_key = "test-only"
         init_music(
@@ -84,21 +84,14 @@ class MusicBlueprintTests(unittest.TestCase):
         with client.session_transaction() as session:
             session["csrf_token"] = "known-token"
 
-        protected_urls = (
-            "/api/music/library",
-            "/api/music/scan",
-            f"/api/music/audio/{self.track.id}",
-            f"/api/music/art/{self.track.id}",
-            "/api/music/stats?days=all",
+        settings = client.get(
+            "/api/music/settings",
+            headers={"X-Test-Admin": "yes"},
+            environ_base={"REMOTE_ADDR": "198.51.100.4"},
         )
-        for url in protected_urls:
-            with self.subTest(url=url):
-                allowed = client.get(
-                    url,
-                    headers={"X-Test-Admin": "yes"},
-                    environ_base={"REMOTE_ADDR": "198.51.100.4"},
-                )
-                self.assertEqual(allowed.status_code, 200)
+        self.assertEqual(settings.status_code, 200)
+        self.assertTrue(settings.json["editable"])
+        self.assertEqual(settings.json["music_folder"], str(self.music.resolve()))
 
         response = client.put(
             "/api/music/settings",
@@ -109,26 +102,35 @@ class MusicBlueprintTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.json["editable"])
 
-    def test_metadata_audio_art_and_stats_reads_reject_remote_lan_peer(self) -> None:
-        protected_urls = (
+    def test_remote_lan_peer_can_browse_stream_and_record_stats(self) -> None:
+        public_urls = (
             "/api/music/library",
             "/api/music/scan",
             f"/api/music/audio/{self.track.id}",
             f"/api/music/art/{self.track.id}",
             "/api/music/stats?days=all",
         )
-        for url in protected_urls:
+        for url in public_urls:
             with self.subTest(url=url):
                 response = self.client.get(
                     url, environ_base={"REMOTE_ADDR": "192.168.1.25"}
                 )
-                self.assertEqual(response.status_code, 403)
+                self.assertEqual(response.status_code, 200)
 
         head = self.client.head(
             f"/api/music/audio/{self.track.id}",
             environ_base={"REMOTE_ADDR": "192.168.1.25"},
         )
-        self.assertEqual(head.status_code, 403)
+        self.assertEqual(head.status_code, 200)
+
+        partial = self.client.get(
+            f"/api/music/audio/{self.track.id}",
+            headers={"Range": "bytes=2-5"},
+            environ_base={"REMOTE_ADDR": "192.168.1.25"},
+        )
+        self.assertEqual(partial.status_code, 206)
+        self.assertEqual(partial.data, b"2345")
+        self.assertEqual(partial.headers["Content-Range"], "bytes 2-5/10")
 
         stats_write = self.client.post(
             "/api/music/stats",
@@ -136,7 +138,34 @@ class MusicBlueprintTests(unittest.TestCase):
             headers={"X-CSRF-Token": "known-token"},
             environ_base={"REMOTE_ADDR": "192.168.1.25"},
         )
-        self.assertEqual(stats_write.status_code, 403)
+        self.assertEqual(stats_write.status_code, 200)
+        summary = self.client.get(
+            "/api/music/stats?days=all",
+            environ_base={"REMOTE_ADDR": "192.168.1.25"},
+        )
+        self.assertEqual(summary.json["summary"]["seconds"], 1)
+
+    def test_remote_management_stays_blocked(self) -> None:
+        remote = {"REMOTE_ADDR": "192.168.1.25"}
+        headers = {"X-CSRF-Token": "known-token"}
+        settings_write = self.client.put(
+            "/api/music/settings",
+            json={"music_folder": str(self.music)},
+            headers=headers,
+            environ_base=remote,
+        )
+        self.assertEqual(settings_write.status_code, 403)
+        for url in ("/api/music/scan", "/api/music/refresh"):
+            with self.subTest(url=url):
+                response = self.client.post(url, headers=headers, environ_base=remote)
+                self.assertEqual(response.status_code, 403)
+
+        missing_csrf = self.client.post(
+            "/api/music/stats",
+            json={"track_id": self.track.id, "client_event_id": "no-token"},
+            environ_base=remote,
+        )
+        self.assertEqual(missing_csrf.status_code, 403)
 
     def test_mutating_routes_require_csrf_separately_from_local_access(self) -> None:
         response = self.client.post("/api/music/scan")

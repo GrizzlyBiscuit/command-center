@@ -22,6 +22,13 @@ test("persistent dock is revealed when a current track exists", () => {
   assert.match(appSource, /nodes\.player\.hidden = !track/);
 });
 
+test("remote music stays playable while host-only folder controls are disabled", () => {
+  assert.match(appSource, /You can browse and play this library here\./);
+  assert.match(appSource, /browse\.disabled = !state\.editable/);
+  assert.match(appSource, /save\.disabled = !state\.editable/);
+  assert.match(appSource, /rescan\.disabled = !state\.editable/);
+});
+
 test("stats payload contains only trusted identity, time, boolean play count, and event id", () => {
   const payloadMatch = appSource.match(/const payload = \{([\s\S]*?)\n\s*\};\n\s*request\(API\.stats/);
   assert.ok(payloadMatch, "stats payload should be posted through API.stats");

@@ -466,7 +466,7 @@
           "cc-music-muted",
           state.editable
             ? "Pick the folder containing this Command Center's music. Subfolders are included."
-            : `Folder management is available only on the computer running Command Center${state.folderName ? ` (${state.folderName})` : ""}.`,
+            : "You can browse and play this library here. Folder selection and rescanning are available only on the computer running Command Center.",
         ),
       );
       const label = element("label", "", "Folder path");

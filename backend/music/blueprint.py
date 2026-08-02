@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from flask import Request
 
 
-MutationAuthorizer = Callable[["Request"], bool]
+ManagementAuthorizer = Callable[["Request"], bool]
 CsrfValidator = Callable[["Request"], bool]
 CHUNK_SIZE = 128 * 1024
 
@@ -54,16 +54,17 @@ def _read_slice(path: Path, start: int, length: int) -> Iterator[bytes]:
 def create_music_blueprint(
     service: MusicService | None = None,
     *,
-    authorize_mutation: MutationAuthorizer | None = None,
+    authorize_mutation: ManagementAuthorizer | None = None,
     validate_csrf: CsrfValidator | None = None,
     url_prefix: str = "/api/music",
 ) -> Blueprint:
     """Create routes without importing or mutating the host Flask app.
 
-    ``authorize_mutation`` can grant a signed-in administrator access from a
-    non-loopback address.  For backwards compatibility the parameter keeps
-    its original name, but it protects both library reads and mutations.
-    Local direct peers are always allowed.
+    Library metadata, artwork, audio, scan status, and listening stats are
+    available to every client that can reach Command Center, matching the
+    rest of its LAN interface. Server-side folder configuration and rescans
+    remain local by default. ``authorize_mutation`` can explicitly grant a
+    trusted remote client those management permissions.
     """
 
     blueprint = Blueprint("cc_music", __name__, url_prefix=url_prefix)
@@ -74,7 +75,7 @@ def create_music_blueprint(
             raise RuntimeError("register MusicService as app.extensions['cc_music']")
         return result
 
-    def can_access() -> bool:
+    def can_manage() -> bool:
         if is_local_request(request):
             return True
         if authorize_mutation is None:
@@ -82,11 +83,11 @@ def create_music_blueprint(
         try:
             return bool(authorize_mutation(request))
         except Exception:
-            current_app.logger.exception("music mutation authorizer failed")
+            current_app.logger.exception("music management authorizer failed")
             return False
 
-    def require_access() -> None:
-        if not can_access():
+    def require_management() -> None:
+        if not can_manage():
             abort(403)
 
     def csrf_is_valid() -> bool:
@@ -107,7 +108,7 @@ def create_music_blueprint(
     @blueprint.get("/settings")
     def get_settings() -> Response:
         payload = get_service().settings_payload()
-        payload["editable"] = can_access()
+        payload["editable"] = can_manage()
         if not payload["editable"]:
             payload["music_folder"] = ""
             payload["folder_name"] = ""
@@ -115,7 +116,7 @@ def create_music_blueprint(
 
     @blueprint.route("/settings", methods=["POST", "PUT"])
     def put_settings() -> tuple[Response, int] | Response:
-        require_access()
+        require_management()
         require_csrf()
         payload = request.get_json(silent=True)
         if not isinstance(payload, dict):
@@ -134,14 +135,13 @@ def create_music_blueprint(
 
     @blueprint.get("/library")
     def get_library() -> Response:
-        require_access()
         query = request.args.get("q", "")[:200]
         return jsonify(get_service().catalog(query))
 
     @blueprint.post("/scan")
     @blueprint.post("/refresh")
     def start_scan() -> tuple[Response, int]:
-        require_access()
+        require_management()
         require_csrf()
         try:
             status = get_service().start_scan()
@@ -151,12 +151,10 @@ def create_music_blueprint(
 
     @blueprint.get("/scan")
     def get_scan() -> Response:
-        require_access()
         return jsonify(get_service().library.status().public_dict())
 
     @blueprint.route("/audio/<track_id>", methods=["GET", "HEAD"])
     def get_audio(track_id: str) -> Response:
-        require_access()
         track = get_service().track(track_id)
         if track is None:
             abort(404)
@@ -185,7 +183,6 @@ def create_music_blueprint(
 
     @blueprint.get("/art/<track_id>")
     def get_art(track_id: str) -> Response:
-        require_access()
         artwork = get_service().library.artwork_for(track_id)
         if artwork is None:
             abort(404)
@@ -214,7 +211,6 @@ def create_music_blueprint(
 
     @blueprint.get("/stats")
     def get_stats() -> tuple[Response, int] | Response:
-        require_access()
         value = request.args.get("days", "30").strip().lower()
         try:
             days = None if value in {"", "all"} else int(value)
@@ -224,7 +220,6 @@ def create_music_blueprint(
 
     @blueprint.post("/stats")
     def post_stats() -> tuple[Response, int] | Response:
-        require_access()
         require_csrf()
         payload = request.get_json(silent=True)
         if not isinstance(payload, dict):
