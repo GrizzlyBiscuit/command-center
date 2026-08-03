@@ -79,6 +79,7 @@
               }
             })
             .catch(function () { addMsg('ai', '(request failed)'); setStatus('endpoint: error'); });
+          });
         };
       }
       // probe which endpoint is reachable
