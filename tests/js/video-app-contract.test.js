@@ -28,9 +28,45 @@ test("video panel has library, recent, settings, output, and HTML5 player contro
 });
 
 test("video library uses generic film tiles without thumbnail extraction", () => {
-  assert.match(app, /element\("div", "cc-video-poster"/);
+  assert.match(app, /element\("span", "cc-video-poster"/);
+  assert.match(app, /createIcon\?\.\("film"/);
   assert.match(css, /\.cc-video-poster/);
   assert.doesNotMatch(panel + "\n" + app, /thumbnail_url|folder_cover|ffmpeg|youtube/i);
+});
+
+test("video cards prioritize one main target and retain stable secondary actions", () => {
+  assert.match(app, /button\("", "cc-video-card-main"/);
+  assert.match(app, /main\.dataset\.spatialKey = `video:\$\{opaqueVideoId\(video\)\}`/);
+  assert.match(app, /restart\.dataset\.spatialKey = `video-restart:/);
+  assert.match(app, /main\.setAttribute\("aria-current", "true"\)/);
+  assert.match(app, /function syncVideoHighlights/);
+  assert.match(css, /\.cc-video button\.cc-video-card-main\s*\{/);
+  assert.match(css, /\.cc-video-card:focus-within\s*\{/);
+});
+
+test("video rerenders restore card focus by stable key", () => {
+  assert.match(app, /function focusedContentKey/);
+  assert.match(app, /function restoreContentFocus/);
+  assert.match(app, /Array\.from\(nodes\.content\.querySelectorAll\("\[data-spatial-key\]"\)\)/);
+  assert.match(app, /target\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(app, /const focusKey = focusedContentKey\(\)/);
+  assert.match(app, /restoreContentFocus\(focusKey\)/);
+});
+
+test("video screen and icon transport are controller friendly", () => {
+  assert.match(panel, /id="cc-video-screen"[^>]*role="button"[^>]*tabindex="0"[^>]*data-spatial-key="video-screen"/);
+  assert.match(app, /nodes\.screen\?\.addEventListener\("keydown"/);
+  assert.match(app, /\["Enter", " "\]\.includes\(event\.key\)/);
+  assert.match(app, /setControlIcon\(nodes\.play, playing \? "pause" : "play"/);
+  assert.match(app, /fullscreen \? "fullscreenExit" : "fullscreen"/);
+  assert.match(app, /` · \$\{state\.queueIndex \+ 1\} of \$\{state\.queue\.length\}`/);
+});
+
+test("video library stays visual and compact on phones", () => {
+  const phone = css.slice(css.indexOf("@media (max-width: 540px)"), css.indexOf("@media (max-width: 340px)"));
+  assert.match(phone, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+  assert.match(phone, /\.cc-video-card-actions button\s*\{[\s\S]*?min-width:\s*44px;[\s\S]*?min-height:\s*44px;/);
+  assert.match(css, /@media \(max-width: 340px\)[\s\S]*?grid-template-columns:\s*1fr/);
 });
 
 test("video streams and shared progress use opaque catalog IDs", () => {

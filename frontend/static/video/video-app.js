@@ -10,6 +10,7 @@
 
   const Domain = root.CCVideoDomain;
   const Remote = root.CCVideoRemote;
+  const MediaUI = root.CCMediaUI;
   const API = Object.freeze({
     settings: "/api/video/settings",
     library: "/api/video/library",
@@ -38,6 +39,22 @@
     const node = element("button", className, label);
     node.type = "button";
     if (action) node.addEventListener("click", action);
+    return node;
+  }
+
+  function iconButton(name, label, className, action, fallback = label) {
+    const node = button("", className, action);
+    setControlIcon(node, name, label, fallback);
+    return node;
+  }
+
+  function setControlIcon(node, name, label, fallback = label) {
+    if (MediaUI?.setButtonIcon) MediaUI.setButtonIcon(node, name, label, { fallback });
+    else if (node) {
+      node.textContent = fallback;
+      node.setAttribute("aria-label", label);
+      node.title = label;
+    }
     return node;
   }
 
@@ -635,7 +652,7 @@
     function progressBar(progress, video) {
       const percent = Domain.progressPercent(progress, video?.duration);
       if (percent <= 0) return null;
-      const track = element("div", "cc-video-resume");
+      const track = element("span", "cc-video-resume");
       track.setAttribute("aria-label", progress?.completed ? "Watched" : Math.round(percent) + "% watched");
       const value = element("span");
       value.style.width = percent + "%";
@@ -647,27 +664,49 @@
       const card = element("article", "cc-video-card");
       card.dataset.videoId = video.id;
       if (currentVideo()?.id === video.id) card.classList.add("is-current");
-      const poster = element("div", "cc-video-poster", "\ud83c\udfac");
-      poster.setAttribute("aria-hidden", "true");
-      const copy = element("div", "cc-video-card-copy");
-      copy.append(element("strong", "", video.title));
-      copy.append(element("span", "", videoMeta(video) || "Local video"));
+
       const progress = progressFor(video);
       const resumeAt = Domain.resumePosition(progress, video.duration);
-      const actions = element("div", "cc-video-card-actions");
-      const label = resumeAt > 0 ? "Resume " + Domain.formatTime(resumeAt) : progress?.completed ? "Watch again" : "Play";
-      const playButton = button(label, "cc-video-primary", () => playVideo(video.id, sourceVideos));
-      playButton.setAttribute("aria-label", label + " " + video.title);
-      actions.append(playButton);
-      if (resumeAt > 0 || progress?.completed) {
-        const restart = button("Start over", "cc-video-secondary", () => playVideo(video.id, sourceVideos, { startOver: true }));
-        restart.setAttribute("aria-label", "Start " + video.title + " from the beginning");
-        actions.append(restart);
-      }
-      card.append(poster, copy);
+      const label = resumeAt > 0
+        ? "Resume " + Domain.formatTime(resumeAt)
+        : progress?.completed ? "Watch again" : "Play";
+      const main = button("", "cc-video-card-main", () => playVideo(video.id, sourceVideos));
+      main.dataset.spatialKey = `video:${opaqueVideoId(video)}`;
+      main.setAttribute("aria-label", label + " " + video.title);
+      if (currentVideo()?.id === video.id) main.setAttribute("aria-current", "true");
+
+      const poster = element("span", "cc-video-poster");
+      poster.setAttribute("aria-hidden", "true");
+      const filmIcon = MediaUI?.createIcon?.("film", { document: root.document });
+      if (filmIcon) poster.append(filmIcon);
+      else poster.textContent = "\ud83c\udfac";
+      poster.append(element("small", "cc-video-format", String(video.format || "video").toUpperCase()));
+      const copy = element("span", "cc-video-card-copy");
+      copy.append(element("strong", "", video.title));
+      copy.append(element("span", "", videoMeta(video) || "Local video"));
+      const cue = element("span", "cc-video-card-cue");
+      const playIcon = MediaUI?.createIcon?.("play", { document: root.document });
+      if (playIcon) cue.append(playIcon);
+      cue.append(element("span", "", label));
+      main.append(poster, copy);
       const bar = progressBar(progress, video);
-      if (bar) card.append(bar);
-      card.append(actions);
+      if (bar) main.append(bar);
+      main.append(cue);
+      card.append(main);
+
+      if (resumeAt > 0 || progress?.completed) {
+        const actions = element("div", "cc-video-card-actions");
+        const restart = iconButton(
+          "restart",
+          "Start " + video.title + " from the beginning",
+          "cc-video-secondary",
+          () => playVideo(video.id, sourceVideos, { startOver: true }),
+          "Start over",
+        );
+        restart.dataset.spatialKey = `video-restart:${opaqueVideoId(video)}`;
+        actions.append(restart);
+        card.append(actions);
+      }
       return card;
     }
 
@@ -762,7 +801,40 @@
       return wrap;
     }
 
+    function focusedContentKey() {
+      const active = root.document.activeElement;
+      if (!active || !nodes.content.contains(active)) return "";
+      const direct = active.dataset?.spatialKey;
+      if (direct) return direct;
+      return active.closest?.(".cc-video-card")
+        ?.querySelector("[data-spatial-key]")?.dataset.spatialKey || "";
+    }
+
+    function restoreContentFocus(key) {
+      if (!key) return;
+      const schedule = root.requestAnimationFrame || (callback => root.setTimeout(callback, 0));
+      schedule(() => {
+        const active = root.document.activeElement;
+        if (active && active !== root.document.body && active.isConnected) return;
+        const target = Array.from(nodes.content.querySelectorAll("[data-spatial-key]"))
+          .find(control => control.dataset.spatialKey === key);
+        target?.focus({ preventScroll: true });
+      });
+    }
+
+    function syncVideoHighlights(video = currentVideo()) {
+      const currentId = opaqueVideoId(video);
+      nodes.content.querySelectorAll(".cc-video-card").forEach(card => {
+        const active = currentId !== null && opaqueVideoId(card.dataset.videoId) === currentId;
+        card.classList.toggle("is-current", active);
+        const main = card.querySelector(".cc-video-card-main");
+        if (active) main?.setAttribute("aria-current", "true");
+        else main?.removeAttribute("aria-current");
+      });
+    }
+
     function renderContent() {
+      const focusKey = focusedContentKey();
       updateNav();
       if (state.loading) {
         replace(nodes.content, emptyState("Loading videos...", "Reading the local library."));
@@ -775,6 +847,8 @@
       if (state.view === "library") replace(nodes.content, renderLibrary());
       if (state.view === "recent") replace(nodes.content, renderRecent());
       if (state.view === "settings") replace(nodes.content, renderSettings());
+      syncVideoHighlights();
+      restoreContentFocus(focusKey);
     }
 
     function setView(view) {
@@ -792,11 +866,15 @@
 
     function updatePlayer() {
       const video = currentVideo();
+      syncVideoHighlights(video);
       if (nodes.player) nodes.player.hidden = !video;
       if (nodes.nowTitle) nodes.nowTitle.textContent = video ? video.title : "Nothing playing";
       if (nodes.nowMeta) {
+        const queuePosition = video && state.queue.length
+          ? ` · ${state.queueIndex + 1} of ${state.queue.length}`
+          : "";
         nodes.nowMeta.textContent = video
-          ? videoMeta(video) + (usingRemoteOutput() ? " \u00b7 Playing on Command Center PC" : "")
+          ? videoMeta(video) + queuePosition + (usingRemoteOutput() ? " \u00b7 Playing on Command Center PC" : "")
           : "Choose a video from the library";
       }
       const localSource = Boolean(video && !usingRemoteOutput() && nodes.media.getAttribute("src"));
@@ -809,18 +887,36 @@
       }
       const playing = Boolean(video && playbackIsPlaying());
       if (nodes.play) {
-        nodes.play.textContent = playing ? "Pause" : "Play";
-        nodes.play.setAttribute("aria-label", playing ? "Pause video" : "Play video");
+        setControlIcon(nodes.play, playing ? "pause" : "play", playing ? "Pause video" : "Play video", playing ? "Pause" : "Play");
         nodes.play.setAttribute("aria-pressed", playing ? "true" : "false");
         nodes.play.disabled = !video;
       }
-      if (nodes.previous) nodes.previous.disabled = !video;
-      if (nodes.next) nodes.next.disabled = !video || state.queueIndex >= state.queue.length - 1;
+      if (nodes.previous) {
+        setControlIcon(nodes.previous, "previous", "Previous video", "Previous");
+        nodes.previous.disabled = !video;
+      }
+      if (nodes.next) {
+        setControlIcon(nodes.next, "next", "Next video", "Next");
+        nodes.next.disabled = !video || state.queueIndex >= state.queue.length - 1;
+      }
       if (nodes.progress) nodes.progress.disabled = !video;
-      if (nodes.stop) nodes.stop.disabled = !video;
+      if (nodes.stop) {
+        setControlIcon(nodes.stop, "close", "Close video player", "Close");
+        nodes.stop.disabled = !video;
+      }
       if (nodes.fullscreen) {
         nodes.fullscreen.disabled = !localSource;
-        nodes.fullscreen.textContent = root.document.fullscreenElement ? "Exit fullscreen" : "Fullscreen";
+        const fullscreen = Boolean(root.document.fullscreenElement);
+        setControlIcon(
+          nodes.fullscreen,
+          fullscreen ? "fullscreenExit" : "fullscreen",
+          fullscreen ? "Exit fullscreen" : "Enter fullscreen",
+          fullscreen ? "Exit fullscreen" : "Fullscreen",
+        );
+      }
+      if (nodes.screen) {
+        nodes.screen.setAttribute("aria-label", video ? `${playing ? "Pause" : "Play"} ${video.title}` : "Video screen");
+        nodes.screen.setAttribute("aria-pressed", playing ? "true" : "false");
       }
       if (nodes.volume && root.document.activeElement !== nodes.volume) {
         nodes.volume.value = String(playbackVolume());
@@ -1356,6 +1452,17 @@
       nodes.next?.addEventListener("click", () => next());
       nodes.stop?.addEventListener("click", () => closePlayer());
       nodes.fullscreen?.addEventListener("click", toggleFullscreen);
+      nodes.screen?.addEventListener("click", () => {
+        if (!currentVideo()) return;
+        if (playbackIsPlaying()) pause();
+        else play().catch(error => setStatus(error.message, "error"));
+      });
+      nodes.screen?.addEventListener("keydown", event => {
+        if (!currentVideo() || !["Enter", " "].includes(event.key)) return;
+        event.preventDefault();
+        if (playbackIsPlaying()) pause();
+        else play().catch(error => setStatus(error.message, "error"));
+      });
       nodes.progress?.addEventListener("input", () => {
         const duration = playbackDuration();
         const position = duration > 0 ? Number(nodes.progress.value) / 1000 * duration : 0;
