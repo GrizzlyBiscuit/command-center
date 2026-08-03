@@ -37,8 +37,21 @@
   const PLAY_COUNT_SECONDS = 10;
   const SAVE_INTERVAL_MS = 3000;
   const STATS_FLUSH_SECONDS = 30;
+  const EXPANDED_GROUP_CONTROL = '.cc-music-group-actions button[aria-expanded="true"]';
 
   let app = null;
+
+  function expandedGroupForBack(content, activeElement) {
+    if (!content || typeof content.querySelector !== "function") return null;
+    const activeGroup = activeElement && typeof activeElement.closest === "function"
+      ? activeElement.closest(".cc-music-group.is-expanded")
+      : null;
+    if (activeGroup && typeof content.contains === "function" && content.contains(activeGroup)) {
+      const activeControl = activeGroup.querySelector(EXPANDED_GROUP_CONTROL);
+      if (activeControl) return activeControl;
+    }
+    return content.querySelector(EXPANDED_GROUP_CONTROL);
+  }
 
   function byId(id) {
     return root.document ? root.document.getElementById(id) : null;
@@ -648,23 +661,66 @@
         : `${group.tracks.length} track${group.tracks.length === 1 ? "" : "s"}`;
       copy.append(element("p", "", subtitle));
       const actions = element("div", "cc-music-group-actions");
-      actions.append(
-        button("Play", "cc-music-primary", () => playTrack(group.tracks[0].id, group.tracks)),
-        button("Add all", "cc-music-secondary", () => queueTracks(group.tracks)),
-      );
-      const reveal = button("Show tracks", "cc-music-secondary");
+      const playButton = button("Play", "cc-music-primary", () => playTrack(group.tracks[0].id, group.tracks));
+      playButton.setAttribute("aria-label", `Play ${type} ${group.label}`);
+      const addButton = button(type === "album" ? "Add" : "Add all", "cc-music-secondary", () => queueTracks(group.tracks));
+      addButton.setAttribute("aria-label", `Add ${type} ${group.label} to queue`);
+      actions.append(playButton, addButton);
+      const reveal = button(type === "album" ? "Open" : "Show tracks", "cc-music-secondary");
       reveal.setAttribute("aria-expanded", "false");
+      reveal.setAttribute("aria-label", `Show tracks for ${type} ${group.label}`);
       actions.append(reveal);
-      header.append(copy, actions);
+
+      let albumCover = null;
+      if (type === "album") {
+        albumCover = button("", "cc-music-album-cover");
+        albumCover.setAttribute("aria-expanded", "false");
+        albumCover.setAttribute("aria-label", `Open album ${group.label} by ${group.artist}`);
+        albumCover.dataset.spatialKey = `music-album:${opaqueTrackId(group.tracks[0])}`;
+        const artwork = element("span", "cc-music-album-artwork");
+        const fallback = element("span", "cc-music-album-art-fallback", "\u266b");
+        fallback.setAttribute("aria-hidden", "true");
+        artwork.append(fallback);
+        const artworkTrack = Domain.albumArtworkTrack(group);
+        if (artworkTrack) artwork.append(trackArtwork(artworkTrack, "cc-music-album-art"));
+        albumCover.append(artwork);
+        header.append(albumCover, copy, actions);
+      } else {
+        header.append(copy, actions);
+      }
+
       const list = element("div", "cc-music-group-tracks");
       list.hidden = true;
       group.tracks.forEach(track => list.append(trackRow(track, group.tracks)));
-      reveal.addEventListener("click", () => {
-        const opening = list.hidden;
+
+      function setExpanded(opening, trigger) {
+        if (opening) {
+          nodes.content.querySelectorAll(".cc-music-group.is-expanded").forEach(openCard => {
+            if (openCard === card) return;
+            openCard.querySelector(EXPANDED_GROUP_CONTROL)?.click();
+          });
+        }
         list.hidden = !opening;
-        reveal.textContent = opening ? "Hide tracks" : "Show tracks";
+        card.classList.toggle("is-expanded", opening);
+        reveal.textContent = type === "album"
+          ? (opening ? "Close" : "Open")
+          : (opening ? "Hide tracks" : "Show tracks");
         reveal.setAttribute("aria-expanded", opening ? "true" : "false");
-      });
+        reveal.setAttribute("aria-label", `${opening ? "Hide" : "Show"} tracks for ${type} ${group.label}`);
+        if (albumCover) {
+          albumCover.setAttribute("aria-expanded", opening ? "true" : "false");
+          albumCover.setAttribute("aria-label", `${opening ? "Close" : "Open"} album ${group.label} by ${group.artist}`);
+        }
+        if (opening && trigger) {
+          card.querySelectorAll("[data-group-return-focus]").forEach(control => {
+            delete control.dataset.groupReturnFocus;
+          });
+          trigger.dataset.groupReturnFocus = "true";
+        }
+      }
+
+      reveal.addEventListener("click", () => setExpanded(list.hidden, reveal));
+      albumCover?.addEventListener("click", () => setExpanded(list.hidden, albumCover));
       card.append(header, list);
       return card;
     }
@@ -673,7 +729,7 @@
       const source = filteredTracks();
       const groups = type === "album" ? Domain.groupAlbums(source) : Domain.groupArtists(source);
       if (!groups.length) return emptyState("No matches", "Try a different search.", "Clear search", clearSearch);
-      const list = element("div", "cc-music-group-list");
+      const list = element("div", `cc-music-group-list${type === "album" ? " cc-music-album-grid" : ""}`);
       groups.forEach(group => list.append(groupCard(group, type)));
       return list;
     }
@@ -1317,10 +1373,12 @@
       }
       const musicPanel = nodes.root.closest(".tab-panel");
       if (musicPanel && (musicPanel.hidden || root.getComputedStyle?.(musicPanel).display === "none")) return false;
-      const expanded = nodes.content.querySelector('.cc-music-group-actions button[aria-expanded="true"]');
+      const expanded = expandedGroupForBack(nodes.content, root.document?.activeElement);
       if (!expanded) return false;
+      const returnFocus = expanded.closest(".cc-music-group")
+        ?.querySelector('[data-group-return-focus="true"]') || expanded;
       expanded.click();
-      expanded.focus();
+      returnFocus.focus();
       return true;
     }
 
@@ -1699,6 +1757,9 @@
     reload() { return app?.reload(); },
   };
   root.CCMusic = Object.freeze(publicApi);
+  if (typeof module === "object" && module.exports) {
+    module.exports = Object.freeze({ expandedGroupForBack });
+  }
 
   function init() {
     if (!app) app = createApp();
