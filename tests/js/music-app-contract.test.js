@@ -53,6 +53,34 @@ test("controller actions are explicitly scoped to player state and open drawers"
   assert.match(appSource, /handleInputAction\(action, detail\)/);
 });
 
+test("albums render as controller-friendly artwork cards while artists keep group rows", () => {
+  assert.match(appSource, /type === "album" \? " cc-music-album-grid" : ""/);
+  assert.match(appSource, /button\("", "cc-music-album-cover"\)/);
+  assert.match(appSource, /Domain\.albumArtworkTrack\(group\)/);
+  assert.match(appSource, /albumCover\.dataset\.spatialKey = `music-album:\$\{opaqueTrackId\(group\.tracks\[0\]\)\}`/);
+  assert.match(appSource, /`Open album \$\{group\.label\} by \$\{group\.artist\}`/);
+  assert.match(appSource, /trackArtwork\(artworkTrack, "cc-music-album-art"\)/);
+  assert.doesNotMatch(appSource, /track\.(?:path|filename)/);
+});
+
+test("album cards expand across the grid and Back restores the opening control", () => {
+  assert.match(appSource, /card\.classList\.toggle\("is-expanded", opening\)/);
+  assert.match(appSource, /querySelectorAll\("\.cc-music-group\.is-expanded"\)/);
+  assert.match(appSource, /trigger\.dataset\.groupReturnFocus = "true"/);
+  assert.match(appSource, /querySelector\('\[data-group-return-focus="true"\]'\)/);
+  assert.match(appSource, /returnFocus\.focus\(\)/);
+  assert.match(cssSource, /\.cc-music-album-grid\s*\{[\s\S]*?repeat\(auto-fill, minmax\(min\(185px, 100%\), 1fr\)\)/);
+  assert.match(cssSource, /\.cc-music-album\.is-expanded\s*\{\s*grid-column:\s*1 \/ -1;/);
+});
+
+test("album artwork stays square, cropped, responsive, and keeps a visible fallback", () => {
+  assert.match(cssSource, /\.cc-music button\.cc-music-album-cover\s*\{[\s\S]*?aspect-ratio:\s*1 \/ 1;[\s\S]*?overflow:\s*hidden;/);
+  assert.match(cssSource, /\.cc-music-album-art\s*\{[\s\S]*?object-fit:\s*cover;/);
+  assert.match(cssSource, /\.cc-music-album-art\.is-missing\s*\{\s*opacity:\s*0;/);
+  assert.match(cssSource, /\.cc-music-album-art-fallback\s*\{[\s\S]*?radial-gradient/);
+  assert.match(cssSource, /@media \(max-width: 520px\)[\s\S]*?grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
+});
+
 test("dock avoids the open sidebar and stays below modal layers", () => {
   assert.match(cssSource, /#cc-music-player\s*\{[\s\S]*?left:\s*252px;[\s\S]*?z-index:\s*500;/);
   assert.match(cssSource, /\.app-shell\.sidebar-collapsed #cc-music-player\s*\{\s*left:\s*18px;/);

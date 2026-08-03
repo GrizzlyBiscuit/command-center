@@ -114,6 +114,11 @@
     }));
   }
 
+  function albumArtworkTrack(group) {
+    const tracks = Array.isArray(group && group.tracks) ? group.tracks : [];
+    return tracks.find(track => Boolean(track && (track.has_artwork || text(track.artwork_url)))) || null;
+  }
+
   function groupArtists(source) {
     return groupBy(
       source,
@@ -306,6 +311,7 @@
   return Object.freeze({
     REPEAT_MODES,
     addToQueue,
+    albumArtworkTrack,
     albumIdentity,
     buildPlaybackState,
     compareTracks,
