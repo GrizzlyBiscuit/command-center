@@ -12,7 +12,8 @@
  *     #cc-music-shuffle, #cc-music-repeat, #cc-music-progress,
  *     #cc-music-elapsed, #cc-music-duration, #cc-music-volume,
  *     #cc-music-queue-count, #cc-music-queue-clear, #cc-music-queue,
- *     and optional #cc-music-queue-toggle.
+ *     #cc-music-queue-toggle, #cc-music-player-hide, and
+ *     #cc-music-player-show.
  *   Settings controls are rendered into #cc-music-content by this module.
  *
  * Load music-domain.js and music-remote.js before this file. The audio element
@@ -38,6 +39,7 @@
   const SAVE_INTERVAL_MS = 3000;
   const STATS_FLUSH_SECONDS = 30;
   const EXPANDED_GROUP_CONTROL = '.cc-music-group-actions button[aria-expanded="true"]';
+  const PLAYER_HIDDEN_STORAGE_KEY = "cc.music.player.hidden.v1";
 
   let app = null;
 
@@ -51,6 +53,23 @@
       if (activeControl) return activeControl;
     }
     return content.querySelector(EXPANDED_GROUP_CONTROL);
+  }
+
+  function dockVisibility(hasTrack, playerHidden) {
+    return Object.freeze({
+      playerHidden: !hasTrack || Boolean(playerHidden),
+      restoreHidden: !hasTrack || !playerHidden,
+    });
+  }
+
+  function readPlayerHiddenPreference(host) {
+    try { return host?.localStorage?.getItem(PLAYER_HIDDEN_STORAGE_KEY) === "1"; }
+    catch { return false; }
+  }
+
+  function writePlayerHiddenPreference(host, hidden) {
+    try { host?.localStorage?.setItem(PLAYER_HIDDEN_STORAGE_KEY, hidden ? "1" : "0"); }
+    catch {}
   }
 
   function byId(id) {
@@ -189,6 +208,8 @@
       queueClear: byId("cc-music-queue-clear"),
       queue: byId("cc-music-queue"),
       queueToggle: byId("cc-music-queue-toggle"),
+      playerHide: byId("cc-music-player-hide"),
+      playerShow: byId("cc-music-player-show"),
     };
     if (!nodes.root || !nodes.content || !nodes.audio) return null;
 
@@ -208,6 +229,7 @@
       queueIndex: -1,
       repeat: "off",
       shuffle: false,
+      playerHidden: readPlayerHiddenPreference(root),
       storageKey: Domain.playbackStorageKey("unconfigured"),
       lastSaveAt: 0,
       resumeAt: 0,
@@ -908,9 +930,27 @@
       }
     }
 
+    function syncDockVisibility(track = currentTrack()) {
+      const visibility = dockVisibility(Boolean(track), state.playerHidden);
+      if (nodes.player) nodes.player.hidden = visibility.playerHidden;
+      if (nodes.playerShow) nodes.playerShow.hidden = visibility.restoreHidden;
+    }
+
+    function setPlayerHidden(hidden) {
+      state.playerHidden = Boolean(hidden);
+      if (state.playerHidden && nodes.queue && !nodes.queue.hidden) {
+        nodes.queue.hidden = true;
+        nodes.queueToggle?.setAttribute("aria-expanded", "false");
+      }
+      writePlayerHiddenPreference(root, state.playerHidden);
+      updateDock();
+      const focusTarget = state.playerHidden ? nodes.playerShow : nodes.playerHide;
+      if (focusTarget && !focusTarget.hidden) focusTarget.focus();
+    }
+
     function updateDock() {
       const track = currentTrack();
-      if (nodes.player) nodes.player.hidden = !track;
+      syncDockVisibility(track);
       if (nodes.player) nodes.player.classList.toggle("is-empty", !track);
       if (nodes.nowTitle) nodes.nowTitle.textContent = track ? track.title : "Nothing playing";
       if (nodes.nowMeta) nodes.nowMeta.textContent = track ? `${track.artist} · ${track.album}` : "Choose a track from Music";
@@ -1645,6 +1685,8 @@
         nodes.queue.hidden = !opening;
         nodes.queueToggle.setAttribute("aria-expanded", opening ? "true" : "false");
       });
+      nodes.playerHide?.addEventListener("click", () => setPlayerHidden(true));
+      nodes.playerShow?.addEventListener("click", () => setPlayerHidden(false));
       nodes.progress?.addEventListener("input", () => {
         if (usingRemoteOutput()) {
           const duration = playbackDuration();
@@ -1758,7 +1800,12 @@
   };
   root.CCMusic = Object.freeze(publicApi);
   if (typeof module === "object" && module.exports) {
-    module.exports = Object.freeze({ expandedGroupForBack });
+    module.exports = Object.freeze({
+      dockVisibility,
+      expandedGroupForBack,
+      readPlayerHiddenPreference,
+      writePlayerHiddenPreference,
+    });
   }
 
   function init() {
