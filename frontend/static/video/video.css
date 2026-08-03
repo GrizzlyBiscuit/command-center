@@ -190,6 +190,7 @@
   border: 1px solid rgba(185, 87, 255, 0.22);
   border-radius: 13px;
   background: #010205;
+  cursor: pointer;
 }
 
 .cc-video-screen video {
@@ -273,6 +274,13 @@
   justify-content: flex-end;
 }
 
+.cc-video-controls button,
+#cc-video-fullscreen {
+  width: 42px;
+  min-width: 42px;
+  padding: 0;
+}
+
 .cc-video-controls label {
   margin: 0 0 0 8px;
   color: var(--muted, #94a3b8);
@@ -280,7 +288,8 @@
 }
 
 #cc-video-play {
-  min-width: 76px;
+  width: 52px;
+  min-width: 52px;
 }
 
 #cc-video-volume {
@@ -298,21 +307,56 @@
 }
 
 .cc-video-card {
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  position: relative;
+  display: block;
   min-width: 0;
   overflow: hidden;
   border: 1px solid rgba(124, 128, 255, 0.18);
   border-radius: 15px;
   background: var(--video-card);
+  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+}
+
+.cc-video-card:focus-within {
+  border-color: rgba(53, 245, 255, 0.62);
+  box-shadow: 0 0 25px rgba(53, 245, 255, 0.13);
 }
 
 .cc-video-card.is-current {
-  border-color: rgba(53, 245, 255, 0.58);
-  box-shadow: 0 0 24px rgba(53, 245, 255, 0.1);
+  border-color: rgba(53, 245, 255, 0.76);
+  background: linear-gradient(145deg, rgba(53, 245, 255, 0.1), rgba(185, 87, 255, 0.08));
+  box-shadow: inset 0 3px var(--video-cyan), 0 0 24px rgba(53, 245, 255, 0.12);
+}
+
+.cc-video-card.is-current:focus-within {
+  border-color: #dffcff;
+  box-shadow: inset 0 3px var(--video-cyan), inset 0 0 0 2px rgba(53, 245, 255, 0.48), 0 0 28px rgba(53, 245, 255, 0.18);
+}
+
+.cc-video button.cc-video-card-main {
+  display: grid;
+  grid-template-rows: auto 1fr auto auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 14px;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+}
+
+.cc-video button.cc-video-card-main:hover {
+  border-color: transparent;
+  background: rgba(53, 245, 255, 0.045);
+  box-shadow: none;
+  transform: none;
 }
 
 .cc-video-poster {
+  position: relative;
   display: grid;
   place-content: center;
   aspect-ratio: 16 / 9;
@@ -323,6 +367,25 @@
     linear-gradient(120deg, transparent 42%, rgba(53, 245, 255, 0.06) 42% 58%, transparent 58%),
     radial-gradient(circle at 72% 25%, rgba(185, 87, 255, 0.2), transparent 34%),
     #080d20;
+}
+
+.cc-video-poster > .cc-media-icon {
+  width: 48px;
+  height: 48px;
+  stroke-width: 1.35;
+}
+
+.cc-video-format {
+  position: absolute;
+  right: 9px;
+  bottom: 8px;
+  padding: 3px 6px;
+  border: 1px solid rgba(53, 245, 255, 0.25);
+  border-radius: 999px;
+  color: #d9f8ff;
+  background: rgba(3, 7, 20, 0.8);
+  font-size: 0.61rem;
+  letter-spacing: 0.08em;
 }
 
 .cc-video-card-copy {
@@ -345,14 +408,20 @@
 }
 
 .cc-video-card-actions {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  z-index: 2;
   display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  padding: 4px 13px 13px;
 }
 
 .cc-video-card-actions button {
-  flex: 1 1 auto;
+  width: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  border-color: rgba(53, 245, 255, 0.35);
+  background: rgba(3, 7, 20, 0.88);
 }
 
 .cc-video-resume {
@@ -368,6 +437,26 @@
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, var(--video-cyan), var(--video-purple));
+}
+
+.cc-video-card-cue {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 13px 13px;
+  color: #dffcff;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.cc-video-card-cue .cc-media-icon {
+  width: 13px;
+  height: 13px;
+  color: var(--video-cyan);
+}
+
+.cc-video-card.is-current .cc-video-card-cue .cc-media-icon {
+  color: #fff;
 }
 
 .cc-video-empty {
@@ -433,15 +522,55 @@
   }
 
   .cc-video-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
   }
 
   .cc-video-screen {
     min-height: 150px;
   }
 
+  .cc-video-card-copy {
+    gap: 3px;
+    padding: 9px 9px 6px;
+  }
+
+  .cc-video-card-copy strong {
+    font-size: 0.82rem;
+  }
+
+  .cc-video-card-copy span {
+    font-size: 0.68rem;
+  }
+
+  .cc-video-resume {
+    margin: 1px 9px 7px;
+  }
+
+  .cc-video-card-cue {
+    gap: 5px;
+    margin: 0 9px 9px;
+    font-size: 0.7rem;
+  }
+
+  .cc-video-poster > .cc-media-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .cc-video-card-actions {
+    top: 6px;
+    right: 6px;
+  }
+
+  .cc-video-card-actions button {
+    width: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
   .cc-video-controls button {
-    flex: 1 1 auto;
+    flex: 0 0 44px;
   }
 
   .cc-video-controls label {
@@ -450,6 +579,12 @@
 
   #cc-video-volume {
     flex: 1 1 110px;
+  }
+}
+
+@media (max-width: 340px) {
+  .cc-video-grid {
+    grid-template-columns: 1fr;
   }
 }
 

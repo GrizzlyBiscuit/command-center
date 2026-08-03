@@ -26,6 +26,7 @@
 
   const Domain = root.CCMusicDomain;
   const Remote = root.CCMusicRemote;
+  const MediaUI = root.CCMediaUI;
   const API = Object.freeze({
     settings: "/api/music/settings",
     library: "/api/music/library",
@@ -87,6 +88,22 @@
     const node = element("button", className, label);
     node.type = "button";
     if (action) node.addEventListener("click", action);
+    return node;
+  }
+
+  function iconButton(name, label, className, action, fallback = label) {
+    const node = button("", className, action);
+    setControlIcon(node, name, label, fallback);
+    return node;
+  }
+
+  function setControlIcon(node, name, label, fallback = label) {
+    if (MediaUI?.setButtonIcon) MediaUI.setButtonIcon(node, name, label, { fallback });
+    else if (node) {
+      node.textContent = fallback;
+      node.setAttribute("aria-label", label);
+      node.title = label;
+    }
     return node;
   }
 
@@ -634,20 +651,48 @@
     function trackRow(track, context) {
       const row = element("article", "cc-music-track");
       row.dataset.trackId = String(track.id);
-      row.append(trackArtwork(track));
-      const copy = element("div", "cc-music-track-copy");
+
+      const main = button("", "cc-music-track-main", () => playTrack(track.id, context));
+      main.dataset.spatialKey = `music-track:${opaqueTrackId(track)}`;
+      main.setAttribute("aria-label", `Play ${track.title} by ${track.artist}`);
+
+      const artwork = element("span", "cc-music-track-artwork");
+      const fallback = element("span", "cc-music-track-art-fallback");
+      fallback.setAttribute("aria-hidden", "true");
+      const note = MediaUI?.createIcon?.("music", { document: root.document });
+      if (note) fallback.append(note);
+      else fallback.textContent = "\u266b";
+      artwork.append(fallback, trackArtwork(track));
+
+      const copy = element("span", "cc-music-track-copy");
       copy.append(element("strong", "cc-music-track-title", track.title));
       copy.append(element("span", "cc-music-track-meta", `${track.artist} · ${track.album}`));
       const duration = element("span", "cc-music-track-duration", Domain.formatTime(track.duration));
+      const cue = element("span", "cc-music-track-cue");
+      const playIcon = MediaUI?.createIcon?.("play", { document: root.document });
+      if (playIcon) cue.append(playIcon);
+      cue.setAttribute("aria-hidden", "true");
+      main.append(artwork, copy, duration, cue);
+
       const actions = element("div", "cc-music-track-actions");
-      const playButton = button("Play", "cc-music-primary", () => playTrack(track.id, context));
-      playButton.setAttribute("aria-label", `Play ${track.title}`);
-      const nextButton = button("Play next", "cc-music-secondary", () => queueTracks([track], { next: true }));
-      nextButton.setAttribute("aria-label", `Play ${track.title} next`);
-      const addButton = button("Add", "cc-music-secondary", () => queueTracks([track]));
-      addButton.setAttribute("aria-label", `Add ${track.title} to queue`);
-      actions.append(playButton, nextButton, addButton);
-      row.append(copy, duration, actions);
+      const nextButton = iconButton(
+        "playNext",
+        `Play ${track.title} next`,
+        "cc-music-secondary",
+        () => queueTracks([track], { next: true }),
+        "Play next",
+      );
+      nextButton.dataset.spatialKey = `music-track-next:${opaqueTrackId(track)}`;
+      const addButton = iconButton(
+        "add",
+        `Add ${track.title} to queue`,
+        "cc-music-secondary",
+        () => queueTracks([track]),
+        "Add",
+      );
+      addButton.dataset.spatialKey = `music-track-add:${opaqueTrackId(track)}`;
+      actions.append(nextButton, addButton);
+      row.append(main, actions);
       return row;
     }
 
@@ -683,14 +728,30 @@
         : `${group.tracks.length} track${group.tracks.length === 1 ? "" : "s"}`;
       copy.append(element("p", "", subtitle));
       const actions = element("div", "cc-music-group-actions");
-      const playButton = button("Play", "cc-music-primary", () => playTrack(group.tracks[0].id, group.tracks));
-      playButton.setAttribute("aria-label", `Play ${type} ${group.label}`);
-      const addButton = button(type === "album" ? "Add" : "Add all", "cc-music-secondary", () => queueTracks(group.tracks));
-      addButton.setAttribute("aria-label", `Add ${type} ${group.label} to queue`);
+      if (type === "album") actions.dataset.controllerNav = "off";
+      const playButton = iconButton(
+        "play",
+        `Play ${type} ${group.label}`,
+        "cc-music-primary",
+        () => playTrack(group.tracks[0].id, group.tracks),
+        "Play",
+      );
+      const addButton = iconButton(
+        "add",
+        `Add ${type} ${group.label} to queue`,
+        "cc-music-secondary",
+        () => queueTracks(group.tracks),
+        type === "album" ? "Add" : "Add all",
+      );
       actions.append(playButton, addButton);
-      const reveal = button(type === "album" ? "Open" : "Show tracks", "cc-music-secondary");
+      const reveal = iconButton(
+        "chevronDown",
+        `Show tracks for ${type} ${group.label}`,
+        "cc-music-secondary",
+        null,
+        type === "album" ? "Open" : "Show tracks",
+      );
       reveal.setAttribute("aria-expanded", "false");
-      reveal.setAttribute("aria-label", `Show tracks for ${type} ${group.label}`);
       actions.append(reveal);
 
       let albumCover = null;
@@ -724,11 +785,17 @@
         }
         list.hidden = !opening;
         card.classList.toggle("is-expanded", opening);
-        reveal.textContent = type === "album"
-          ? (opening ? "Close" : "Open")
-          : (opening ? "Hide tracks" : "Show tracks");
+        if (type === "album") {
+          if (opening) delete actions.dataset.controllerNav;
+          else actions.dataset.controllerNav = "off";
+        }
+        setControlIcon(
+          reveal,
+          opening ? "chevronUp" : "chevronDown",
+          `${opening ? "Hide" : "Show"} tracks for ${type} ${group.label}`,
+          type === "album" ? (opening ? "Close" : "Open") : (opening ? "Hide tracks" : "Show tracks"),
+        );
         reveal.setAttribute("aria-expanded", opening ? "true" : "false");
-        reveal.setAttribute("aria-label", `${opening ? "Hide" : "Show"} tracks for ${type} ${group.label}`);
         if (albumCover) {
           albumCover.setAttribute("aria-expanded", opening ? "true" : "false");
           albumCover.setAttribute("aria-label", `${opening ? "Close" : "Open"} album ${group.label} by ${group.artist}`);
@@ -901,6 +968,7 @@
           loadStats();
         }
       }
+      syncLibraryHighlights();
     }
 
     function setView(view) {
@@ -948,9 +1016,24 @@
       if (focusTarget && !focusTarget.hidden) focusTarget.focus();
     }
 
+    function syncLibraryHighlights(track = currentTrack()) {
+      const currentId = opaqueTrackId(track);
+      nodes.content.querySelectorAll(".cc-music-track").forEach(row => {
+        const active = currentId !== null && opaqueTrackId(row.dataset.trackId) === currentId;
+        row.classList.toggle("is-current", active);
+        const main = row.querySelector(".cc-music-track-main");
+        if (active) main?.setAttribute("aria-current", "true");
+        else main?.removeAttribute("aria-current");
+      });
+      nodes.content.querySelectorAll(".cc-music-group").forEach(group => {
+        group.classList.toggle("is-current", Boolean(group.querySelector(".cc-music-track.is-current")));
+      });
+    }
+
     function updateDock() {
       const track = currentTrack();
       syncDockVisibility(track);
+      syncLibraryHighlights(track);
       if (nodes.player) nodes.player.classList.toggle("is-empty", !track);
       if (nodes.nowTitle) nodes.nowTitle.textContent = track ? track.title : "Nothing playing";
       if (nodes.nowMeta) nodes.nowMeta.textContent = track ? `${track.artist} · ${track.album}` : "Choose a track from Music";
@@ -967,24 +1050,33 @@
       }
       if (nodes.play) {
         const playing = playbackIsPlaying();
-        nodes.play.textContent = playing ? "Pause" : "Play";
-        nodes.play.setAttribute("aria-label", playing ? "Pause music" : "Play music");
+        setControlIcon(nodes.play, playing ? "pause" : "play", playing ? "Pause music" : "Play music", playing ? "Pause" : "Play");
         nodes.play.setAttribute("aria-pressed", playing ? "true" : "false");
         nodes.play.disabled = !track;
       }
-      if (nodes.previous) nodes.previous.disabled = !track;
-      if (nodes.next) nodes.next.disabled = !track;
+      if (nodes.previous) {
+        setControlIcon(nodes.previous, "previous", "Previous track", "Previous");
+        nodes.previous.disabled = !track;
+      }
+      if (nodes.next) {
+        setControlIcon(nodes.next, "next", "Next track", "Next");
+        nodes.next.disabled = !track;
+      }
       if (nodes.shuffle) {
-        nodes.shuffle.textContent = state.shuffle ? "Shuffle: On" : "Shuffle: Off";
-        nodes.shuffle.setAttribute("aria-label", state.shuffle ? "Turn shuffle off" : "Turn shuffle on");
+        setControlIcon(nodes.shuffle, "shuffle", state.shuffle ? "Turn shuffle off" : "Turn shuffle on", "Shuffle");
         nodes.shuffle.setAttribute("aria-pressed", state.shuffle ? "true" : "false");
       }
       if (nodes.repeat) {
-        nodes.repeat.textContent = `Repeat: ${state.repeat[0].toUpperCase()}${state.repeat.slice(1)}`;
-        nodes.repeat.setAttribute("aria-label", `Repeat ${state.repeat}`);
+        setControlIcon(nodes.repeat, "repeat", `Repeat ${state.repeat}`, "Repeat");
         nodes.repeat.dataset.repeat = state.repeat;
         nodes.repeat.setAttribute("aria-pressed", state.repeat === "off" ? "false" : "true");
       }
+      if (nodes.queueToggle) {
+        setControlIcon(nodes.queueToggle, "queue", `Queue, ${state.queue.length} tracks`, "Queue");
+        if (nodes.queueCount) nodes.queueToggle.append(nodes.queueCount);
+      }
+      setControlIcon(nodes.queueClear, "trash", "Clear queue", "Clear");
+      setControlIcon(nodes.playerHide, "close", "Hide music player", "Hide");
       if (nodes.volume && root.document.activeElement !== nodes.volume) nodes.volume.value = String(playbackVolume());
       updateProgress();
     }
@@ -1014,22 +1106,54 @@
         const track = state.trackById.get(id);
         if (!track) return;
         const item = element("li", "cc-music-queue-item");
+        item.dataset.queueIndex = String(index);
         if (index === state.queueIndex) item.classList.add("is-current");
         const playButton = button("", "cc-music-queue-play", () => {
           state.queueIndex = index;
           selectCurrent({ autoplay: true });
         });
+        playButton.dataset.spatialKey = `music-queue:${index}:${opaqueTrackId(track)}`;
         playButton.setAttribute("aria-label", `Play ${track.title}`);
-        playButton.append(element("strong", "", track.title), element("span", "", track.artist));
-        const remove = button("Remove", "cc-music-queue-remove", () => removeFromQueue(index));
-        remove.setAttribute("aria-label", `Remove ${track.title} from queue`);
+        if (index === state.queueIndex) playButton.setAttribute("aria-current", "true");
+        const copy = element("span", "cc-music-queue-copy");
+        copy.append(
+          element("strong", "", track.title),
+          element("span", "", track.artist),
+          element(
+            "small",
+            "cc-music-queue-position",
+            index === state.queueIndex ? "Now playing" : index > state.queueIndex ? "Up next" : "Played",
+          ),
+        );
+        playButton.append(trackArtwork(track, "cc-music-queue-art"), copy);
+        const remove = iconButton(
+          "close",
+          `Remove ${track.title} from queue`,
+          "cc-music-queue-remove",
+          () => removeFromQueue(index),
+          "Remove",
+        );
+        remove.dataset.spatialKey = `music-queue-remove:${index}:${opaqueTrackId(track)}`;
         item.append(playButton, remove);
         list.append(item);
       });
       replace(nodes.queue, list);
     }
 
+    function focusQueueItem(index = state.queueIndex) {
+      if (!nodes.queue || nodes.queue.hidden || !["gamepad", "keyboard"].includes(root.document.body?.dataset.inputMode)) return;
+      const bounded = Math.max(0, Math.min(Number(index) || 0, state.queue.length - 1));
+      const schedule = root.requestAnimationFrame || (callback => root.setTimeout(callback, 0));
+      schedule(() => {
+        const target = nodes.queue.querySelector(`[data-queue-index="${bounded}"] .cc-music-queue-play`)
+          || nodes.queue.querySelector(".cc-music-queue-play");
+        target?.focus({ preventScroll: true });
+        target?.scrollIntoView?.({ block: "nearest" });
+      });
+    }
+
     function removeFromQueue(index) {
+      const restoreFocus = Boolean(nodes.queue?.contains(root.document.activeElement));
       const before = currentTrack();
       const result = Domain.removeQueueItem(state.queue, state.queueIndex, index);
       state.queue = result.queue;
@@ -1042,6 +1166,7 @@
         }).catch(() => {});
         renderQueue();
         updateDock();
+        if (restoreFocus && state.queue.length) focusQueueItem(Math.min(index, state.queue.length - 1));
         return;
       }
       if (!state.queue.length) {
@@ -1055,6 +1180,7 @@
       renderQueue();
       updateDock();
       savePlayback(true);
+      if (restoreFocus && state.queue.length) focusQueueItem(Math.min(index, state.queue.length - 1));
     }
 
     function clearQueue() {
@@ -1684,6 +1810,7 @@
         const opening = nodes.queue.hidden;
         nodes.queue.hidden = !opening;
         nodes.queueToggle.setAttribute("aria-expanded", opening ? "true" : "false");
+        if (opening) focusQueueItem();
       });
       nodes.playerHide?.addEventListener("click", () => setPlayerHidden(true));
       nodes.playerShow?.addEventListener("click", () => setPlayerHidden(false));

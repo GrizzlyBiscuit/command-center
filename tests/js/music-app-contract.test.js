@@ -93,6 +93,37 @@ test("albums render as controller-friendly artwork cards while artists keep grou
   assert.doesNotMatch(appSource, /track\.(?:path|filename)/);
 });
 
+test("music tracks expose one stable controller-first play surface", () => {
+  assert.match(appSource, /button\("", "cc-music-track-main"/);
+  assert.match(appSource, /main\.dataset\.spatialKey = `music-track:\$\{opaqueTrackId\(track\)\}`/);
+  assert.match(appSource, /iconButton\(\s*"playNext"/);
+  assert.match(appSource, /iconButton\(\s*"add"/);
+  assert.match(appSource, /nextButton\.dataset\.spatialKey = `music-track-next:/);
+  assert.match(appSource, /addButton\.dataset\.spatialKey = `music-track-add:/);
+  assert.match(appSource, /function syncLibraryHighlights/);
+  assert.match(appSource, /main\?\.setAttribute\("aria-current", "true"\)/);
+  assert.match(cssSource, /\.cc-music button\.cc-music-track-main\s*\{[\s\S]*?grid-template-columns:/);
+  assert.match(cssSource, /\.cc-music-track\.is-current\s*\{/);
+  assert.match(cssSource, /\.cc-music-track:focus-within\s*\{/);
+});
+
+test("music queue keeps one stable row target and restores controller focus", () => {
+  assert.match(appSource, /playButton\.dataset\.spatialKey = `music-queue:\$\{index\}:\$\{opaqueTrackId\(track\)\}`/);
+  assert.match(appSource, /playButton\.setAttribute\("aria-current", "true"\)/);
+  assert.match(appSource, /remove\.dataset\.spatialKey = `music-queue-remove:/);
+  assert.match(appSource, /function focusQueueItem/);
+  assert.match(appSource, /if \(opening\) focusQueueItem\(\)/);
+  assert.match(appSource, /"Now playing"/);
+});
+
+test("music transport updates fixed-size icons without text-heavy state labels", () => {
+  assert.match(appSource, /setControlIcon\(nodes\.play, playing \? "pause" : "play"/);
+  assert.match(appSource, /setControlIcon\(nodes\.shuffle, "shuffle"/);
+  assert.match(appSource, /setControlIcon\(nodes\.repeat, "repeat"/);
+  assert.match(appSource, /setControlIcon\(nodes\.queueToggle, "queue"/);
+  assert.doesNotMatch(appSource, /nodes\.shuffle\.textContent = state\.shuffle/);
+});
+
 test("album cards expand across the grid and Back restores the opening control", () => {
   assert.match(appSource, /card\.classList\.toggle\("is-expanded", opening\)/);
   assert.match(appSource, /querySelectorAll\("\.cc-music-group\.is-expanded"\)/);
