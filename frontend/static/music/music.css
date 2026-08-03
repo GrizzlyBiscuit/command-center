@@ -1,7 +1,8 @@
 /* Command Center music library — portions Copyright (c) 2026 sagan246, MIT. */
 
 .cc-music,
-.cc-music-player {
+.cc-music-player,
+.cc-music-player-show {
   --music-cyan: var(--accent, #35f5ff);
   --music-purple: var(--accent-2, #b957ff);
   --music-ink: rgba(4, 8, 22, 0.94);
@@ -574,8 +575,26 @@ body:has(#cc-music-player:not([hidden])) .app-shell {
 }
 
 .cc-music-now-copy {
+  grid-column: 2;
   display: grid;
   gap: 4px;
+  min-width: 0;
+}
+
+.cc-music-now:has(> img[hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cc-music-now:has(> img[hidden]) .cc-music-now-copy {
+  grid-column: 1;
+}
+
+.cc-music-now-copy strong,
+.cc-music-now-copy span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .cc-music-now-copy span {
@@ -628,6 +647,30 @@ body:has(#cc-music-player:not([hidden])) .app-shell {
 
 #cc-music-volume {
   width: 76px;
+}
+
+#cc-music-player-hide {
+  font-size: 0.86rem;
+}
+
+.cc-music-player-show {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 500;
+  min-width: 108px;
+  min-height: 44px;
+  padding: 9px 14px;
+  border: 1px solid rgba(53, 245, 255, 0.42);
+  border-radius: 999px;
+  color: var(--text, #e8f1ff);
+  background: rgba(3, 7, 20, 0.96);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.52), 0 0 22px rgba(53, 245, 255, 0.13);
+  backdrop-filter: blur(18px);
+}
+
+.cc-music-player-show[hidden] {
+  display: none;
 }
 
 .cc-music-queue {
@@ -779,6 +822,129 @@ body:has(#cc-music-player:not([hidden])) .app-shell {
   }
 }
 
+/* Match the phone player layout: one compact row, with detailed controls
+   available again at wider widths. An open queue may intentionally add a row. */
+@media (max-width: 680px) {
+  #cc-music-player,
+  .app-shell.sidebar-collapsed #cc-music-player {
+    right: max(6px, env(safe-area-inset-right));
+    bottom: max(6px, env(safe-area-inset-bottom));
+    left: max(6px, env(safe-area-inset-left));
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 6px;
+    padding: 7px 8px;
+    border-radius: 14px;
+  }
+
+  .cc-music-now {
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .cc-music-now img {
+    width: 38px;
+    height: 38px;
+    border-radius: 7px;
+  }
+
+  .cc-music-now-copy {
+    gap: 2px;
+  }
+
+  .cc-music-now-copy strong {
+    font-size: 0.78rem;
+  }
+
+  .cc-music-now-copy span {
+    font-size: 0.66rem;
+  }
+
+  .cc-music-transport {
+    justify-content: flex-end;
+    gap: 2px;
+  }
+
+  .cc-music-transport button {
+    width: 34px;
+    min-width: 34px;
+    min-height: 44px;
+    padding: 0;
+    font-size: 0.72rem;
+  }
+
+  #cc-music-play {
+    width: 42px;
+    min-width: 42px;
+    padding: 0;
+    font-size: 0;
+  }
+
+  #cc-music-play::before {
+    content: "\25B6";
+    font-size: 1rem;
+  }
+
+  #cc-music-play[aria-pressed="true"]::before {
+    content: "\275A\275A";
+    letter-spacing: -0.18em;
+  }
+
+  #cc-music-shuffle,
+  #cc-music-repeat,
+  .cc-music-timeline,
+  .cc-music-player-tools label,
+  #cc-music-volume,
+  #cc-music-queue-clear {
+    display: none;
+  }
+
+  .cc-music-player-tools {
+    grid-column: auto;
+    justify-content: flex-end;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .cc-music-player-tools button {
+    width: 34px;
+    min-width: 34px;
+    min-height: 44px;
+    padding: 0;
+  }
+
+  #cc-music-queue-toggle {
+    width: 42px;
+    min-width: 42px;
+    font-size: 0;
+  }
+
+  #cc-music-queue-toggle::before {
+    content: "\2630";
+    font-size: 0.92rem;
+  }
+
+  #cc-music-queue-count {
+    margin-left: 2px;
+    font-size: 0.62rem;
+  }
+
+  .cc-music-queue {
+    grid-column: 1 / -1;
+  }
+
+  .cc-music-player-show {
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(8px, env(safe-area-inset-bottom));
+    min-width: 96px;
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+
+  body:has(#cc-music-player:not([hidden])) .app-shell {
+    padding-bottom: calc(82px + env(safe-area-inset-bottom));
+  }
+}
+
 @media (max-width: 520px) {
   .cc-music-album-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -835,10 +1001,6 @@ body:has(#cc-music-player:not([hidden])) .app-shell {
     grid-template-columns: 1fr;
   }
 
-  .cc-music-transport button {
-    min-width: 36px;
-    padding-inline: 7px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {

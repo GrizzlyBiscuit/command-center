@@ -31,7 +31,10 @@ test("persistent player is a sibling outside the hidden Music panel", () => {
   for(const id of [
     "cc-music-audio", "cc-music-play", "cc-music-previous", "cc-music-next",
     "cc-music-progress", "cc-music-volume", "cc-music-queue",
+    "cc-music-player-hide", "cc-music-player-show",
   ]) assert.match(panel, new RegExp(`id="${id}"`));
+  assert.match(panel, /id="cc-music-player-hide"[^>]*aria-label="Hide music player"[^>]*aria-controls="cc-music-player"/);
+  assert.match(panel, /<\/section>\s*<button type="button" class="cc-music-player-show" id="cc-music-player-show"[^>]*aria-label="Show music player"[^>]*hidden>/);
 });
 
 test("music delegates contextual controller actions without taking panel bumpers", () => {
