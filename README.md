@@ -2,6 +2,8 @@
 
 Local-first, synthwave Command Center hub for Windows. It gives you a single home dashboard, a sidebar app launcher, local model controls, live monitoring, model competitions, automation tools, and optional mobile/LAN access.
 
+Testing the controller and media feature branches? See [FEATURE_CHANGES.md](FEATURE_CHANGES.md) for the short try-and-merge guide.
+
 ## What this repo is
 
 - `backend/` — Flask hub, API, agents, webhooks, game servers, kanban routes
