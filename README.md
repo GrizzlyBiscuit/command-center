@@ -162,7 +162,8 @@ Local MP4/WebM library and player.
 Audio-reactive neon visualizer.
 
 - Driven by the active music player or titlebar audio menu.
-- Idle until audio is playing.
+- Choose the original **Bars + scope** view or the music-reactive **Particle accelerator** mode.
+- Both modes keep a calm idle animation until audio is playing; the selected style is saved in that browser.
 
 ### Focus
 Pomodoro-style focus timer with a charging sun.

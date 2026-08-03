@@ -10,7 +10,7 @@ const index = read("frontend/templates/index.html");
 const panel = read("frontend/templates/_music_panel.html");
 const app = read("frontend/static/music/music-app.js");
 const controller = read("frontend/static/input/controller-navigation.js");
-const visualizer = read("frontend/static/visualizer.js");
+const visualizer = require(path.join(root, "frontend/static/visualizer.js"));
 
 test("Music sidebar, panel, and scripts are wired in dependency order", () => {
   assert.match(base, /data-tab="music"/);
@@ -46,9 +46,24 @@ test("music delegates contextual controller actions without taking panel bumpers
 });
 
 test("visualizer prefers active library music and falls back to ambient audio", () => {
-  const music = visualizer.indexOf("window.CCMusic.getAnalyser");
-  const ambient = visualizer.indexOf("window.CCAudio.getAnalyser");
-  assert.ok(music >= 0 && music < ambient);
+  const calls = [];
+  const musicAnalyser = { source: "music" };
+  const ambientAnalyser = { source: "ambient" };
+  const host = {
+    CCMusic: {
+      isPlaying: () => true,
+      getAnalyser: () => { calls.push("music"); return musicAnalyser; },
+    },
+    CCAudio: {
+      getAnalyser: () => { calls.push("ambient"); return ambientAnalyser; },
+    },
+  };
+  assert.equal(visualizer.resolveAnalyser(host), musicAnalyser);
+  assert.deepEqual(calls, ["music"]);
+
+  host.CCMusic.isPlaying = () => false;
+  assert.equal(visualizer.resolveAnalyser(host), ambientAnalyser);
+  assert.deepEqual(calls, ["music", "ambient"]);
 });
 
 test("music UI remains music-only", () => {
