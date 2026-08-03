@@ -32,6 +32,7 @@ jobs:
         run: >-
           node --check frontend/static/arcade.js &&
           node --check frontend/static/chess.js &&
+          node --check frontend/static/chat.js &&
           node --check frontend/static/fx.js &&
           node --check frontend/static/kanban.js &&
           node --check frontend/static/visualizer.js &&

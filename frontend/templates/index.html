@@ -864,7 +864,7 @@
   if (killYes) killYes.onclick = async () => {
     killYes.disabled = true; killYes.textContent = 'Killing…';
     try { await fetch('/api/hub/kill', {method:'POST'}); } catch (e) {}
-    setTimeout(() => { document.body.innerHTML = '<div style="padding:30px;font-family:monospace;color:#ff2d55;">Hub killed. Restart it from <strong>C:\\web\\app.py</strong>.</div>'; }, 1000);
+    setTimeout(() => { document.body.innerHTML = '<div style="padding:30px;font-family:monospace;color:#ff2d55;">Hub killed. Restart it with your Command Center launcher or run <strong>python backend/app.py</strong> from the project folder.</div>'; }, 1000);
   };
 
   // ---- Fire Watch widget ----
