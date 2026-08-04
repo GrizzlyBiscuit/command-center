@@ -14,6 +14,7 @@ from threading import Lock
 import threading
 from functools import wraps
 from flask import session, flash
+from dotenv import load_dotenv
 
 # Windows process-creation flags (only used on Windows; safe no-op elsewhere)
 if sys.platform.startswith("win"):
@@ -28,6 +29,8 @@ else:
 # legacy deployed layout where app.py, templates/, and static/ are siblings.
 BACKEND_ROOT = Path(__file__).resolve().parent
 PROJECT_ROOT = BACKEND_ROOT.parent
+ENV_ROOT = PROJECT_ROOT if (PROJECT_ROOT / 'frontend').is_dir() else BACKEND_ROOT
+load_dotenv(ENV_ROOT / '.env')
 if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 from agent import runner, installer
@@ -35,6 +38,9 @@ from agent.telegram_notifier import TelegramNotifier
 from secure_store import save_creds, load_creds
 from desktop_log import read_entries
 from music import init_music
+from path_config import configured_path as _configured_path, resolve_ollama_executable
+from relaunch import build_relaunch_command
+from video import init_video
 
 _repo_templates = PROJECT_ROOT / 'frontend' / 'templates'
 _repo_static = PROJECT_ROOT / 'frontend' / 'static'
@@ -45,6 +51,7 @@ app = Flask(
 )
 app.config['SECRET_KEY'] = os.environ.get('UI_SECRET', 'dev-secret')
 init_music(app, scan_on_start=True)
+init_video(app, scan_on_start=True)
 RELAY_TRACE_KEY = os.environ.get('RELAY_TRACE_KEY', 'cc-trace-local')
 
 stream_events = deque()
@@ -318,12 +325,15 @@ def install_endpoint():
 # ------------------------------------------------------------------
 # Discord relay control (the "on switch" hub tab)
 # ------------------------------------------------------------------
-RELAY_SCRIPT = os.path.expanduser(r"C:\Users\mattz\Desktop\Ai\discord_relay.py")
-RELAY_LAUNCHER = os.path.expanduser(r"C:\Users\mattz\Desktop\Ai\discord_relay_launcher.bat")
-RELAY_VENV_PY = os.path.expanduser(r"C:\Users\mattz\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe")
-RELAY_PIDFILE = os.path.expanduser(r"C:\Users\mattz\Desktop\Ai\relay.pid")
-RELAY_LOGFILE = os.path.expanduser(r"C:\Users\mattz\Desktop\Ai\relay_out.txt")
-OLLAMA_EXE = r"C:\Users\mattz\AppData\Local\Programs\Ollama\ollama.exe"
+RELAY_SCRIPT = _configured_path('RELAY_SCRIPT', r"C:\Users\mattz\Desktop\Ai\discord_relay.py")
+RELAY_LAUNCHER = _configured_path('RELAY_LAUNCHER', r"C:\Users\mattz\Desktop\Ai\discord_relay_launcher.bat")
+RELAY_VENV_PY = _configured_path(
+    'RELAY_VENV_PY',
+    r"C:\Users\mattz\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe",
+)
+RELAY_PIDFILE = _configured_path('RELAY_PIDFILE', r"C:\Users\mattz\Desktop\Ai\relay.pid")
+RELAY_LOGFILE = _configured_path('RELAY_LOGFILE', r"C:\Users\mattz\Desktop\Ai\relay_out.txt")
+OLLAMA_EXE = resolve_ollama_executable(r"C:\Users\mattz\AppData\Local\Programs\Ollama\ollama.exe")
 CRON_JOBS = ["3b56fa6e0b27", "3c17efea16cb"]  # Daily Readiness, Kanban WIP
 
 CREATE_NEW_PROCESS_GROUP = 0x00000200
@@ -964,18 +974,24 @@ def readiness_status():
 # ------------------------------------------------------------------
 @app.route('/app/restart', methods=['POST'])
 def app_restart():
-    import subprocess, threading, time as _t, os as _os
-    pyw = r"C:\Python314\pythonw.exe"
-    helper = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'relaunch.py')
+    helper = BACKEND_ROOT / 'relaunch.py'
+    current_port = int(os.environ.get('FLASK_PORT', '5050'))
+    command = build_relaunch_command(
+        executable=sys.executable,
+        helper_path=helper,
+        old_pid=os.getpid(),
+        app_path=Path(__file__).resolve(),
+        cwd=Path.cwd(),
+        port=current_port,
+    )
     # pass THIS process's pid so the relauncher can keep us serving
     # until the new hub is fully warmed up (near zero-downtime restart)
-    subprocess.Popen([pyw, helper, str(os.getpid())], creationflags=0x08000000,
-                     close_fds=True, cwd=os.path.dirname(os.path.abspath(__file__)))
-
-    def _die():
-        _t.sleep(0.6)   # let the response flush first
-        _os._exit(0)
-    threading.Thread(target=_die, daemon=True).start()
+    subprocess.Popen(
+        command,
+        creationflags=CREATE_NO_WINDOW,
+        close_fds=True,
+        cwd=str(Path.cwd()),
+    )
     return jsonify({'ok': True, 'msg': 'restarting'})
 
 

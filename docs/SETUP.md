@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - Windows 10/11
-- Python 3.11+ installed at `C:\Python314` or in PATH
+- Python 3.11+ in PATH
 - Git
 - Ollama (local LLM runtime)
 - Optional: Android SDK + Gradle wrapper for mobile build
@@ -33,7 +33,7 @@ Copy `.env.example` to `.env` and set:
 - Discord / Telegram bot tokens if using those platforms
 - Any local agent keys
 
-Note: `.env` is for secrets only. Non-secret settings belong in config files.
+The launcher reads this checkout's `.env` before resolving its startup paths. Application settings still belong in their config files.
 
 ## Run
 
@@ -51,8 +51,34 @@ Open:
 ## Windows minimized launcher
 
 - Double-click `launcher/launch_cc.vbs`
-- Or place a shortcut to `pythonw.exe backend\app.py` in the Startup folder with `WindowStyle=7`
-- The full `launcher/synth_launcher.py` desktop window is the music renderer used by **Play on > Command Center PC**. Keep that window open or minimized when controlling PC playback from a phone; running Flask alone cannot output audio.
+- The script uses this checkout's `.venv` and `backend/app.py`, so the same checkout works from any Windows user profile or drive.
+- `pywebview` is installed by `requirements.txt`; it provides the chromeless desktop window and the native Music/Video folder picker.
+- The full `launcher/synth_launcher.py` desktop window is the music/video renderer used by **Play on > Command Center PC**. Keep that window open or minimized when controlling playback from a phone; running Flask alone cannot produce PC media playback.
+- Configure the music and video folders separately from their **Settings** views. Only the host can choose folders or start manual scans; LAN/private-VPN clients can browse, stream, and control playback.
+- Direct video playback supports MP4 and WebM in this first version. Codec support still depends on the destination browser, and Command Center does not transcode files.
+
+Launcher state and logs default to `%LOCALAPPDATA%\CommandCenter\launcher`, outside the repository. Advanced or legacy installs can set these in the process environment or this checkout's `.env`:
+
+- `CC_LAUNCHER_PYTHON` - full path to Python used by `launch_cc.vbs` (Windows process environment only, because it is needed before `.env` can load)
+- `CC_HUB_PYTHON` - full path to Python used for the Flask process
+- `CC_HUB_SCRIPT` - full path to the backend `app.py`
+- `CC_LAUNCHER_RUNTIME_DIR` - launcher log/lock directory
+- `CC_HUB_LOG_FILE`, `CC_LAUNCHER_LOCK_FILE`, `CC_HUB_PID_FILE`, and `CC_LAUNCHER_LIFETIME_FILE` - individual launcher-state file overrides
+- `HUB_URL`, `FLASK_PORT` - local hub URL and port
+
+The repository `.venv` and `backend/app.py` take priority. If they are unavailable, the standalone launcher still recognizes the original `C:\Python314`, `C:\web`, and Hermes locations. Environment overrides take priority over both layouts.
+
+Ollama is resolved from `OLLAMA_EXE`, then `PATH`, then the current Windows user's standard install. The original host-specific path remains the final fallback. The desktop refresh button likewise restarts the interpreter and `backend/app.py` belonging to the currently running checkout.
+
+## Quick verification
+
+From the project folder:
+
+```
+.venv\Scripts\python.exe -m unittest discover -s tests\python -p "test_*.py"
+```
+
+Then double-click `launcher/launch_cc.vbs`. Open **Music > Settings** to choose a music folder and **Video > Settings** to choose a video folder. From a phone on the same LAN, open `http://<this-pc-ip>:5050`; playback can target either the phone or **Command Center PC** while the desktop launcher stays open.
 
 ## Hub routes
 

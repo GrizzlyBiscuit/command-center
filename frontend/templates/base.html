@@ -10,7 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='synthwave.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='media/media-ui.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='music/music.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='video/video.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='media/now-playing.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='banner.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='input/navigation.css') }}">
   </head>
@@ -35,6 +38,7 @@
           <button class="tab-btn" data-tab="maze" role="tab" data-tip="Watch local models solve a maze, live"><span class="glyph">&#128373;</span> <span class="label">Maze</span></button>
           <button class="tab-btn" data-tab="fusion" role="tab" data-tip="Forge named model pairs you can call anywhere"><span class="glyph">&#9883;</span> <span class="label">Fusion Core</span></button>
           <button class="tab-btn" data-tab="music" role="tab" data-tip="Play music stored on this computer"><span class="glyph">&#9835;</span> <span class="label">Music</span></button>
+          <button class="tab-btn" data-tab="video" role="tab" data-tip="Watch videos stored on this computer"><span class="glyph">&#127916;</span> <span class="label">Video</span></button>
           <button class="tab-btn" data-tab="visualizer" role="tab" data-tip="Audio-reactive neon visualizer"><span class="glyph">&#127911;</span> <span class="label">Visualizer</span></button>
           <button class="tab-btn" data-tab="pomodoro" role="tab" data-tip="Focus timer with a charging sun"><span class="glyph">&#9202;</span> <span class="label">Focus</span></button>
           <button class="tab-btn" data-tab="launchpad" role="tab" data-tip="Pin your favorite apps"><span class="glyph">&#128640;</span> <span class="label">Launchpad</span></button>
@@ -77,7 +81,7 @@
       <div class="kill-confirm" id="kill-confirm">
         <div class="kill-box" role="dialog" aria-modal="true" aria-labelledby="kill-confirm-title">
           <h3 id="kill-confirm-title">Kill hub?</h3>
-          <p>This stops the Command Center backend process. Restart it from the Startup shortcut or `C:\web\app.py`.</p>
+          <p>This stops the Command Center backend process. Restart it with your Command Center launcher or by running <code>python backend/app.py</code> from the project folder.</p>
           <div class="kill-acts">
             <button class="btn-ghost" id="kill-no">Cancel</button>
             <button class="btn-danger" id="kill-yes">Kill hub</button>
@@ -115,9 +119,15 @@
     <script src="{{ url_for('static', filename='webhooks.js') }}"></script>
     <script src="{{ url_for('static', filename='kanban.js') }}"></script>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="{{ url_for('static', filename='media/media-session.js') }}"></script>
+    <script src="{{ url_for('static', filename='media/media-ui.js') }}"></script>
     <script src="{{ url_for('static', filename='music/music-domain.js') }}"></script>
     <script src="{{ url_for('static', filename='music/music-remote.js') }}"></script>
     <script src="{{ url_for('static', filename='music/music-app.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='video/video-domain.js') }}"></script>
+    <script src="{{ url_for('static', filename='video/video-remote.js') }}"></script>
+    <script src="{{ url_for('static', filename='video/video-app.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='media/now-playing.js') }}" defer></script>
     <script src="{{ url_for('static', filename='input/keyboard-controls.js') }}"></script>
     <script src="{{ url_for('static', filename='input/spatial-navigation.js') }}"></script>
     <script src="{{ url_for('static', filename='input/gamepad-controller.js') }}"></script>
@@ -302,7 +312,7 @@
               <div><dt>Choose</dt><dd><kbd>Enter</kbd> / <kbd>Space</kbd></dd></div>
               <div><dt>Back / Home</dt><dd><kbd>Esc</kbd></dd></div>
               <div><dt>Previous / next panel</dt><dd><kbd>Q</kbd> / <kbd>E</kbd></dd></div>
-              <div><dt>Music/audio / Sidebar</dt><dd><kbd>X</kbd> / <kbd>Y</kbd></dd></div>
+              <div><dt>Media/audio / Sidebar</dt><dd><kbd>X</kbd> / <kbd>Y</kbd></dd></div>
               <div><dt>Jump Home</dt><dd><kbd>Home</kbd></dd></div>
               <div><dt>Help</dt><dd><kbd>?</kbd></dd></div>
             </dl>
@@ -313,7 +323,7 @@
               <div><dt>Move focus</dt><dd>D-pad / Left stick</dd></div>
               <div><dt>Choose / Back</dt><dd>A / B</dd></div>
               <div><dt>Previous / next panel</dt><dd>LB / RB</dd></div>
-              <div><dt>Music/audio / Sidebar</dt><dd>X / Y</dd></div>
+              <div><dt>Media/audio / Sidebar</dt><dd>X / Y</dd></div>
               <div><dt>Home / Help</dt><dd>View / Menu</dd></div>
             </dl>
           </section>

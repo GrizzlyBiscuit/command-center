@@ -42,6 +42,17 @@ test("albums with the same title are kept separate by artist", () => {
   assert.deepEqual(groups.map(group => [group.artist, group.tracks.length]), [["Artist A", 2], ["Artist B", 1]]);
 });
 
+test("album artwork uses the first art-bearing track without changing its opaque id", () => {
+  const noArt = track(ID.one, "One");
+  const withArt = track(ID.two, "Two", "Artist", "Album", { has_artwork: true });
+  const withUrl = track(ID.three, "Three", "Artist", "Album", { artwork_url: `/api/music/art/${ID.three}` });
+
+  assert.equal(Music.albumArtworkTrack({ tracks: [noArt, withArt, withUrl] }), withArt);
+  assert.equal(Music.albumArtworkTrack({ tracks: [noArt] }), null);
+  assert.equal(Music.albumArtworkTrack({ tracks: [] }), null);
+  assert.equal(Music.albumArtworkTrack({ tracks: [noArt, withArt] }).id, ID.two);
+});
+
 test("stable identity prefers opaque backend IDs over colliding metadata", () => {
   const first = track(ID.one, "Same", "Artist", "Album", { duration: 180 });
   const second = track(ID.two, "Same", "Artist", "Album", { duration: 180 });

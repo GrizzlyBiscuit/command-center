@@ -1,8 +1,8 @@
 # Third-party notices
 
-## Taeyeon Media Player controller and music modules
+## Taeyeon Media Player controller, media, and visualizer modules
 
-Portions of the keyboard, gamepad, spatial-navigation, local music-library, player, and related test modules were adapted from Taeyeon Media Player.
+Portions of the keyboard, gamepad, spatial-navigation, local music/video-library, player, playback-persistence, audio-reactive visualization patterns, and related test modules were adapted from Taeyeon Media Player.
 
 MIT License
 
