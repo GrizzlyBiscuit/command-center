@@ -7,6 +7,8 @@ const root = path.resolve(__dirname, "../..");
 const read = relativePath => fs.readFileSync(path.join(root, relativePath), "utf8");
 const base = read("frontend/templates/base.html");
 const index = read("frontend/templates/index.html");
+const musicPanel = read("frontend/templates/_music_panel.html");
+const indexMarkup = `${index}\n${musicPanel}`;
 const arcade = read("frontend/static/arcade.js");
 const chess = read("frontend/static/chess.js");
 
@@ -28,7 +30,7 @@ test("input scripts load in dependency order", () => {
 test("every sidebar tab button has a matching panel", () => {
   const tabs = Array.from(base.matchAll(/<button[^>]+class="tab-btn"[^>]+data-tab="([^"]+)"/g), match => match[1]);
   assert.ok(tabs.length > 10, "expected the Command Center panel buttons");
-  for(const tab of tabs) assert.match(index, new RegExp(`id="tab-${tab}"`));
+  for(const tab of tabs) assert.match(indexMarkup, new RegExp(`id="tab-${tab}"`));
   assert.doesNotMatch(base, /data-tab="relay"\s+r(?:\s|$)/);
 });
 

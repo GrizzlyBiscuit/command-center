@@ -190,22 +190,11 @@
       return Boolean(windowRef.CCArcade.handleDirection?.(DIRECTIONS[action]));
     }
 
-    function goBack(){
+    function goBack(detail = {}){
       if(closeHelp()) return true;
-      if(windowRef.CCArcade?.isInputCaptured?.()){
-        windowRef.CCArcade.releaseInput?.();
-        showStatus("Arcade controls released");
-        return true;
-      }
-      if(windowRef.CCChess?.cancelSelection?.()) return true;
       const kill = documentRef.getElementById("kill-confirm");
       if(kill?.classList.contains("on")){
         documentRef.getElementById("kill-no")?.click();
-        return true;
-      }
-      const audio = documentRef.getElementById("tb-audio-wrap");
-      if(audio?.classList.contains("open")){
-        audio.classList.remove("open");
         return true;
       }
       const caution = documentRef.getElementById("kb-wip-caution");
@@ -216,6 +205,18 @@
       const kanban = documentRef.getElementById("kb-pop");
       if(isVisible(kanban)){
         documentRef.getElementById("kb-cancel")?.click();
+        return true;
+      }
+      if(windowRef.CCArcade?.isInputCaptured?.()){
+        windowRef.CCArcade.releaseInput?.();
+        showStatus("Arcade controls released");
+        return true;
+      }
+      if(windowRef.CCChess?.cancelSelection?.()) return true;
+      if(windowRef.CCMusic?.handleInputAction?.("back", detail)) return true;
+      const audio = documentRef.getElementById("tb-audio-wrap");
+      if(audio?.classList.contains("open")){
+        audio.classList.remove("open");
         return true;
       }
       if(isTypingTarget(documentRef.activeElement)){
@@ -247,9 +248,10 @@
         if(isTypingTarget(documentRef.activeElement)) return false;
         return spatial.activate();
       }
-      if(action === "back") return goBack();
+      if(action === "back") return goBack(detail);
       if(activeScope() !== documentRef) return true;
       if(action === "secondaryAction"){
+        if(windowRef.CCMusic?.handleInputAction?.(action, detail)) return true;
         documentRef.getElementById("tb-audio")?.click();
         return true;
       }

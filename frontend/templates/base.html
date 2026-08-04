@@ -3,12 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Agent UI{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='synthwave.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='music/music.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='banner.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='input/navigation.css') }}">
   </head>
@@ -32,6 +34,7 @@
           <button class="tab-btn" data-tab="arena" role="tab" data-tip="Pit two local models against each other"><span class="glyph">&#9876;</span> <span class="label">Model Arena</span></button>
           <button class="tab-btn" data-tab="maze" role="tab" data-tip="Watch local models solve a maze, live"><span class="glyph">&#128373;</span> <span class="label">Maze</span></button>
           <button class="tab-btn" data-tab="fusion" role="tab" data-tip="Forge named model pairs you can call anywhere"><span class="glyph">&#9883;</span> <span class="label">Fusion Core</span></button>
+          <button class="tab-btn" data-tab="music" role="tab" data-tip="Play music stored on this computer"><span class="glyph">&#9835;</span> <span class="label">Music</span></button>
           <button class="tab-btn" data-tab="visualizer" role="tab" data-tip="Audio-reactive neon visualizer"><span class="glyph">&#127911;</span> <span class="label">Visualizer</span></button>
           <button class="tab-btn" data-tab="pomodoro" role="tab" data-tip="Focus timer with a charging sun"><span class="glyph">&#9202;</span> <span class="label">Focus</span></button>
           <button class="tab-btn" data-tab="launchpad" role="tab" data-tip="Pin your favorite apps"><span class="glyph">&#128640;</span> <span class="label">Launchpad</span></button>
@@ -112,6 +115,9 @@
     <script src="{{ url_for('static', filename='webhooks.js') }}"></script>
     <script src="{{ url_for('static', filename='kanban.js') }}"></script>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="{{ url_for('static', filename='music/music-domain.js') }}"></script>
+    <script src="{{ url_for('static', filename='music/music-remote.js') }}"></script>
+    <script src="{{ url_for('static', filename='music/music-app.js') }}" defer></script>
     <script src="{{ url_for('static', filename='input/keyboard-controls.js') }}"></script>
     <script src="{{ url_for('static', filename='input/spatial-navigation.js') }}"></script>
     <script src="{{ url_for('static', filename='input/gamepad-controller.js') }}"></script>
@@ -296,7 +302,7 @@
               <div><dt>Choose</dt><dd><kbd>Enter</kbd> / <kbd>Space</kbd></dd></div>
               <div><dt>Back / Home</dt><dd><kbd>Esc</kbd></dd></div>
               <div><dt>Previous / next panel</dt><dd><kbd>Q</kbd> / <kbd>E</kbd></dd></div>
-              <div><dt>Audio / Sidebar</dt><dd><kbd>X</kbd> / <kbd>Y</kbd></dd></div>
+              <div><dt>Music/audio / Sidebar</dt><dd><kbd>X</kbd> / <kbd>Y</kbd></dd></div>
               <div><dt>Jump Home</dt><dd><kbd>Home</kbd></dd></div>
               <div><dt>Help</dt><dd><kbd>?</kbd></dd></div>
             </dl>
@@ -307,7 +313,7 @@
               <div><dt>Move focus</dt><dd>D-pad / Left stick</dd></div>
               <div><dt>Choose / Back</dt><dd>A / B</dd></div>
               <div><dt>Previous / next panel</dt><dd>LB / RB</dd></div>
-              <div><dt>Audio / Sidebar</dt><dd>X / Y</dd></div>
+              <div><dt>Music/audio / Sidebar</dt><dd>X / Y</dd></div>
               <div><dt>Home / Help</dt><dd>View / Menu</dd></div>
             </dl>
           </section>

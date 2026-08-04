@@ -60,6 +60,16 @@ Command Center supports full-page spatial navigation with a keyboard or a standa
 - Controller: D-pad or left stick moves, A selects, B goes back, LB/RB changes panels, X opens audio, Y focuses the sidebar, View returns home, and Menu opens help.
 - Snake and 2048 capture controls only after the game area is selected; Escape/B releases them. Chess squares are directly keyboard/controller selectable.
 
+## Local music library
+
+Open **Music > Settings** and choose the folder that contains this Command Center's music. The desktop launcher provides a native **Browse** dialog; the folder path can also be entered manually in a regular browser. Saving the folder starts a background scan.
+
+- Music-only scanning with optional subfolders; video files and interview features are intentionally not included.
+- Tracks, albums, artists, search, queue, shuffle, repeat, a persistent player dock, listening stats, Media Session controls, and visualizer integration.
+- Phones and other clients that can reach Command Center over the LAN or a private VPN can browse and stream the music library. Folder configuration and manual rescans stay on the host computer.
+- Each phone/browser can choose **This device** or **Command Center PC**. PC output uses the always-open desktop Command Center window as the speaker while the phone controls its queue, transport, seek, repeat, shuffle, and volume.
+- Settings, the artwork cache, and listening stats are stored outside the repo. Set `CC_MUSIC_DATA_DIR` to override the per-user runtime-data location.
+
 ## Run on boot, minimized
 
 Use one of:
@@ -124,10 +134,19 @@ Forge named model pairs that appear in dropdowns everywhere.
 ### Relay
 Relay/bridge trace and activity view.
 
+### Music
+Local music library and player.
+
+- Choose a music folder in **Settings**, then scan it.
+- Browse tracks, albums, and artists; search, queue, shuffle, and repeat.
+- The player stays available while switching panels, and can drive the Visualizer.
+- Music browsing and playback work from phones and other LAN/private-VPN clients. Choose the server's music folder and start manual rescans on the host computer.
+- Use **Play on** to keep audio on the current phone/browser or control playback through the Command Center PC. The desktop launcher window must remain open or minimized for PC output.
+
 ### Visualizer
 Audio-reactive neon visualizer.
 
-- Driven by the titlebar audio menu.
+- Driven by the active music player or titlebar audio menu.
 - Idle until audio is playing.
 
 ### Focus
@@ -210,12 +229,24 @@ Key endpoints used by the UI:
 - `/arena/*` — model arena, maze, fusion, voting, pairing
 - `/api/chat` — local AI chat endpoint
 
+- `/api/music/library`, `GET /api/music/scan` - LAN-accessible catalog and scan status
+- `/api/music/audio/<track-id>`, `/api/music/art/<track-id>` - LAN-accessible ID-based media delivery
+- `/api/music/stats` - LAN-accessible listening receipts and summaries; writes require CSRF
+- `/api/music/remote` - LAN-accessible PC-player status
+- `/api/music/remote/command` - CSRF-protected LAN control of the active PC player
+- `/api/music/remote/renderer` - host-only desktop-player heartbeat, state, command acknowledgement, and polling
+- `/api/music/settings`, `POST /api/music/scan`, `/api/music/refresh` - host-only folder management and manual scan actions
+
 ## Troubleshooting
 
 - **Hub won’t start** — make sure `.env` exists and `FLASK_PORT` is free.
 - **Ollama down** — run `ollama serve` and pull at least one model.
 - **Discord not working** — verify bot token and channel IDs in `.env`.
 - **Mobile can’t connect** — use the PC’s LAN IP, make sure firewall allows the port.
+
+- **Music won’t load remotely** - use the PC's direct LAN or private-VPN address and make sure the firewall allows the Command Center port. Folder management remains available only on the host computer; that boundary assumes Command Center is not hidden behind a same-host reverse proxy. Do not expose the port directly to the public internet.
+- **Command Center PC is offline in Play on** - start the desktop launcher and leave its window open or minimized. Flask by itself streams files but does not produce PC audio.
+- **The phone controls the PC but playback stays paused** - press **Play** once inside the desktop Command Center window to allow its embedded browser to produce audio, then retry from the phone.
 
 ## Project facts and runtime notes
 
