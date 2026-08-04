@@ -2559,11 +2559,11 @@ def changelog():
             ],
         },
     ]
-    return render_template('changelog.html', entries=entries, version=APP_VERSION, string=version_string())
-    # Event-driven trigger: the user confirmed a task into WIP via the
-    # caution modal. Record a clean "user wants this picked up" flag and the
-    # caller (kanban.js) will fire the agent job. We just persist the intent
-    # here so the agent job has a durable signal to read.
+    return render_template('changelog.html', entries=entries, version=APP_VERSION, string=version_string)
+
+
+@app.route('/api/wip/start', methods=['POST'])
+def api_wip_start():
     try:
         data = request.get_json(silent=True) or {}
     except Exception:
@@ -2581,32 +2581,19 @@ def changelog():
     return jsonify({'ok': True})
 
 
+@app.route('/api/wip/run', methods=['POST'])
 def api_wip_run():
-    # Event-driven: the user confirmed a task into WIP. Fire the
-    # WIP picker so it actually DOES the task (instead of a polling loop).
-    #
-    # REROUTED off the dead Hermes ollama-launch bridge (hermes chat -q hangs
-    # on local models — abandoned per MEMORY.md). The picker is now
-    # ~/Desktop/Ai/wip_worker.py, which calls Ollama DIRECTLY
-    # (urllib api/chat, num_ctx 65536) — the same proven path the Discord
-    # relay uses. One-shot: it edits + closes the card, then EXITS.
-    #
-    # WAKE-ON-WIP: if the local Ollama server is asleep, boot it so the
-    # worker's first call doesn't cold-start-timeout.
     try:
         import subprocess
-        # (1) ensure Ollama is up; boot it if not
         if not _ollama_up():
             _ollama_start()
-        # (2) warm the model so the worker's first inference doesn't stall.
         model = 'qwen3:14b-ctx64k'
         try:
             subprocess.Popen([OLLAMA_EXE, 'run', model, ''],
                              creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP | CREATE_NO_WINDOW,
                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, close_fds=True)
         except Exception:
-            pass  # non-fatal: worker will attempt the call regardless
-        # (3) launch the direct-Ollama WIP worker (one-shot, fire-and-forget)
+            pass
         worker_py = os.path.join(os.path.expanduser('~'), 'Desktop', 'Ai', 'wip_worker.py')
         relay_py = RELAY_VENV_PY.replace('python.exe', 'pythonw.exe')
         if not os.path.exists(relay_py):
@@ -2621,5 +2608,5 @@ def api_wip_run():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('FLASK_PORT', '5000')),
+    app.run(host='0.0.0.0', port=int(os.environ.get('FLASK_PORT', '5050')),
             debug=True, use_reloader=False)
