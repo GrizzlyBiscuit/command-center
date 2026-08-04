@@ -1,0 +1,29 @@
+name: Input navigation checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run input navigation tests
+        run: node --test tests/js/*.test.js
+      - name: Parse changed browser modules
+        run: >-
+          node --check frontend/static/arcade.js &&
+          node --check frontend/static/chess.js &&
+          node --check frontend/static/kanban.js &&
+          node --check frontend/static/input/controller-navigation.js &&
+          node --check frontend/static/input/gamepad-controller.js &&
+          node --check frontend/static/input/keyboard-controls.js &&
+          node --check frontend/static/input/spatial-navigation.js

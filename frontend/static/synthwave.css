@@ -449,6 +449,10 @@ body {
 .cc-sq {
   position: relative;
   display: flex; align-items: center; justify-content: center;
+  min-width: 0; padding: 0; border: 0; border-radius: 0;
+  appearance: none;
+  color: inherit;
+  font-family: inherit;
   font-size: calc(min(78vmin, 560px) / 11);
   line-height: 1;
   cursor: pointer;

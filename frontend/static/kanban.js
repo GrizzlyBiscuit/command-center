@@ -177,6 +177,7 @@
   // ---- WIP caution modal ----
   function showWipCaution(title, cb) {
     var ov = document.getElementById('kb-wip-caution');
+    var opener = document.activeElement;
     var msg = document.getElementById('kb-wip-msg');
     if (!ov) { cb(true); return; }       // no modal in DOM -> just proceed
     if (msg) msg.textContent = title;
@@ -186,7 +187,9 @@
     function cleanup() {
       ov.style.display = 'none';
       yes.onclick = null; no.onclick = null;
+      if (opener && opener.isConnected && opener.focus) { try { opener.focus(); } catch (e) {} }
     }
+    if (no) { try { no.focus(); } catch (e) {} }
     yes.onclick = function () { cleanup(); cb(true); };
     no.onclick = function () { cleanup(); cb(false); };
   }
@@ -300,13 +303,19 @@
     var pop = document.getElementById('kb-pop');
     var t = document.getElementById('kb-title');
     var d = document.getElementById('kb-desc');
-    if (pop) pop.style.display = 'flex';
+    if (pop) { pop._ccOpener = document.activeElement; pop.style.display = 'flex'; }
     if (t) { t.value = ''; try { t.focus(); } catch (e) {} }
     if (d) d.value = '';
   }
   function closePop() {
     var pop = document.getElementById('kb-pop');
-    if (pop) pop.style.display = 'none';
+    if (pop) {
+      pop.style.display = 'none';
+      if (pop._ccOpener && pop._ccOpener.isConnected && pop._ccOpener.focus) {
+        try { pop._ccOpener.focus(); } catch (e) {}
+      }
+      pop._ccOpener = null;
+    }
   }
   function savePop() {
     var t = document.getElementById('kb-title');

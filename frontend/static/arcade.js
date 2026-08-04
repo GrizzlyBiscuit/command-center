@@ -2,6 +2,25 @@
 (function () {
   var stage, scoreEl, raf = null, game = 'snake', snake = null, board = null;
   var score = 0;
+  var inputCaptured = false;
+
+  function captureInput() {
+    if (game === 'chess' || !stage) return false;
+    inputCaptured = true;
+    stage.dataset.inputCaptured = 'true';
+    stage.setAttribute('aria-label', 'Arcade game controls active. Press Escape or controller B to leave.');
+    try { stage.focus({ preventScroll: true }); } catch (e) { try { stage.focus(); } catch (_) {} }
+    return true;
+  }
+
+  function releaseInput() {
+    inputCaptured = false;
+    if (stage) {
+      delete stage.dataset.inputCaptured;
+      stage.setAttribute('aria-label', 'Arcade game area. Press Enter or controller A to play.');
+    }
+    return true;
+  }
 
   // ---------- SNAKE ----------
   function snakeStart() {
@@ -118,22 +137,36 @@
 
   function updateScore() { if (scoreEl) scoreEl.textContent = 'Score: ' + score; }
 
-  function onKey(e) {
+  function handleDirection(direction) {
     if (game === 'snake' && snake && !snake.dead) {
-      var k = e.key.toLowerCase();
-      if (k === 'arrowup' || k === 'w') { if (snake.dir.y === 0) snake.dir = { x: 0, y: -1 }; }
-      else if (k === 'arrowdown' || k === 's') { if (snake.dir.y === 0) snake.dir = { x: 0, y: 1 }; }
-      else if (k === 'arrowleft' || k === 'a') { if (snake.dir.x === 0) snake.dir = { x: -1, y: 0 }; }
-      else if (k === 'arrowright' || k === 'd') { if (snake.dir.x === 0) snake.dir = { x: 1, y: 0 }; }
-      else return;
-      e.preventDefault();
+      if (direction === 'up') { if (snake.dir.y === 0) snake.dir = { x: 0, y: -1 }; }
+      else if (direction === 'down') { if (snake.dir.y === 0) snake.dir = { x: 0, y: 1 }; }
+      else if (direction === 'left') { if (snake.dir.x === 0) snake.dir = { x: -1, y: 0 }; }
+      else if (direction === 'right') { if (snake.dir.x === 0) snake.dir = { x: 1, y: 0 }; }
+      else return false;
+      return true;
     } else if (game === '2048' && board) {
-      var kk = e.key.toLowerCase();
-      if (kk === 'arrowup' || kk === 'w') { move2048(0, -1); e.preventDefault(); }
-      else if (kk === 'arrowdown' || kk === 's') { move2048(0, 1); e.preventDefault(); }
-      else if (kk === 'arrowleft' || kk === 'a') { move2048(-1, 0); e.preventDefault(); }
-      else if (kk === 'arrowright' || kk === 'd') { move2048(1, 0); e.preventDefault(); }
+      if (direction === 'up') move2048(0, -1);
+      else if (direction === 'down') move2048(0, 1);
+      else if (direction === 'left') move2048(-1, 0);
+      else if (direction === 'right') move2048(1, 0);
+      else return false;
+      return true;
     }
+    return false;
+  }
+
+  function onKey(e) {
+    var panel = document.getElementById('tab-arcade');
+    if (!panel || panel.hidden || panel.style.display === 'none' || !inputCaptured) return;
+    if (e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    var key = e.key.toLowerCase();
+    var direction = key === 'arrowup' || key === 'w' ? 'up'
+      : key === 'arrowdown' || key === 's' ? 'down'
+      : key === 'arrowleft' || key === 'a' ? 'left'
+      : key === 'arrowright' || key === 'd' ? 'right'
+      : null;
+    if (direction && handleDirection(direction)) e.preventDefault();
   }
 
   function showGame(g) {
@@ -142,6 +175,7 @@
     var score = document.getElementById('arc-score');
     var chess = document.getElementById('arc-chess');
     if (g === 'chess') {
+      releaseInput();
       if (stage) stage.style.display = 'none';
       if (score) score.style.display = 'none';
       if (chess) chess.style.display = '';
@@ -155,6 +189,9 @@
   }
 
   window.CCArcade = {
+    captureInput: captureInput,
+    handleDirection: handleDirection,
+    isInputCaptured: function () { return inputCaptured; },
     onShow: function () {
       stage = document.getElementById('arc-stage');
       scoreEl = document.getElementById('arc-score');
@@ -166,13 +203,15 @@
         document.addEventListener('keydown', onKey);
       }
     },
-    onHide: function () { if (raf) { clearTimeout(raf); raf = null; } }
+    onHide: function () { releaseInput(); if (raf) { clearTimeout(raf); raf = null; } },
+    releaseInput: releaseInput
   };
 
   // tab switcher inside arcade
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.arc-tab').forEach(function (b) {
       b.onclick = function () {
+        releaseInput();
         document.querySelectorAll('.arc-tab').forEach(function (x) { x.classList.remove('active'); });
         b.classList.add('active');
         if (window.CCArcade && document.getElementById('tab-arcade').style.display !== 'none') {
