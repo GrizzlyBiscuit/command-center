@@ -10,7 +10,10 @@
   function draw() {
     if (!running) return;
     raf = requestAnimationFrame(draw);
-    var an = (window.CCAudio && window.CCAudio.getAnalyser()) || null;
+    var musicActive = window.CCMusic && window.CCMusic.isPlaying && window.CCMusic.isPlaying();
+    var an = (musicActive && window.CCMusic.getAnalyser && window.CCMusic.getAnalyser())
+      || (window.CCAudio && window.CCAudio.getAnalyser())
+      || null;
     var W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
     // backdrop

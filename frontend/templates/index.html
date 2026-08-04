@@ -585,6 +585,8 @@
     </div>
   </div>
 
+  {% include "_music_panel.html" %}
+
   <!-- TAB 18: Kanban (shared task board) -->
   <div class="tab-panel" id="tab-kanban" style="display:none">
     <div class="kb-wrap">
@@ -623,7 +625,6 @@
     </div>
     <!-- transient confirmation flash after starting -->
     <div class="kb-wip-flash" id="kb-wip-flash"></div>
-  </div>
 
     <!-- Add-task mini popover -->
     <div class="kb-pop" id="kb-pop" role="dialog" aria-modal="true" aria-labelledby="kb-pop-title" style="display:none">
@@ -639,7 +640,7 @@
     </div>
   </div>
 
-  <!-- TAB 15: Themes -->
+  <!-- Themes -->
   <div class="tab-panel" id="tab-settings" style="display:none">
     <div class="theme-wrap">
       <h3 class="panel-h">&#9881; Themes</h3>
@@ -655,7 +656,7 @@
 <script>
   // ---- tab switching (no tab is active on a fresh open) ----
   var _lastTab = null;
-  var _ccTabs = ['home','switches','control','sys','arena','maze','fusion','visualizer','pomodoro','launchpad','arcade','chat','notes','discord','webhooks','kanban','settings'];
+  var _ccTabs = ['home','switches','control','sys','arena','maze','fusion','music','visualizer','pomodoro','launchpad','arcade','chat','notes','discord','webhooks','kanban','settings'];
   function showTab(name) {
     if (_ccTabs.indexOf(name) < 0) name = 'home';
     if (name === _lastTab) return;
@@ -691,6 +692,7 @@
     if (name === 'maze' && window.CCMaze) window.CCMaze.mount();
     if (name === 'fusion' && window.CCFusion) window.CCFusion.mount();
     if (name === 'control' && window.CCControl) window.CCControl.mount();
+    if (name === 'music' && window.CCMusic) window.CCMusic.onShow();
     if (name === 'visualizer' && window.CCViz) window.CCViz.onShow();
     if (name === 'pomodoro' && window.CCPomo) window.CCPomo.onShow();
     if (name === 'launchpad' && window.CCLaunch) window.CCLaunch.onShow();
