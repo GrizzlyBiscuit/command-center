@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='synthwave.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='banner.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='input/navigation.css') }}">
   </head>
   <body>
     <div class="synth-sun"></div>
@@ -18,12 +19,12 @@
     <div class="synth-grid"></div>
     <div class="app-shell">
       <!-- Global sidebar overlay: present on EVERY page, collapses out of the way -->
-      <button class="cc-side-reopen" id="cc-side-reopen" data-tip="Show the panel list">&#187;</button>
-      <aside class="cc-sidebar" id="cc-sidebar">
+      <button class="cc-side-reopen" id="cc-side-reopen" data-tip="Show the panel list" aria-controls="cc-sidebar" aria-expanded="false">&#187;</button>
+      <aside class="cc-sidebar" id="cc-sidebar" aria-label="Command Center panels">
         <div class="cc-side-head">
           <div class="cc-side-brand">Sidebar</div>
         </div>
-        <nav class="cc-side-nav" role="tablist">
+        <nav class="cc-side-nav" role="tablist" aria-label="Command Center panels">
           <button class="tab-btn" data-tab="home" role="tab" data-tip="Blank landing — pick a panel"><span class="glyph">&#8962;</span> <span class="label">Home</span></button>
           <button class="tab-btn" data-tab="switches" role="tab" data-tip="On/off switches for Ollama &amp; the Discord bridge"><span class="glyph">&#9889;</span> <span class="label">Power Switches</span></button>
           <button class="tab-btn" data-tab="control" role="tab" data-tip="The original agent dashboard &amp; console"><span class="glyph">&#128421;</span> <span class="label">Control Panel</span></button>
@@ -31,7 +32,6 @@
           <button class="tab-btn" data-tab="arena" role="tab" data-tip="Pit two local models against each other"><span class="glyph">&#9876;</span> <span class="label">Model Arena</span></button>
           <button class="tab-btn" data-tab="maze" role="tab" data-tip="Watch local models solve a maze, live"><span class="glyph">&#128373;</span> <span class="label">Maze</span></button>
           <button class="tab-btn" data-tab="fusion" role="tab" data-tip="Forge named model pairs you can call anywhere"><span class="glyph">&#9883;</span> <span class="label">Fusion Core</span></button>
-          <button class="tab-btn" data-tab="relay" r
           <button class="tab-btn" data-tab="visualizer" role="tab" data-tip="Audio-reactive neon visualizer"><span class="glyph">&#127911;</span> <span class="label">Visualizer</span></button>
           <button class="tab-btn" data-tab="pomodoro" role="tab" data-tip="Focus timer with a charging sun"><span class="glyph">&#9202;</span> <span class="label">Focus</span></button>
           <button class="tab-btn" data-tab="launchpad" role="tab" data-tip="Pin your favorite apps"><span class="glyph">&#128640;</span> <span class="label">Launchpad</span></button>
@@ -42,10 +42,10 @@
           <button class="tab-btn" data-tab="webhooks" role="tab" data-tip="Catch incoming local webhooks live"><span class="glyph">&#128225;</span> <span class="label">Webhooks</span></button>
           <button class="tab-btn" data-tab="kanban" role="tab" data-tip="Shared task board (you + agent)"><span class="glyph">&#128221;</span> <span class="label">Kanban</span></button>
           <button class="tab-btn" data-tab="settings" role="tab" data-tip="Swap the synthwave palette"><span class="glyph">&#9881;</span> <span class="label">Themes</span></button>
-          <a href="/changelog" class="tab-btn" data-tab="changelog" role="tab" data-tip="Full change history by topic"><span class="glyph">&#128197;</span> <span class="label">Changelog</span></a>
+          <a href="/changelog" class="tab-btn" data-tab="changelog" data-tip="Full change history by topic"><span class="glyph">&#128197;</span> <span class="label">Changelog</span></a>
         </nav>
       </aside>
-      <button class="cc-side-toggle cc-side-toggle-outside" id="cc-side-toggle" data-tip="Hide the panel list">&#171;</button>
+      <button class="cc-side-toggle cc-side-toggle-outside" id="cc-side-toggle" data-tip="Hide the panel list" aria-controls="cc-sidebar" aria-expanded="true">&#171;</button>
       <div class="bg-overlay"></div>
       <div class="app-titlebar" id="app-titlebar">
         <div class="tb-drag pywebview-drag-region">
@@ -63,10 +63,22 @@
             </div>
           </div>
         </div>
+          <button class="tb-btn" id="tb-input-help" data-tip="Keyboard &amp; controller shortcuts" aria-label="Keyboard and controller shortcuts">?</button>
           <button class="tb-btn" id="tb-refresh" data-tip="Reload — see latest changes">&#10227;</button>
           <button class="tb-btn" id="tb-min" data-tip="Minimize — tuck it away">&#8211;</button>
           <button class="tb-btn" id="tb-max" data-tip="Fullscreen — go big">&#9633;</button>
           <button class="tb-btn tb-close" id="tb-close" data-tip="Exit — blow it up">&#10005;</button>
+        </div>
+      </div>
+
+      <div class="kill-confirm" id="kill-confirm">
+        <div class="kill-box" role="dialog" aria-modal="true" aria-labelledby="kill-confirm-title">
+          <h3 id="kill-confirm-title">Kill hub?</h3>
+          <p>This stops the Command Center backend process. Restart it from the Startup shortcut or `C:\web\app.py`.</p>
+          <div class="kill-acts">
+            <button class="btn-ghost" id="kill-no">Cancel</button>
+            <button class="btn-danger" id="kill-yes">Kill hub</button>
+          </div>
         </div>
       </div>
 
@@ -100,6 +112,10 @@
     <script src="{{ url_for('static', filename='webhooks.js') }}"></script>
     <script src="{{ url_for('static', filename='kanban.js') }}"></script>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
+    <script src="{{ url_for('static', filename='input/keyboard-controls.js') }}"></script>
+    <script src="{{ url_for('static', filename='input/spatial-navigation.js') }}"></script>
+    <script src="{{ url_for('static', filename='input/gamepad-controller.js') }}"></script>
+    <script src="{{ url_for('static', filename='input/controller-navigation.js') }}"></script>
     <script>
       // Custom frameless titlebar -> pywebview window controls + FX
       (function () {
@@ -225,11 +241,20 @@
           function apply(collapsed) {
             shell.classList.toggle('sidebar-collapsed', collapsed);
             sb.classList.toggle('collapsed', collapsed);
+            sb.inert = collapsed;
+            sb.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
+            if (tog) tog.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
             // clear any inline display set by the idle auto-collapse so the
             // CSS class rule (.app-shell.sidebar-collapsed .cc-side-reopen)
             // fully governs visibility.
             var reo = document.getElementById('cc-side-reopen');
-            if (reo) reo.style.display = '';
+            if (reo) {
+              reo.style.display = '';
+              reo.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+              if (collapsed && sb.contains(document.activeElement)) {
+                requestAnimationFrame(function () { try { reo.focus(); } catch (e) {} });
+              }
+            }
           }
           // Fresh start (no saved pref) => default CLOSED. Only an explicit '0' keeps it open.
           var saved = localStorage.getItem('cc_sidebar_collapsed');
@@ -253,16 +278,41 @@
         });
         })();
         </script>
-    <div class="kill-confirm" id="kill-confirm">
-    <div class="kill-box">
-      <h3>Kill hub?</h3>
-      <p>This stops the Command Center backend process. Restart it from the Startup shortcut or `C:\web\app.py`.</p>
-      <div class="kill-acts">
-        <button class="btn-ghost" id="kill-no">Cancel</button>
-        <button class="btn-danger" id="kill-yes">Kill hub</button>
+    <div class="cc-controller-status" id="cc-controller-status" role="status" aria-live="polite"></div>
+    <div class="cc-input-help" id="cc-input-help" role="dialog" aria-modal="true" aria-labelledby="cc-input-help-title" hidden>
+      <div class="cc-input-help-panel">
+        <div class="cc-input-help-head">
+          <div>
+            <h2 id="cc-input-help-title">Keyboard &amp; controller</h2>
+            <p>Navigate every Command Center panel without reaching for the mouse.</p>
+          </div>
+          <button id="cc-input-help-close" class="btn-ghost" type="button">Close</button>
+        </div>
+        <div class="cc-input-help-grid">
+          <section>
+            <h3>Keyboard</h3>
+            <dl>
+              <div><dt>Move focus</dt><dd><kbd>Arrows</kbd> / <kbd>WASD</kbd></dd></div>
+              <div><dt>Choose</dt><dd><kbd>Enter</kbd> / <kbd>Space</kbd></dd></div>
+              <div><dt>Back / Home</dt><dd><kbd>Esc</kbd></dd></div>
+              <div><dt>Previous / next panel</dt><dd><kbd>Q</kbd> / <kbd>E</kbd></dd></div>
+              <div><dt>Audio / Sidebar</dt><dd><kbd>X</kbd> / <kbd>Y</kbd></dd></div>
+              <div><dt>Jump Home</dt><dd><kbd>Home</kbd></dd></div>
+              <div><dt>Help</dt><dd><kbd>?</kbd></dd></div>
+            </dl>
+          </section>
+          <section>
+            <h3>Standard controller</h3>
+            <dl>
+              <div><dt>Move focus</dt><dd>D-pad / Left stick</dd></div>
+              <div><dt>Choose / Back</dt><dd>A / B</dd></div>
+              <div><dt>Previous / next panel</dt><dd>LB / RB</dd></div>
+              <div><dt>Audio / Sidebar</dt><dd>X / Y</dd></div>
+              <div><dt>Home / Help</dt><dd>View / Menu</dd></div>
+            </dl>
+          </section>
+        </div>
       </div>
     </div>
-  </div>
-
 </body>
 </html>
