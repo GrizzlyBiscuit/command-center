@@ -201,9 +201,9 @@ test("Synthwave carries its wallpaper through darkened album and Now Playing sur
 test("immersive themes tint the glass player and carry into Music surfaces", () => {
   assert.match(
     css,
-    /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\], \[data-theme="forest"\], \[data-theme="ember"\]\) #cc-music-player\s*\{(?=[^}]*border-color:\s*var\(--theme-player-edge\);)(?=[^}]*background:\s*var\(--theme-player\);)(?=[^}]*var\(--theme-glow\))[^}]*\}/,
+    /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\], \[data-theme="forest"\], \[data-theme="ember"\], \[data-theme="tropical"\]\) #cc-music-player\s*\{(?=[^}]*border-color:\s*var\(--theme-player-edge\);)(?=[^}]*background:\s*var\(--theme-player\);)(?=[^}]*var\(--theme-glow\))[^}]*\}/,
   );
-  assert.match(css, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\], \[data-theme="forest"\], \[data-theme="ember"\]\) \.cc-music-content\s*\{(?=[^}]*background:\s*color-mix)(?=[^}]*backdrop-filter:\s*blur\(3px\) saturate\(108%\);)[^}]*\}/);
+  assert.match(css, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\], \[data-theme="forest"\], \[data-theme="ember"\], \[data-theme="tropical"\]\) \.cc-music-content\s*\{(?=[^}]*background:\s*color-mix)(?=[^}]*backdrop-filter:\s*blur\(3px\) saturate\(108%\);)[^}]*\}/);
   assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing\s*\{(?=[^}]*isolation:\s*isolate;)(?=[^}]*radial-gradient\(circle at 84% 13%)(?=[^}]*backdrop-filter:\s*blur\(4px\) saturate\(92%\);)[^}]*\}/);
   assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing\s*\{[^}]*linear-gradient\(#020610, #030814\);/);
   assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing::before\s*\{(?=[^}]*background-size:\s*113px 127px, 181px 163px, 239px 211px;)(?=[^}]*cc-starlight-drift 16s linear infinite alternate)(?=[^}]*cc-starlight-twinkle 3\.6s ease-in-out infinite)[^}]*\}/);
@@ -223,6 +223,10 @@ test("immersive themes tint the glass player and carry into Music surfaces", () 
   assert.match(css, /html\[data-theme="forest"\] \.cc-music-now-playing::after\s*\{(?=[^}]*radial-gradient\(ellipse at 59% 51%)(?=[^}]*clip-path:\s*polygon)(?=[^}]*cc-forest-sway 9s)[^}]*\}/);
   assert.match(css, /html\[data-theme="ember"\] \.cc-music-now-playing::before\s*\{(?=[^}]*radial-gradient\(circle)(?=[^}]*cc-ember-rise 9s linear infinite)[^}]*\}/);
   assert.match(css, /html\[data-theme="ember"\] \.cc-music-now-playing::after\s*\{(?=[^}]*conic-gradient)(?=[^}]*cc-ember-breathe 4\.6s)[^}]*\}/);
+  assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing\s*\{(?=[^}]*--cc-local-music-text:\s*#fbffff;)(?=[^}]*--cc-local-music-muted:\s*#c7dfdc;)(?=[^}]*radial-gradient\(circle at 72% 24%)(?=[^}]*linear-gradient\(to bottom)(?=[^}]*#bba66f 66%)[^}]*\}/);
+  assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing :is\([\s\S]*?\.cc-music-now-playing-story,[\s\S]*?text-shadow:\s*0 2px 12px rgba\(0, 20, 24, 0\.88\);/);
+  assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing::before\s*\{(?=[^}]*repeating-linear-gradient)(?=[^}]*cc-tropical-surf 7s)[^}]*\}/);
+  assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing::after\s*\{(?=[^}]*tropical-palms\.svg)(?=[^}]*cc-tropical-palms 10s)[^}]*\}/);
   assert.match(css, /\.cc-music-now-playing-album\s*\{(?=[^}]*background:\s*transparent;)(?=[^}]*cursor:\s*pointer;)(?=[^}]*text-align:\s*left;)[^}]*\}/);
 });
 

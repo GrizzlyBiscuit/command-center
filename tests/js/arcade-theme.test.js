@@ -50,3 +50,9 @@ test("Forest and Ember keep their atmospheric animation behind Arcade", () => {
   assert.match(modern, /html\[data-theme="ember"\] body::before\s*\{[^}]*animation:\s*cc-ember-rise 9s linear infinite;/);
   assert.match(modern, /html\[data-theme="ember"\] body::after\s*\{[^}]*animation:\s*cc-ember-breathe 4\.6s/);
 });
+
+test("Tropical Island keeps animated surf and palm silhouettes behind Arcade", () => {
+  assert.match(modern, /html\[data-theme="tropical"\] body\s*\{(?=[^}]*#ecd185 66%)(?=[^}]*#614226 100%)[^}]*\}/);
+  assert.match(modern, /html\[data-theme="tropical"\] body::before\s*\{(?=[^}]*repeating-linear-gradient)(?=[^}]*animation:\s*cc-tropical-surf 7s)[^}]*\}/);
+  assert.match(modern, /html\[data-theme="tropical"\] body::after\s*\{(?=[^}]*tropical-palms\.svg)(?=[^}]*animation:\s*cc-tropical-palms 10s)[^}]*\}/);
+});

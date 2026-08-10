@@ -2931,16 +2931,16 @@ html[data-theme="synthwave"] :is(.cc-music-card, .cc-music-row, .cc-video-card, 
    These keep the modern layout contract while adding restrained,
    theme-specific atmosphere behind readable glass surfaces. */
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) body {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"], [data-theme="tropical"]) body {
   isolation: isolate;
   background-attachment: fixed;
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) .app-shell {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"], [data-theme="tropical"]) .app-shell {
   z-index: 2;
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) :is(
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"], [data-theme="tropical"]) :is(
   .app-titlebar,
   .cc-sidebar,
   .workspace-topbar
@@ -2951,7 +2951,7 @@ html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], 
   -webkit-backdrop-filter: blur(20px) saturate(120%);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) :is(
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"], [data-theme="tropical"]) :is(
   .app-main > .panel:not(.home-panel),
   .dashboard-card,
   .cc-hero,
@@ -2978,7 +2978,7 @@ html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], 
   -webkit-backdrop-filter: blur(10px) saturate(112%);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) :is(
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"], [data-theme="tropical"]) :is(
   .home-time-card,
   .hub-card,
   .switch-block,
@@ -2996,20 +2996,20 @@ html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], 
   background: var(--theme-card-glass);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) .cc-side-nav .tab-btn.active {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"], [data-theme="tropical"]) .cc-side-nav .tab-btn.active {
   border-color: var(--border);
   background: linear-gradient(90deg, var(--accent-soft), transparent);
   box-shadow: inset 3px 0 0 var(--accent), 0 0 24px var(--theme-glow);
   color: var(--text);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) .theme-swatch.active {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"], [data-theme="tropical"]) .theme-swatch.active {
   border-color: var(--accent);
   background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--accent-2) 8%, transparent));
   box-shadow: 0 0 24px var(--theme-glow);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) .home-hero-title {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"], [data-theme="tropical"]) .home-hero-title {
   background: linear-gradient(96deg, var(--text) 0%, var(--accent) 52%, var(--accent-2) 100%);
   background-clip: text;
   -webkit-background-clip: text;
@@ -3455,6 +3455,61 @@ html[data-theme="ember"] :is(input, textarea, select) {
   background: rgba(30, 7, 3, 0.84);
 }
 
+html[data-theme="tropical"] body {
+  background:
+    radial-gradient(circle at 72% 24%, rgba(255, 238, 157, 0.92) 0 3.8rem, rgba(255, 164, 111, 0.2) 4rem 8rem, transparent 15rem),
+    linear-gradient(to bottom, #041725 0%, #0b3d52 39%, #137586 53%, #2aaca9 65%, #ecd185 66%, #b88f50 82%, #614226 100%);
+}
+
+html[data-theme="tropical"] body::before {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  inset: 0 -10%;
+  background-image:
+    repeating-linear-gradient(176deg, transparent 0 20px, rgba(221, 255, 250, 0.19) 21px 23px, transparent 24px 45px),
+    repeating-linear-gradient(184deg, transparent 0 31px, rgba(116, 234, 226, 0.16) 32px 35px, transparent 36px 67px);
+  background-position: 0 0, 80px 20px;
+  background-size: 280px 190px, 390px 240px;
+  opacity: 0.88;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, transparent 0 47%, #000 55% 70%, transparent 78%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0 47%, #000 55% 70%, transparent 78%);
+  animation: cc-tropical-surf 7s ease-in-out infinite alternate;
+}
+
+html[data-theme="tropical"] body::after {
+  content: "";
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  background: url("/static/tropical-palms.svg") center bottom / cover no-repeat;
+  opacity: 0.88;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 -10px 28px rgba(2, 23, 21, 0.16));
+  animation: cc-tropical-palms 10s ease-in-out infinite alternate;
+}
+
+html[data-theme="tropical"] :is(.cc-brand-mark, .tb-drag::before) {
+  border-color: rgba(255, 229, 154, 0.38);
+  background: linear-gradient(145deg, rgba(76, 226, 207, 0.28), rgba(255, 143, 112, 0.12));
+  color: #fff0b7;
+  filter: drop-shadow(0 0 11px rgba(76, 226, 207, 0.38));
+}
+
+html[data-theme="tropical"] :is(.btn-primary, button[type="submit"], input[type="submit"]) {
+  border-color: rgba(255, 229, 154, 0.34);
+  background: linear-gradient(145deg, #ffe59a, #4ce2cf 58%, #3cb6c8);
+  box-shadow: 0 9px 30px rgba(48, 194, 184, 0.2);
+  color: #05252a;
+}
+
+html[data-theme="tropical"] :is(input, textarea, select) {
+  border-color: rgba(76, 226, 207, 0.22);
+  background: rgba(3, 35, 42, 0.82);
+}
+
 /* Only the expressive palettes animate between tools. The restrained
    palettes intentionally keep the instant, clean tab switch. */
 html[data-theme="synthwave"] .tab-panel:not([hidden]) {
@@ -3486,6 +3541,11 @@ html[data-theme="forest"] .tab-panel:not([hidden]) {
 
 html[data-theme="ember"] .tab-panel:not([hidden]) {
   animation: cc-ember-tab-in 300ms cubic-bezier(0.18, 0.78, 0.2, 1) both;
+  transform-origin: 50% 100%;
+}
+
+html[data-theme="tropical"] .tab-panel:not([hidden]) {
+  animation: cc-tropical-tab-in 360ms cubic-bezier(0.2, 0.76, 0.22, 1) both;
   transform-origin: 50% 100%;
 }
 
@@ -3605,6 +3665,21 @@ html[data-theme="ember"] .tab-panel:not([hidden]) {
   to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(1); }
 }
 
+@keyframes cc-tropical-surf {
+  from { background-position: 0 0, 80px 20px; transform: translateX(-1.5%); }
+  to { background-position: 120px 16px, -70px 5px; transform: translateX(1.5%); }
+}
+
+@keyframes cc-tropical-palms {
+  from { transform: translateX(-0.35%) skewX(-0.18deg) scale(1.005); filter: brightness(0.9) drop-shadow(0 -10px 28px rgba(2, 23, 21, 0.14)); }
+  to { transform: translateX(0.35%) skewX(0.18deg) scale(1.012); filter: brightness(1.08) drop-shadow(0 -14px 36px rgba(2, 23, 21, 0.2)); }
+}
+
+@keyframes cc-tropical-tab-in {
+  from { opacity: 0; transform: translateY(9px) scale(0.997); filter: blur(4px) saturate(0.82); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) saturate(1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html[data-theme="synthwave"] body::before,
   html[data-theme="synthwave"] body::after,
@@ -3628,7 +3703,11 @@ html[data-theme="ember"] .tab-panel:not([hidden]) {
   html[data-theme="ember"] body::after,
   html[data-theme="ember"] .cc-music-now-playing::before,
   html[data-theme="ember"] .cc-music-now-playing::after,
-  html:is([data-theme="synthwave"], [data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) .tab-panel:not([hidden]) {
+  html[data-theme="tropical"] body::before,
+  html[data-theme="tropical"] body::after,
+  html[data-theme="tropical"] .cc-music-now-playing::before,
+  html[data-theme="tropical"] .cc-music-now-playing::after,
+  html:is([data-theme="synthwave"], [data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"], [data-theme="tropical"]) .tab-panel:not([hidden]) {
     animation: none !important;
   }
 }
@@ -3678,6 +3757,15 @@ html[data-theme="ember"] .tab-panel:not([hidden]) {
   html[data-theme="ember"] body::after {
     right: -34%;
     left: -34%;
+  }
+
+  html[data-theme="tropical"] body::after {
+    background-position: 42% bottom;
+    background-size: auto 100%;
+  }
+
+  html[data-theme="tropical"] body::before {
+    background-size: 220px 160px, 310px 210px;
   }
 }
 

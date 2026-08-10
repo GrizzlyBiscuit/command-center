@@ -13,6 +13,7 @@ const read = file => fs.readFileSync(file, "utf8").replace(/\r\n?/g, "\n");
 const themeSource = read(themePath);
 const baseSource = read(basePath);
 const appearanceSource = read(appearancePath);
+const tropicalPalmsSource = read("frontend/static/tropical-palms.svg");
 const modernSource = read(modernPath);
 
 function createStyle() {
@@ -237,12 +238,13 @@ test("the final restrained and animated theme set registers complete persistent 
     aurora: { label: "Aurora", accent: "#65f5bf", accent2: "#8eb8ff", bg: "#041014" },
     forest: { label: "Forest", accent: "#78e89f", accent2: "#e4ff9a", bg: "#030b08" },
     ember: { label: "Ember", accent: "#ff7b32", accent2: "#ffd36a", bg: "#100402" },
+    tropical: { label: "Tropical Island", accent: "#4ce2cf", accent2: "#ffe59a", bg: "#03121a" },
   };
   const harness = loadTheme();
 
   assert.deepEqual(
     Array.from(harness.api.list()),
-    ["outrun", "ice", "midnight", "synthwave", "starlight", "matrix", "iceage", "aurora", "forest", "ember"],
+    ["outrun", "ice", "midnight", "synthwave", "starlight", "matrix", "iceage", "aurora", "forest", "ember", "tropical"],
   );
 
   for (const [id, palette] of Object.entries(expected)) {
@@ -258,7 +260,7 @@ test("the final restrained and animated theme set registers complete persistent 
     assert.equal(swatchFor(harness, id).classList.contains("active"), true);
   }
 
-  assert.match(baseSource, /'outrun', 'ice', 'midnight', 'synthwave', 'starlight', 'matrix', 'iceage', 'aurora', 'forest', 'ember'/);
+  assert.match(baseSource, /'outrun', 'ice', 'midnight', 'synthwave', 'starlight', 'matrix', 'iceage', 'aurora', 'forest', 'ember', 'tropical'/);
   for (const removed of ["vaporwave", "cyberpunk", "bloodmoon", "neon", "verse"]) {
     assert.equal(harness.api.list().includes(removed), false);
   }
@@ -283,7 +285,11 @@ test("immersive themes have distinct animated scenes and readable glass surfaces
   assert.match(modernSource, /html\[data-theme="forest"\] body::after \{(?=[^}]*radial-gradient\(ellipse at 59% 51%)(?=[^}]*clip-path: polygon)(?=[^}]*cc-forest-sway 9s)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="ember"\] body::before \{(?=[^}]*radial-gradient\(circle)(?=[^}]*cc-ember-rise 9s linear infinite)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="ember"\] body::after \{(?=[^}]*conic-gradient)(?=[^}]*cc-ember-breathe 4\.6s)[^}]*\}/);
-  assert.match(modernSource, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\], \[data-theme="forest"\], \[data-theme="ember"\]\) :is\([\s\S]*?\.app-titlebar,[\s\S]*?background: var\(--theme-shell\);/);
+  assert.match(modernSource, /html\[data-theme="tropical"\] body \{(?=[^}]*radial-gradient\(circle at 72% 24%)(?=[^}]*#ecd185 66%)(?=[^}]*#614226 100%)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="tropical"\] body::before \{(?=[^}]*repeating-linear-gradient)(?=[^}]*cc-tropical-surf 7s)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="tropical"\] body::after \{(?=[^}]*url\("\/static\/tropical-palms\.svg"\))(?=[^}]*cc-tropical-palms 10s)[^}]*\}/);
+  assert.match(tropicalPalmsSource, /<svg[\s\S]*?<path[\s\S]*?<path[\s\S]*?<path/);
+  assert.match(modernSource, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\], \[data-theme="forest"\], \[data-theme="ember"\], \[data-theme="tropical"\]\) :is\([\s\S]*?\.app-titlebar,[\s\S]*?background: var\(--theme-shell\);/);
 });
 
 test("a saved Synthwave preference is restored while building picker controls", () => {
@@ -333,5 +339,5 @@ test("the standalone Appearance cards match the runtime theme registry", () => {
 
   assert.deepEqual(cardIds, registryIds);
   assert.ok(cardIds.includes("synthwave"));
-  assert.deepEqual(cardIds.slice(-4), ["iceage", "aurora", "forest", "ember"]);
+  assert.deepEqual(cardIds.slice(-4), ["aurora", "forest", "ember", "tropical"]);
 });

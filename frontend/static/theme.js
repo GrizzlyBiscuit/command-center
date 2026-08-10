@@ -149,6 +149,25 @@
         '--theme-card-glass': 'rgba(49,17,8,0.73)', '--theme-player': 'rgba(27,8,3,0.62)',
         '--theme-player-edge': 'rgba(255,123,50,0.36)', '--theme-glow': 'rgba(255,92,38,0.22)'
       }
+    },
+    tropical: {
+      label: 'Tropical Island',
+      vars: {
+        '--bg': '#03121a', '--bg-elevated': '#08232c', '--panel': '#0b3038',
+        '--panel-soft': '#10404a', '--surface-hover': '#17515b', '--surface-active': '#1d6670',
+        '--accent': '#4ce2cf', '--accent-2': '#ffe59a', '--accent-3': '#ff8f70',
+        '--accent-soft': 'rgba(76,226,207,0.15)', '--text': '#f8ffff',
+        '--text-soft': '#d8efec', '--muted': '#8eb4b2', '--muted-strong': '#b5d5d1',
+        '--border': 'rgba(76,226,207,0.3)', '--border-soft': 'rgba(255,229,154,0.16)',
+        '--success': '#62e8ac', '--success-soft': 'rgba(98,232,172,0.13)',
+        '--warning': '#ffe59a', '--warning-soft': 'rgba(255,229,154,0.14)',
+        '--danger': '#ff7d7d', '--danger-soft': 'rgba(255,125,125,0.14)',
+        '--info': '#69d9ec', '--shadow': '0 22px 58px rgba(0,22,31,0.5)',
+        '--shadow-soft': '0 10px 28px rgba(0,22,31,0.34)',
+        '--theme-shell': 'rgba(3,24,31,0.86)', '--theme-panel-glass': 'rgba(7,44,51,0.72)',
+        '--theme-card-glass': 'rgba(10,55,62,0.7)', '--theme-player': 'rgba(3,31,38,0.58)',
+        '--theme-player-edge': 'rgba(76,226,207,0.34)', '--theme-glow': 'rgba(255,186,112,0.2)'
+      }
     }
   };
 
