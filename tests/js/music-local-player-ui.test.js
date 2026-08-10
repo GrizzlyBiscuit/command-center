@@ -187,6 +187,17 @@ test("Synthwave carries its wallpaper through darkened album and Now Playing sur
   assert.match(css, /html\[data-theme="synthwave"\] #cc-music-player\s*\{(?=[^}]*background:\s*rgba\(8, 2, 22, 0\.58\);)(?=[^}]*border-color:\s*rgba\(103, 232, 255, 0\.25\);)[^}]*\}/);
 });
 
+test("immersive themes tint the glass player and carry into Music surfaces", () => {
+  assert.match(
+    css,
+    /html:is\(\[data-theme="matrix"\], \[data-theme="verse"\], \[data-theme="aurora"\]\) #cc-music-player\s*\{(?=[^}]*border-color:\s*var\(--theme-player-edge\);)(?=[^}]*background:\s*var\(--theme-player\);)(?=[^}]*var\(--theme-glow\))[^}]*\}/,
+  );
+  assert.match(css, /html:is\(\[data-theme="matrix"\], \[data-theme="verse"\], \[data-theme="aurora"\]\) \.cc-music-content\s*\{(?=[^}]*background:\s*color-mix)(?=[^}]*backdrop-filter:\s*blur\(3px\) saturate\(108%\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing\s*\{(?=[^}]*repeating-linear-gradient)(?=[^}]*rgba\(57, 255, 120, 0\.1\))[^}]*\}/);
+  assert.match(css, /html\[data-theme="verse"\] \.cc-music-now-playing\s*\{(?=[^}]*14px 14px)(?=[^}]*rgba\(63, 231, 255, 0\.1\))[^}]*\}/);
+  assert.match(css, /html\[data-theme="aurora"\] \.cc-music-now-playing\s*\{(?=[^}]*rgba\(101, 245, 191, 0\.1\))(?=[^}]*rgba\(196, 147, 255, 0\.09\))[^}]*\}/);
+});
+
 test("desktop and mobile mini-player sizing remain deliberate", () => {
   assert.match(
     css,

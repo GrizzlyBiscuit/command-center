@@ -9,7 +9,7 @@
       <div>
         <p class="appearance-eyebrow">Settings</p>
         <h1>Appearance</h1>
-        <p>Choose a restrained palette or switch on the full Synthwave aesthetic.</p>
+        <p>Choose a restrained palette or switch on a full-screen aesthetic.</p>
       </div>
       <nav class="appearance-nav" aria-label="Appearance">
         <a href="{{ url_for('index') }}">Home</a>
@@ -75,6 +75,24 @@
           <span class="dm-desc">Neon glow, sunset color, and a horizon grid on the same modern layout.</span>
           <span class="dm-check">Selected</span>
         </button>
+        <button class="dm-card" type="button" data-theme="matrix" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#39ff78;--sw2:#b4ffca" aria-hidden="true"></span>
+          <span class="dm-name">Matrix</span>
+          <span class="dm-desc">Deep black glass, terminal green light, and quiet data-rain texture.</span>
+          <span class="dm-check">Selected</span>
+        </button>
+        <button class="dm-card" type="button" data-theme="verse" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#ff365f;--sw2:#3fe7ff" aria-hidden="true"></span>
+          <span class="dm-name">Verse</span>
+          <span class="dm-desc">Comic halftones, offset red and cyan, and energetic diagonal framing.</span>
+          <span class="dm-check">Selected</span>
+        </button>
+        <button class="dm-card" type="button" data-theme="aurora" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#65f5bf;--sw2:#8eb8ff" aria-hidden="true"></span>
+          <span class="dm-name">Aurora</span>
+          <span class="dm-desc">Soft polar light in mint, blue, and violet over deep ocean glass.</span>
+          <span class="dm-check">Selected</span>
+        </button>
       </div>
 
       <p class="dm-note">Your selection is saved in this browser and is also available under
@@ -94,7 +112,10 @@
     ice: 'Glacier',
     midnight: 'Ink',
     neon: 'Ocean',
-    synthwave: 'Synthwave'
+    synthwave: 'Synthwave',
+    matrix: 'Matrix',
+    verse: 'Verse',
+    aurora: 'Aurora'
   };
 
   function sync() {

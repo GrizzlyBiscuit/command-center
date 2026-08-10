@@ -199,6 +199,56 @@ html[data-theme="synthwave"] .cc-music-album.is-expanded {
   -webkit-backdrop-filter: blur(4px) saturate(92%);
 }
 
+html:is([data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) :is(#tab-music, .cc-music) {
+  border-color: var(--border-soft);
+  background: transparent;
+  box-shadow: none;
+}
+
+html:is([data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .cc-music-content {
+  border-color: var(--border-soft);
+  background: color-mix(in srgb, var(--theme-panel-glass) 58%, transparent);
+  box-shadow: none;
+  backdrop-filter: blur(3px) saturate(108%);
+  -webkit-backdrop-filter: blur(3px) saturate(108%);
+}
+
+html:is([data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) #cc-music-player {
+  border-color: var(--theme-player-edge);
+  background: var(--theme-player);
+  box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.36), 0 -1px 24px var(--theme-glow), inset 0 1px rgba(255, 255, 255, 0.05);
+}
+
+html:is([data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .cc-music-album.is-expanded {
+  border-color: var(--border-soft);
+  background: color-mix(in srgb, var(--theme-panel-glass) 78%, transparent);
+  box-shadow: 0 18px 64px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(6px) saturate(108%);
+  -webkit-backdrop-filter: blur(6px) saturate(108%);
+}
+
+html[data-theme="matrix"] .cc-music-now-playing {
+  background:
+    repeating-linear-gradient(0deg, rgba(57, 255, 120, 0.025) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 70% 44%, rgba(57, 255, 120, 0.1), transparent 34rem),
+    linear-gradient(rgba(1, 7, 3, 0.9), rgba(1, 7, 3, 0.94));
+}
+
+html[data-theme="verse"] .cc-music-now-playing {
+  background:
+    radial-gradient(circle, rgba(255, 54, 95, 0.08) 0 1px, transparent 1.5px) 0 0 / 14px 14px,
+    radial-gradient(circle at 74% 22%, rgba(63, 231, 255, 0.1), transparent 34rem),
+    linear-gradient(145deg, rgba(8, 8, 25, 0.94), rgba(12, 13, 35, 0.96));
+}
+
+html[data-theme="aurora"] .cc-music-now-playing {
+  background:
+    radial-gradient(ellipse at 24% 80%, rgba(101, 245, 191, 0.1), transparent 36rem),
+    radial-gradient(ellipse at 76% 16%, rgba(142, 184, 255, 0.11), transparent 38rem),
+    radial-gradient(ellipse at 90% 70%, rgba(196, 147, 255, 0.09), transparent 32rem),
+    linear-gradient(rgba(3, 14, 18, 0.94), rgba(3, 14, 18, 0.96));
+}
+
 .cc-music-head {
   display: grid;
   grid-template-columns: minmax(300px, auto) minmax(0, 1fr);

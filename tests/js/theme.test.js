@@ -217,6 +217,40 @@ test("Synthwave is registered and apply updates palette state", () => {
   }
 });
 
+test("Matrix, Verse, and Aurora register complete persistent aesthetic palettes", () => {
+  const expected = {
+    matrix: { label: "Matrix", accent: "#39ff78", accent2: "#b4ffca", bg: "#020704" },
+    verse: { label: "Verse", accent: "#ff365f", accent2: "#3fe7ff", bg: "#060713" },
+    aurora: { label: "Aurora", accent: "#65f5bf", accent2: "#8eb8ff", bg: "#041014" },
+  };
+  const harness = loadTheme();
+
+  for (const [id, palette] of Object.entries(expected)) {
+    assert.ok(harness.api.list().includes(id));
+    harness.api.apply(id);
+    assert.equal(harness.documentElement.getAttribute("data-theme"), id);
+    assert.equal(harness.storage.get("cc_theme"), id);
+    assert.equal(harness.currentLabel.textContent, palette.label);
+    assert.equal(harness.rootStyle.getPropertyValue("--bg"), palette.bg);
+    assert.equal(harness.rootStyle.getPropertyValue("--accent"), palette.accent);
+    assert.equal(harness.rootStyle.getPropertyValue("--accent-2"), palette.accent2);
+    assert.match(harness.rootStyle.getPropertyValue("--theme-player"), /^rgba\(/);
+    assert.equal(swatchFor(harness, id).classList.contains("active"), true);
+  }
+
+  assert.match(baseSource, /'synthwave', 'matrix', 'verse', 'aurora'/);
+});
+
+test("immersive themes have distinct static scenes and readable glass surfaces", () => {
+  assert.match(modernSource, /html\[data-theme="matrix"\] body::before \{(?=[^}]*repeating-linear-gradient)(?=[^}]*background-size: 92px 100%, 137px 100%, 173px 100%;)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="matrix"\] body::after \{(?=[^}]*repeating-linear-gradient\(0deg)(?=[^}]*radial-gradient\(ellipse at center)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="verse"\] body::before \{(?=[^}]*radial-gradient\(circle)(?=[^}]*background-size: 14px 14px;)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="verse"\] body::after \{(?=[^}]*linear-gradient\(116deg)(?=[^}]*transform: rotate\(-2deg\);)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="aurora"\] body::before \{(?=[^}]*conic-gradient)(?=[^}]*filter: blur\(58px\);)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="aurora"\] body::after \{(?=[^}]*radial-gradient\(circle at 18% 24%)(?=[^}]*opacity: 0\.28;)[^}]*\}/);
+  assert.match(modernSource, /html:is\(\[data-theme="matrix"\], \[data-theme="verse"\], \[data-theme="aurora"\]\) :is\([\s\S]*?\.app-titlebar,[\s\S]*?background: var\(--theme-shell\);/);
+});
+
 test("a saved Synthwave preference is restored while building picker controls", () => {
   const harness = loadTheme({ savedTheme: "synthwave" });
   const ids = Array.from(harness.api.list());
@@ -264,4 +298,5 @@ test("the standalone Appearance cards match the runtime theme registry", () => {
 
   assert.deepEqual(cardIds, registryIds);
   assert.ok(cardIds.includes("synthwave"));
+  assert.deepEqual(cardIds.slice(-3), ["matrix", "verse", "aurora"]);
 });
