@@ -106,6 +106,9 @@ test("music defaults to sorted albums and synchronizes every playback surface", 
   assert.match(app, /function sortAlbumGroups\(groups\)/);
   assert.match(app, /nodes\.sort\?\.addEventListener\("change"/);
   assert.match(app, /ALBUM_SORT_MODES\.includes\(nodes\.sort\.value\)/);
+  assert.match(app, /function shownPlaybackTracks\(\)[\s\S]*?state\.view !== "albums"[\s\S]*?albumGroupsInDisplayOrder\(tracks\)\.flatMap/);
+  assert.match(app, /function playShownMusic\([\s\S]*?const tracks = shownPlaybackTracks\(\);[\s\S]*?state\.shuffle = false;[\s\S]*?playTrack\(tracks\[0\]\.id, tracks\)/);
+  assert.match(panel, /id="cc-music-play-shown"[^>]*aria-label="Play all shown music"[^>]*>Play all<\/button>/);
 
   assert.match(app, /function openNowPlaying\(\)/);
   assert.match(app, /function closeNowPlaying\(\{ restoreFocus = true \} = \{\}\)/);

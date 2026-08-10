@@ -75,6 +75,30 @@ test("artist groups and tracks have deterministic natural ordering", () => {
   assert.deepEqual(groups[1].tracks.map(item => item.title), ["Song 2", "Song 10"]);
 });
 
+test("album playback order follows newest or oldest sorting and keeps undated albums last", () => {
+  const tracks = [
+    track(ID.one, "Newest second", "Artist", "Newest", { date: "2024-06-01", track_number: 2 }),
+    track(ID.two, "Newest first", "Artist", "Newest", { date: "2024", track_number: 1 }),
+    track(ID.three, "Old release", "Artist", "Old", { date: "2011-03-02", track_number: 1 }),
+    track(ID.ten, "No release date", "Artist", "Unknown", { track_number: 1 }),
+  ];
+
+  assert.deepEqual(Music.orderedAlbumTracks(tracks, "newest").map(item => item.id), [
+    ID.two, ID.one, ID.three, ID.ten,
+  ]);
+  assert.deepEqual(Music.orderedAlbumTracks(tracks, "oldest").map(item => item.id), [
+    ID.three, ID.two, ID.one, ID.ten,
+  ]);
+});
+
+test("album year uses its earliest valid track date", () => {
+  assert.equal(Music.albumReleaseYear({ tracks: [
+    track(ID.one, "Later", "Artist", "Mixed", { date: "2021-01-01" }),
+    track(ID.two, "Earlier", "Artist", "Mixed", { year: "2018" }),
+    track(ID.three, "Missing", "Artist", "Mixed"),
+  ] }), 2018);
+});
+
 test("queue helpers add, insert next, and remove without corrupting the active index", () => {
   assert.deepEqual(Music.addToQueue([ID.one, ID.two], ID.three), [ID.one, ID.two, ID.three]);
   assert.deepEqual(Music.playNext([ID.one, ID.three], 0, ID.two), [ID.one, ID.two, ID.three]);

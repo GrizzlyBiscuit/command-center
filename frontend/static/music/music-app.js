@@ -796,13 +796,26 @@
     }
 
     function sortAlbumGroups(groups) {
-      const result = [...groups];
-      if (!["newest", "oldest"].includes(state.sort)) return result;
-      const direction = state.sort === "oldest" ? 1 : -1;
-      return result.sort((left, right) => {
-        const dated = (releaseYear(left) - releaseYear(right)) * direction;
-        return dated || String(left.label).localeCompare(String(right.label), undefined, { numeric: true, sensitivity: "base" });
-      });
+      return Domain.orderAlbumGroups(groups, state.sort);
+    }
+
+    function albumGroupsInDisplayOrder(source) {
+      if (state.sort === "folder") {
+        return folderTrackSections(source).flatMap(section => (
+          Domain.orderAlbumGroups(Domain.groupAlbums(section.tracks), "title")
+        ));
+      }
+      const groups = Domain.groupAlbums(source);
+      if (state.sort === "year") {
+        return albumYearSections(groups).flatMap(section => Domain.orderAlbumGroups(section.groups, "title"));
+      }
+      return Domain.orderAlbumGroups(groups, state.sort);
+    }
+
+    function shownPlaybackTracks() {
+      const tracks = filteredTracks();
+      if (state.view !== "albums") return tracks;
+      return albumGroupsInDisplayOrder(tracks).flatMap(group => group.tracks);
     }
 
     function trackArtwork(track, className = "cc-music-track-art") {
@@ -861,9 +874,10 @@
     }
 
     function playShownMusic({ shuffle = false } = {}) {
-      const tracks = filteredTracks();
+      const tracks = shownPlaybackTracks();
       if (!tracks.length) return;
       if (!shuffle) {
+        state.shuffle = false;
         playTrack(tracks[0].id, tracks);
         return;
       }
@@ -2099,7 +2113,7 @@
       }
       setControlIcon(nodes.libraryQueue, "queue", `Queue, ${state.queue.length} tracks`, "Queue");
       if (nodes.libraryQueueCount) nodes.libraryQueue?.append(nodes.libraryQueueCount);
-      setControlIcon(nodes.playShown, "play", "Play shown music", "Play");
+      setControlIcon(nodes.playShown, "play", "Play all shown music", "Play all");
       setControlIcon(nodes.shuffleShown, "shuffle", "Shuffle shown music", "Shuffle");
       setControlIcon(nodes.queueClear, "trash", "Clear queue", "Clear");
       setControlIcon(nodes.queueClose, "close", "Close queue", "Close");
@@ -3051,7 +3065,6 @@
       readPlayerHiddenPreference,
       releaseYear,
       safeRelativeFolder,
-      trackReleaseYear,
       writePlayerHiddenPreference,
     });
   }

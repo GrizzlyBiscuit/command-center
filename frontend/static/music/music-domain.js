@@ -114,6 +114,41 @@
     }));
   }
 
+  function trackReleaseYear(track) {
+    for (const value of [track && track.date, track && track.year]) {
+      const match = text(value).match(/^(\d{4})(?=\D|$)/);
+      const year = match ? Number(match[1]) : 0;
+      if (year >= 1000 && year <= 2999) return year;
+    }
+    return 0;
+  }
+
+  function albumReleaseYear(group) {
+    const years = (Array.isArray(group && group.tracks) ? group.tracks : [])
+      .map(trackReleaseYear)
+      .filter(Boolean);
+    return years.length ? Math.min(...years) : 0;
+  }
+
+  function orderAlbumGroups(groups, order = "title") {
+    const result = [...(Array.isArray(groups) ? groups : [])];
+    return result.sort((left, right) => {
+      if (order === "newest" || order === "oldest") {
+        const leftYear = albumReleaseYear(left);
+        const rightYear = albumReleaseYear(right);
+        if (!leftYear && rightYear) return 1;
+        if (leftYear && !rightYear) return -1;
+        if (leftYear !== rightYear) return order === "oldest" ? leftYear - rightYear : rightYear - leftYear;
+      }
+      return compareText(left && left.label, right && right.label)
+        || compareText(left && left.key, right && right.key);
+    });
+  }
+
+  function orderedAlbumTracks(source, order = "newest") {
+    return orderAlbumGroups(groupAlbums(source), order).flatMap(group => group.tracks);
+  }
+
   function albumArtworkTrack(group) {
     const tracks = Array.isArray(group && group.tracks) ? group.tracks : [];
     return tracks.find(track => Boolean(track && (track.has_artwork || text(track.artwork_url)))) || null;
@@ -313,6 +348,7 @@
   return Object.freeze({
     REPEAT_MODES,
     addToQueue,
+    albumReleaseYear,
     albumArtworkTrack,
     albumIdentity,
     buildPlaybackState,
@@ -325,6 +361,8 @@
     nextRepeatMode,
     normalizeRepeatMode,
     normalizedText,
+    orderAlbumGroups,
+    orderedAlbumTracks,
     parsePlaybackState,
     playbackStorageKey,
     playNext,
