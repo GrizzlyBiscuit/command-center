@@ -1575,7 +1575,7 @@ body.cc-music-now-playing-open #cc-music-queue:not([hidden]) {
 
 .cc-music-now-playing-close {
   position: fixed;
-  z-index: 2;
+  z-index: 4;
   top: max(28px, env(safe-area-inset-top));
   right: max(20px, calc((100vw - 1280px) / 2));
   display: inline-grid;

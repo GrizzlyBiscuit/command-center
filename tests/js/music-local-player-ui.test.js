@@ -93,6 +93,7 @@ test("the mini player opens an accessible full-screen Now Playing dialog", () =>
   }
   assert.doesNotMatch(panel, /id="cc-music-now-playing-details-toggle"/);
   assert.doesNotMatch(panel, /id="cc-music-now-playing-details"/);
+  assert.match(css, /\.cc-music-now-playing-close\s*\{(?=[^}]*position:\s*fixed;)(?=[^}]*z-index:\s*4;)[^}]*\}/);
 });
 
 test("music defaults to sorted albums and synchronizes every playback surface", () => {
