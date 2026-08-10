@@ -166,7 +166,7 @@ test("the early boot and standalone Appearance page use the same first-run defau
   assert.match(appearanceSource, /if \(!labels\[cur\]\) cur = 'synthwave';/);
 });
 
-test("Synthwave backdrop is continuous, static, responsive, and isolated below full-screen media", () => {
+test("Synthwave backdrop is continuous, static, responsive, and remains behind full-screen Music", () => {
   assert.match(
     modernSource,
     /html\[data-theme="synthwave"\] body::before \{(?=[^}]*position: fixed;)(?=[^}]*repeating-linear-gradient)(?=[^}]*perspective\(38rem\))[^}]*\}/,
@@ -182,7 +182,7 @@ test("Synthwave backdrop is continuous, static, responsive, and isolated below f
   assert.match(modernSource, /html\[data-theme="synthwave"\] body #tab-music \{\s*background: rgba\(3, 0, 12, 0\.24\);/);
   assert.match(modernSource, /html\[data-theme="synthwave"\] body \.cc-music \{\s*background: transparent;/);
   assert.match(modernSource, /html\[data-theme="synthwave"\] body \.cc-music-content \{\s*background: rgba\(2, 0, 9, 0\.16\);/);
-  assert.match(modernSource, /body\.cc-music-now-playing-open::before,[\s\S]*?body\.cc-music-now-playing-open::after \{\s*opacity: 0;/);
+  assert.doesNotMatch(modernSource, /body\.cc-music-now-playing-open::before,[\s\S]*?body\.cc-music-now-playing-open::after \{\s*opacity: 0;/);
   assert.match(
     modernSource,
     /@media \(max-width: 900px\) \{[\s\S]*?body::before \{[\s\S]*?background-size: 48px 42px, 48px 42px;[\s\S]*?body:has\(#tab-home:not\(\[hidden\]\)\)::after \{[\s\S]*?width: clamp\(440px, 118vw, 720px\);/,

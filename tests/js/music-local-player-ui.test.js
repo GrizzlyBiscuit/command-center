@@ -173,13 +173,18 @@ test("the late CSS owns the black artwork-first library and focused album view",
   assert.match(css.slice(phoneStart), /\.cc-music-album-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/);
 });
 
-test("Synthwave leaves Music library surfaces translucent while Now Playing stays black", () => {
+test("Synthwave carries its wallpaper through darkened album and Now Playing surfaces", () => {
   assert.match(
     css,
     /html\[data-theme="synthwave"\] #tab-music,\s*html\[data-theme="synthwave"\] \.cc-music\s*\{[^}]*background:\s*transparent;/,
   );
   assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-content\s*\{[^}]*background:\s*rgba\(2, 3, 14, 0\.08\);/);
-  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing\s*\{[^}]*background:\s*#000;/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing\s*\{(?=[^}]*isolation:\s*isolate;)(?=[^}]*linear-gradient\(rgba\(3, 0, 13, 0\.78\), rgba\(3, 0, 13, 0\.82\)\))(?=[^}]*backdrop-filter:\s*blur\(5px\) saturate\(88%\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing::before\s*\{(?=[^}]*repeating-linear-gradient)(?=[^}]*opacity:\s*0\.24;)(?=[^}]*transform:\s*perspective\(38rem\) rotateX\(62deg\) scale\(1\.16\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing::after\s*\{(?=[^}]*width:\s*clamp\(340px, 40vw, 640px\);)(?=[^}]*repeating-linear-gradient\(to bottom)(?=[^}]*opacity:\s*0\.3;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing-body\s*\{(?=[^}]*position:\s*relative;)(?=[^}]*z-index:\s*2;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-album\.is-expanded\s*\{(?=[^}]*background:\s*linear-gradient)(?=[^}]*backdrop-filter:\s*blur\(4px\) saturate\(92%\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] #cc-music-player\s*\{(?=[^}]*background:\s*rgba\(8, 2, 22, 0\.58\);)(?=[^}]*border-color:\s*rgba\(103, 232, 255, 0\.25\);)[^}]*\}/);
 });
 
 test("desktop and mobile mini-player sizing remain deliberate", () => {
@@ -188,6 +193,10 @@ test("desktop and mobile mini-player sizing remain deliberate", () => {
     /#cc-music-player\s*\{(?=[^}]*position:\s*fixed;)(?=[^}]*grid-template-columns:\s*minmax\(240px,\s*420px\)\s*auto\s*minmax\(220px,\s*1fr\)\s*auto;)(?=[^}]*min-height:\s*80px;)[^}]*\}/,
   );
   assert.match(css, /\.cc-music-now img\s*\{(?=[^}]*width:\s*56px;)(?=[^}]*height:\s*56px;)[^}]*\}/);
+  assert.match(
+    css,
+    /#cc-music-player\s*\{(?=[^}]*background:\s*rgba\(3, 6, 11, 0\.7\);)(?=[^}]*backdrop-filter:\s*blur\(24px\) saturate\(140%\);)(?=[^}]*-webkit-backdrop-filter:\s*blur\(24px\) saturate\(140%\);)[^}]*\}/,
+  );
 
   const mobileStart = css.indexOf("@media (max-width: 680px)");
   const mobileEnd = css.indexOf("@media (max-width: 440px)", mobileStart);
