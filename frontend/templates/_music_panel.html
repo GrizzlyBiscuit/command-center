@@ -23,11 +23,17 @@
             Queue <span id="cc-music-library-queue-count">0</span>
           </button>
           <label class="cc-music-sort-wrap" for="cc-music-sort">
-            <span class="sr-only">Album order</span>
-            <select id="cc-music-sort" aria-label="Album order">
-              <option value="newest">Newest</option>
-              <option value="oldest">Oldest</option>
-              <option value="title">Title</option>
+            <span class="sr-only">Album order or organization</span>
+            <select id="cc-music-sort" aria-label="Album order or organization">
+              <optgroup label="Order albums">
+                <option value="newest">Newest</option>
+                <option value="oldest">Oldest</option>
+                <option value="title">Title</option>
+              </optgroup>
+              <optgroup label="Organize albums">
+                <option value="folder">Folder</option>
+                <option value="year">Year</option>
+              </optgroup>
             </select>
           </label>
           <button type="button" id="cc-music-play-shown" aria-label="Play shown music" title="Play shown music">Play</button>

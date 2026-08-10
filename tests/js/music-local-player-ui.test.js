@@ -54,10 +54,12 @@ test("the Music panel keeps its persistent player and exposes an album-first too
     assert.match(panel, new RegExp(`id="${id}"`), `${id} should stay wired`);
   }
 
-  assert.match(panel, /<select[^>]*id="cc-music-sort"[^>]*aria-label="Album order"/);
+  assert.match(panel, /<select[^>]*id="cc-music-sort"[^>]*aria-label="Album order or organization"/);
   assert.match(panel, /<option value="newest">Newest<\/option>/);
   assert.match(panel, /<option value="oldest">Oldest<\/option>/);
   assert.match(panel, /<option value="title">Title<\/option>/);
+  assert.match(panel, /<option value="folder">Folder<\/option>/);
+  assert.match(panel, /<option value="year">Year<\/option>/);
   assert.match(panel, /<div[^>]*class="cc-music-queue-body"[^>]*id="cc-music-queue-body"/);
   assert.match(panel, /<\/section>\s*<aside[^>]*id="cc-music-queue"/);
 });
@@ -98,7 +100,7 @@ test("music defaults to sorted albums and synchronizes every playback surface", 
   assert.match(app, /sort:\s*"newest"/);
   assert.match(app, /function sortAlbumGroups\(groups\)/);
   assert.match(app, /nodes\.sort\?\.addEventListener\("change"/);
-  assert.match(app, /\["newest",\s*"oldest",\s*"title"\]\.includes\(nodes\.sort\.value\)/);
+  assert.match(app, /ALBUM_SORT_MODES\.includes\(nodes\.sort\.value\)/);
 
   assert.match(app, /function openNowPlaying\(\)/);
   assert.match(app, /function closeNowPlaying\(\{ restoreFocus = true \} = \{\}\)/);
@@ -138,18 +140,25 @@ test("the late CSS owns the black artwork-first library and focused album view",
   );
   assert.match(
     css,
-    /\.cc-music-album-grid\s*\{(?=[^}]*display:\s*grid;)(?=[^}]*grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(165px,\s*1fr\)\);)[^}]*\}/,
+    /\.cc-music-album-grid\s*\{(?=[^}]*display:\s*grid;)(?=[^}]*grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(min\(165px,\s*100%\),\s*1fr\)\);)[^}]*\}/,
   );
   assert.match(
     css,
-    /\.cc-music button\.cc-music-album-cover\s*\{(?=[^}]*aspect-ratio:\s*1\s*\/\s*1;)(?=[^}]*overflow:\s*hidden;)[^}]*\}/,
+    /\.cc-music-album-artwork\s*\{(?=[^}]*aspect-ratio:\s*1\s*\/\s*1;)(?=[^}]*overflow:\s*hidden;)[^}]*\}/,
   );
+  assert.match(css, /\.cc-music\s*\{(?=[^}]*width:\s*100%;)(?=[^}]*max-width:\s*none;)[^}]*\}/);
   assert.match(css, /\.cc-music-album-art\s*\{[^}]*object-fit:\s*cover;/);
   assert.match(
     css,
     /\.cc-music-album\.is-expanded\s*\{(?=[^}]*grid-column:\s*1\s*\/\s*-1;)(?=[^}]*grid-template-columns:\s*minmax\(260px,\s*360px\)\s*minmax\(520px,\s*760px\);)[^}]*\}/,
   );
   assert.match(css, /\.cc-music-album-grid:has\(> \.cc-music-album\.is-expanded\)[^{]*\{\s*display:\s*none;/);
+
+  const narrowStart = css.indexOf("@media (max-width: 860px)");
+  const phoneStart = css.indexOf("@media (max-width: 440px)", narrowStart);
+  assert.ok(narrowStart >= 0 && phoneStart > narrowStart);
+  assert.doesNotMatch(css.slice(narrowStart, phoneStart), /\.cc-music-album-grid\s*\{[^}]*grid-template-columns:/);
+  assert.match(css.slice(phoneStart), /\.cc-music-album-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/);
 });
 
 test("Synthwave leaves Music library surfaces translucent while Now Playing stays black", () => {

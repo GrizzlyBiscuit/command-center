@@ -134,7 +134,9 @@
       track && (track.album_artist || track.albumartist),
       track && track.album,
       track && track.genre,
+      track && track.date,
       track && track.year,
+      track && (track.folder || track.relative_folder),
     ].map(text).join(" "));
   }
 

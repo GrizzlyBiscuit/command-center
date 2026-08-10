@@ -23,11 +23,13 @@ test("search is accent-insensitive, multi-word, and spans metadata", () => {
   const tracks = [
     track(ID.one, "Café Moon", "Taeyeon", "Blue"),
     track(ID.two, "Moonlight", "Someone", "Red", { genre: "Ambient Pop" }),
-    track(ID.three, "Signal", "Taeyeon", "Purpose"),
+    track(ID.three, "Signal", "Taeyeon", "Purpose", { date: "2019-10-28", folder: "Korean/Solo/Purpose" }),
   ];
 
   assert.deepEqual(Music.searchTracks(tracks, "cafe taeyeon").map(item => item.id), [ID.one]);
   assert.deepEqual(Music.searchTracks(tracks, "ambient red").map(item => item.id), [ID.two]);
+  assert.deepEqual(Music.searchTracks(tracks, "2019 purpose").map(item => item.id), [ID.three]);
+  assert.deepEqual(Music.searchTracks(tracks, "korean solo").map(item => item.id), [ID.three]);
   assert.deepEqual(Music.searchTracks(tracks, "  "), tracks);
 });
 

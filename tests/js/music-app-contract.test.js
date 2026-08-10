@@ -116,12 +116,15 @@ test("controller actions are explicitly scoped to player state and open drawers"
 });
 
 test("albums render as controller-friendly artwork cards while artists keep group rows", () => {
-  assert.match(appSource, /type === "album" \? " cc-music-album-grid" : ""/);
+  assert.match(appSource, /element\("div", "cc-music-group-list cc-music-album-grid"\)/);
+  assert.match(appSource, /element\("div", "cc-music-group-list"\)/);
   assert.match(appSource, /button\("", "cc-music-album-cover"\)/);
   assert.match(appSource, /Domain\.albumArtworkTrack\(group\)/);
   assert.match(appSource, /albumCover\.dataset\.spatialKey = `music-album:\$\{opaqueTrackId\(group\.tracks\[0\]\)\}`/);
   assert.match(appSource, /`Open album \$\{group\.label\} by \$\{group\.artist\}`/);
   assert.match(appSource, /trackArtwork\(artworkTrack, "cc-music-album-art"\)/);
+  assert.match(appSource, /albumCover\.append\(artwork, copy\);\s*header\.append\(albumCover, actions\);/);
+  assert.doesNotMatch(appSource, /header\.append\(albumCover, copy, actions\)/);
   assert.doesNotMatch(appSource, /track\.(?:path|filename)/);
 });
 

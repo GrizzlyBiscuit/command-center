@@ -60,6 +60,7 @@ class Track:
     sample_rate_hz: int
     bit_depth: int
     has_artwork: bool
+    folder: str = ""
     has_lyrics: bool = False
     lyrics_format: str = ""
 
@@ -123,7 +124,9 @@ class LibrarySnapshot:
             tracks = tuple(
                 track
                 for track in tracks
-                if needle in " ".join((track.title, track.artist, track.album, track.genre, track.filename)).casefold()
+                if needle in " ".join(
+                    (track.title, track.artist, track.album, track.genre, track.folder, track.filename)
+                ).casefold()
             )
         artists = sorted({track.artist for track in tracks}, key=str.casefold)
         albums = sorted({track.album for track in tracks}, key=str.casefold)
@@ -332,6 +335,7 @@ class MusicLibrary:
         self, settings: MusicSettings, root: Path, path: Path
     ) -> tuple[Track, Artwork | None, LyricDescriptor | None]:
         relative = path.relative_to(root)
+        relative_folder = "" if relative.parent == Path(".") else relative.parent.as_posix()
         stat = path.stat()
         metadata = self._metadata_reader(path)
         cover = self._artwork_reader(path)
@@ -375,6 +379,7 @@ class MusicLibrary:
                 sample_rate_hz=int(number("sample_rate_hz", True)),
                 bit_depth=int(number("bit_depth", True)),
                 has_artwork=cover is not None,
+                folder=relative_folder,
                 has_lyrics=lyric_descriptor is not None,
                 lyrics_format=lyric_descriptor.format if lyric_descriptor else "",
             ),

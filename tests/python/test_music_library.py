@@ -41,9 +41,23 @@ class MusicLibraryTests(unittest.TestCase):
             self.assertEqual({track["format"] for track in payload["tracks"]}, {"MP3", "FLAC"})
             self.assertNotIn("path", payload["tracks"][0])
             self.assertNotIn("filename", payload["tracks"][0])
+            self.assertEqual({track["folder"] for track in payload["tracks"]}, {"Artist/Album"})
+            self.assertTrue(all(str(root.resolve()) not in track["folder"] for track in payload["tracks"]))
             self.assertTrue(all(len(track["id"]) == 32 for track in payload["tracks"]))
             mp3 = next(track for track in payload["tracks"] if track["format"] == "MP3")
             self.assertIsNotNone(library.artwork_for(mp3["id"]))
+
+    def test_root_tracks_use_an_empty_safe_folder_label(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "song.mp3").write_bytes(b"audio")
+            library = MusicLibrary(metadata_reader=lambda _path: {}, artwork_reader=lambda _path: None)
+
+            library.scan_now(self.make_settings(root))
+            track = library.snapshot().public_dict()["tracks"][0]
+
+            self.assertEqual(track["folder"], "")
+            self.assertNotIn(str(root.resolve()), str(track))
 
     def test_identical_artwork_is_content_addressed_once(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

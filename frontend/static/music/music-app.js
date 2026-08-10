@@ -46,6 +46,7 @@
   const PLAYER_HIDDEN_STORAGE_KEY = "cc.music.player.hidden.v1";
   const FULLSCREEN_VISUALIZER_SCENE_KEY = "fullscreenVisualizerScene";
   const FULLSCREEN_VISUALIZER_GLOW_KEY = "fullscreenVisualizerCenterGlowEnabled";
+  const ALBUM_SORT_MODES = Object.freeze(["newest", "oldest", "title", "folder", "year"]);
 
   let app = null;
 
@@ -86,6 +87,78 @@
   function writeLocalPreference(host, key, value) {
     try { host?.localStorage?.setItem(key, String(value)); }
     catch {}
+  }
+
+  function safeRelativeFolder(value) {
+    const source = String(value == null ? "" : value).trim();
+    if (!source || source === "." || source.toLocaleLowerCase() === "(root)") return "";
+    if (/^[a-z]:/i.test(source) || /^[\\/]/.test(source) || /^[a-z][a-z0-9+.-]*:\/\//i.test(source)) {
+      return "";
+    }
+    const parts = source.replace(/\\/g, "/").split("/");
+    if (parts.some(part => part.trim() === ".." || /[\u0000-\u001f\u007f]/.test(part))) return "";
+    return parts
+      .map(part => part.trim().replace(/\s+/g, " "))
+      .filter(part => part && part !== ".")
+      .join("/")
+      .slice(0, 240);
+  }
+
+  function folderDisplayLabel(value) {
+    const folder = safeRelativeFolder(value);
+    return folder ? folder.split("/").join(" / ") : "Library root";
+  }
+
+  function folderBucket(value) {
+    return safeRelativeFolder(value).split("/").filter(Boolean).slice(0, 2).join("/");
+  }
+
+  function trackReleaseYear(track) {
+    for (const value of [track?.date, track?.year]) {
+      const match = String(value || "").trim().match(/^(\d{4})(?=\D|$)/);
+      const year = match ? Number(match[1]) : 0;
+      if (year >= 1000 && year <= 2999) return year;
+    }
+    return 0;
+  }
+
+  function releaseYear(group) {
+    const years = (group?.tracks || []).map(trackReleaseYear).filter(Boolean);
+    return years.length ? Math.min(...years) : 0;
+  }
+
+  function folderTrackSections(source) {
+    const sections = new Map();
+    for (const track of Array.isArray(source) ? source : []) {
+      const folder = folderBucket(track?.folder);
+      if (!sections.has(folder)) sections.set(folder, []);
+      sections.get(folder).push(track);
+    }
+    return [...sections.entries()]
+      .map(([folder, tracks]) => ({ key: `folder:${folder || "root"}`, label: folderDisplayLabel(folder), folder, tracks }))
+      .sort((left, right) => {
+        if (!left.folder) return right.folder ? 1 : 0;
+        if (!right.folder) return -1;
+        return String(left.folder).localeCompare(String(right.folder), undefined, {
+          numeric: true,
+          sensitivity: "base",
+        });
+      });
+  }
+
+  function albumYearSections(groups) {
+    const sections = new Map();
+    for (const group of Array.isArray(groups) ? groups : []) {
+      const year = releaseYear(group);
+      const key = year ? String(year) : "unknown";
+      if (!sections.has(key)) sections.set(key, { key: `year:${key}`, label: year ? String(year) : "Unknown year", year, groups: [] });
+      sections.get(key).groups.push(group);
+    }
+    return [...sections.values()].sort((left, right) => {
+      if (!left.year) return right.year ? 1 : 0;
+      if (!right.year) return -1;
+      return right.year - left.year;
+    });
   }
 
   function isRenderedControl(node, host) {
@@ -209,6 +282,7 @@
       artist: String(raw.artist || raw.album_artist || raw.albumartist || "Unknown artist"),
       album: String(raw.album || "Unknown album"),
       duration: Math.max(0, Number(raw.duration || raw.duration_seconds) || 0),
+      folder: safeRelativeFolder(raw.relative_folder || raw.folder),
       stable_key: Domain.stableTrackKey(raw),
     };
   }
@@ -721,16 +795,9 @@
       return Domain.searchTracks(state.tracks, state.query).sort(Domain.compareTracks);
     }
 
-    function releaseYear(group) {
-      const years = (group?.tracks || [])
-        .map(track => String(track.date || track.year || "").match(/\b(19|20)\d{2}\b/)?.[0])
-        .map(value => Number(value) || 0);
-      return Math.max(0, ...years);
-    }
-
     function sortAlbumGroups(groups) {
       const result = [...groups];
-      if (state.sort === "title") return result;
+      if (!["newest", "oldest"].includes(state.sort)) return result;
       const direction = state.sort === "oldest" ? 1 : -1;
       return result.sort((left, right) => {
         const dated = (releaseYear(left) - releaseYear(right)) * direction;
@@ -897,13 +964,21 @@
     function groupCard(group, type) {
       const card = element("section", `cc-music-group cc-music-${type}`);
       const header = element("div", "cc-music-group-head");
-      const copy = element("div", "cc-music-group-copy");
-      copy.append(element("h4", "", group.label));
       const year = releaseYear(group);
       const subtitle = type === "album"
         ? `${group.artist} · ${group.tracks.length} track${group.tracks.length === 1 ? "" : "s"}${year ? ` · ${year}` : ""}`
         : `${group.tracks.length} track${group.tracks.length === 1 ? "" : "s"}`;
-      copy.append(element("p", "", subtitle));
+      const copy = type === "album"
+        ? element("span", "cc-music-group-copy cc-music-album-copy")
+        : element("div", "cc-music-group-copy");
+      if (type === "album") {
+        copy.append(
+          element("strong", "cc-music-group-title", group.label),
+          element("span", "cc-music-group-meta", subtitle),
+        );
+      } else {
+        copy.append(element("h4", "", group.label), element("p", "", subtitle));
+      }
 
       const actions = element("div", "cc-music-group-actions");
       if (type === "album") actions.dataset.controllerNav = "off";
@@ -998,8 +1073,8 @@
         artwork.append(fallback);
         const artworkTrack = Domain.albumArtworkTrack(group);
         if (artworkTrack) artwork.append(trackArtwork(artworkTrack, "cc-music-album-art"));
-        albumCover.append(artwork);
-        header.append(albumCover, copy, actions);
+        albumCover.append(artwork, copy);
+        header.append(albumCover, actions);
       } else {
         header.append(copy, actions);
       }
@@ -1063,11 +1138,47 @@
       return card;
     }
 
-    function renderGroups(type) {
+    function renderAlbumGrid(groups) {
+      const list = element("div", "cc-music-group-list cc-music-album-grid");
+      groups.forEach(group => list.append(groupCard(group, "album")));
+      return list;
+    }
+
+    function renderAlbumSections(sections, mode) {
+      const wrap = element("div", `cc-music-library-sections cc-music-library-sections-${mode}`);
+      sections.forEach((section, index) => {
+        const region = element("section", "cc-music-library-section");
+        const heading = element("h3", "cc-music-library-section-title", section.label);
+        heading.id = `cc-music-${mode}-section-${index + 1}`;
+        region.setAttribute("aria-labelledby", heading.id);
+        region.append(heading, renderAlbumGrid(sortAlbumGroups(section.groups)));
+        wrap.append(region);
+      });
+      return wrap;
+    }
+
+    function renderAlbums() {
       const source = filteredTracks();
-      const groups = type === "album" ? sortAlbumGroups(Domain.groupAlbums(source)) : Domain.groupArtists(source);
+      if (!source.length) return emptyState("No matches", "Try a different search.", "Clear search", clearSearch);
+
+      if (state.sort === "folder") {
+        const sections = folderTrackSections(source).map(section => ({
+          ...section,
+          groups: Domain.groupAlbums(section.tracks),
+        }));
+        return renderAlbumSections(sections, "folder");
+      }
+
+      const groups = Domain.groupAlbums(source);
+      if (state.sort === "year") return renderAlbumSections(albumYearSections(groups), "year");
+      return renderAlbumGrid(sortAlbumGroups(groups));
+    }
+
+    function renderGroups(type) {
+      if (type === "album") return renderAlbums();
+      const groups = Domain.groupArtists(filteredTracks());
       if (!groups.length) return emptyState("No matches", "Try a different search.", "Clear search", clearSearch);
-      const list = element("div", `cc-music-group-list${type === "album" ? " cc-music-album-grid" : ""}`);
+      const list = element("div", "cc-music-group-list");
       groups.forEach(group => list.append(groupCard(group, type)));
       return list;
     }
@@ -2721,7 +2832,7 @@
         nodes.search.addEventListener("input", applySearch);
       }
       nodes.sort?.addEventListener("change", () => {
-        if (!["newest", "oldest", "title"].includes(nodes.sort.value)) return;
+        if (!ALBUM_SORT_MODES.includes(nodes.sort.value)) return;
         state.sort = nodes.sort.value;
         renderContent();
       });
@@ -2895,10 +3006,18 @@
   root.CCMusic = Object.freeze(publicApi);
   if (typeof module === "object" && module.exports) {
     module.exports = Object.freeze({
+      ALBUM_SORT_MODES,
+      albumYearSections,
       dockVisibility,
       expandedGroupForBack,
+      folderBucket,
+      folderDisplayLabel,
+      folderTrackSections,
       isRenderedControl,
       readPlayerHiddenPreference,
+      releaseYear,
+      safeRelativeFolder,
+      trackReleaseYear,
       writePlayerHiddenPreference,
     });
   }
