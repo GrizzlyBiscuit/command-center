@@ -2416,6 +2416,12 @@ html[data-theme="synthwave"] {
 html[data-theme="synthwave"] body {
   isolation: isolate;
   background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.014) 0 1px, transparent 1px 4px),
+    radial-gradient(circle at 8% 12%, rgba(255, 255, 255, 0.7) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 22% 28%, rgba(101, 239, 255, 0.62) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 46% 9%, rgba(255, 211, 103, 0.58) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 63% 23%, rgba(255, 255, 255, 0.66) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 91% 17%, rgba(193, 119, 255, 0.62) 0 1px, transparent 1.6px),
     radial-gradient(circle at 74% 8%, rgba(67, 231, 255, 0.15), transparent 34rem),
     radial-gradient(circle at 34% 44%, rgba(165, 109, 255, 0.16), transparent 38rem),
     radial-gradient(circle at 70% 88%, rgba(255, 79, 183, 0.2), transparent 36rem),
@@ -2608,7 +2614,13 @@ html[data-theme="synthwave"] :is(
 ) {
   border-color: rgba(165, 109, 255, 0.22);
   background: linear-gradient(145deg, rgba(24, 11, 48, 0.94), rgba(12, 6, 30, 0.92));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 16px 44px rgba(18, 2, 42, 0.2);
+  box-shadow:
+    inset 0 1px 0 rgba(67, 231, 255, 0.12),
+    inset 0 -1px 0 rgba(255, 79, 183, 0.08),
+    0 16px 44px rgba(18, 2, 42, 0.24),
+    0 0 34px rgba(255, 79, 183, 0.045);
+  backdrop-filter: blur(9px) saturate(118%);
+  -webkit-backdrop-filter: blur(9px) saturate(118%);
 }
 
 html[data-theme="synthwave"] .cc-hero {
@@ -2637,6 +2649,16 @@ html[data-theme="synthwave"] .home-hero-title {
 html[data-theme="synthwave"] :is(.cc-eyebrow, .section-kicker, .appearance-eyebrow) {
   color: var(--accent-2);
   text-shadow: 0 0 12px rgba(67, 231, 255, 0.2);
+}
+
+html[data-theme="synthwave"] :is(.workspace-heading h1, .panel-h, .appearance-header h1, .cc-hero h1) {
+  letter-spacing: 0.025em;
+  text-shadow: 0 0 18px rgba(255, 79, 183, 0.16), 0 0 26px rgba(67, 231, 255, 0.07);
+}
+
+html[data-theme="synthwave"] :is(.cc-eyebrow, .section-kicker, .appearance-eyebrow) {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 html[data-theme="synthwave"] :is(
@@ -2928,12 +2950,13 @@ html[data-theme="matrix"] body::before {
     repeating-linear-gradient(180deg, transparent 0 8px, rgba(80, 255, 130, 0.22) 8px 10px, transparent 10px 25px),
     repeating-linear-gradient(180deg, transparent 0 17px, rgba(33, 196, 87, 0.18) 17px 20px, transparent 20px 39px),
     repeating-linear-gradient(180deg, transparent 0 4px, rgba(155, 255, 185, 0.12) 4px 6px, transparent 6px 31px);
-  background-position: 18px 0, 62px 12px, 101px 5px;
+  background-position: 18px -200px, 62px -195px, 101px -186px;
   background-size: 92px 100%, 137px 100%, 173px 100%;
   opacity: 0.24;
   pointer-events: none;
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.92), transparent 96%);
   -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.92), transparent 96%);
+  animation: cc-matrix-rain 14s linear infinite;
 }
 
 html[data-theme="matrix"] body::after {
@@ -2954,6 +2977,40 @@ html[data-theme="matrix"] :is(.cc-brand-mark, .tb-drag::before) {
 
 html[data-theme="matrix"] :is(.terminal-output, .terminal-panel, code, pre) {
   font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+html[data-theme="matrix"] :is(.workspace-heading h1, .panel-h, .appearance-header h1, .cc-hero h1, .cc-nav-label) {
+  font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+  letter-spacing: 0.055em;
+}
+
+html[data-theme="matrix"] :is(.workspace-heading h1, .panel-h, .appearance-header h1, .cc-hero h1) {
+  color: #dfffe8;
+  text-shadow: 0 0 14px rgba(57, 255, 120, 0.2);
+}
+
+html[data-theme="matrix"] :is(.app-main > .panel:not(.home-panel), .dashboard-card, .cc-hero, .terminal-panel) {
+  box-shadow:
+    inset 0 1px 0 rgba(180, 255, 202, 0.12),
+    inset 0 0 0 1px rgba(57, 255, 120, 0.025),
+    0 18px 48px rgba(0, 12, 4, 0.34);
+}
+
+html[data-theme="matrix"] :is(.btn-primary, button[type="submit"], input[type="submit"]) {
+  border-color: rgba(180, 255, 202, 0.3);
+  background: linear-gradient(180deg, #6dff99, #30df68);
+  box-shadow: 0 0 24px rgba(57, 255, 120, 0.14);
+  color: #011c08;
+}
+
+html[data-theme="matrix"] :is(input, textarea, select) {
+  border-color: rgba(57, 255, 120, 0.2);
+  background: rgba(1, 11, 4, 0.86);
+}
+
+html[data-theme="matrix"] ::selection {
+  background: rgba(57, 255, 120, 0.34);
+  color: #effff3;
 }
 
 html[data-theme="verse"] body {
@@ -3082,6 +3139,11 @@ html[data-theme="aurora"] .tab-panel:not([hidden]) {
   to { opacity: 1; transform: translateY(0); filter: brightness(1) contrast(1) blur(0); }
 }
 
+@keyframes cc-matrix-rain {
+  from { background-position: 18px -200px, 62px -195px, 101px -186px; }
+  to { background-position: 18px 175px, 62px 195px, 101px 186px; }
+}
+
 @keyframes cc-verse-tab-in {
   from { opacity: 0; transform: translateX(12px) skewX(-0.8deg); filter: saturate(1.35); }
   to { opacity: 1; transform: translateX(0) skewX(0); filter: saturate(1); }
@@ -3097,6 +3159,8 @@ html[data-theme="aurora"] .tab-panel:not([hidden]) {
   html[data-theme="synthwave"] body::after,
   html[data-theme="synthwave"] .cc-music-now-playing::before,
   html[data-theme="synthwave"] .cc-music-now-playing::after,
+  html[data-theme="matrix"] body::before,
+  html[data-theme="matrix"] .cc-music-now-playing::before,
   html:is([data-theme="synthwave"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .tab-panel:not([hidden]) {
     animation: none !important;
   }

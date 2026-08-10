@@ -194,7 +194,9 @@ test("immersive themes tint the glass player and carry into Music surfaces", () 
     /html:is\(\[data-theme="matrix"\], \[data-theme="verse"\], \[data-theme="aurora"\]\) #cc-music-player\s*\{(?=[^}]*border-color:\s*var\(--theme-player-edge\);)(?=[^}]*background:\s*var\(--theme-player\);)(?=[^}]*var\(--theme-glow\))[^}]*\}/,
   );
   assert.match(css, /html:is\(\[data-theme="matrix"\], \[data-theme="verse"\], \[data-theme="aurora"\]\) \.cc-music-content\s*\{(?=[^}]*background:\s*color-mix)(?=[^}]*backdrop-filter:\s*blur\(3px\) saturate\(108%\);)[^}]*\}/);
-  assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing\s*\{(?=[^}]*repeating-linear-gradient)(?=[^}]*rgba\(57, 255, 120, 0\.1\))[^}]*\}/);
+  assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing\s*\{(?=[^}]*isolation:\s*isolate;)(?=[^}]*repeating-linear-gradient)(?=[^}]*rgba\(57, 255, 120, 0\.1\))[^}]*\}/);
+  assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing::before\s*\{(?=[^}]*position:\s*fixed;)(?=[^}]*z-index:\s*1;)(?=[^}]*opacity:\s*0\.14;)(?=[^}]*animation:\s*cc-matrix-rain 14s linear infinite;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing-body\s*\{(?=[^}]*position:\s*relative;)(?=[^}]*z-index:\s*2;)[^}]*\}/);
   assert.match(css, /html\[data-theme="verse"\] \.cc-music-now-playing\s*\{(?=[^}]*14px 14px)(?=[^}]*rgba\(63, 231, 255, 0\.1\))[^}]*\}/);
   assert.match(css, /html\[data-theme="aurora"\] \.cc-music-now-playing\s*\{(?=[^}]*rgba\(101, 245, 191, 0\.1\))(?=[^}]*rgba\(196, 147, 255, 0\.09\))[^}]*\}/);
 });

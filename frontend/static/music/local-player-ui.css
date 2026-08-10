@@ -230,10 +230,34 @@ html:is([data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .cc-
 }
 
 html[data-theme="matrix"] .cc-music-now-playing {
+  isolation: isolate;
   background:
     repeating-linear-gradient(0deg, rgba(57, 255, 120, 0.025) 0 1px, transparent 1px 4px),
     radial-gradient(circle at 70% 44%, rgba(57, 255, 120, 0.1), transparent 34rem),
     linear-gradient(rgba(1, 7, 3, 0.9), rgba(1, 7, 3, 0.94));
+}
+
+html[data-theme="matrix"] .cc-music-now-playing::before {
+  content: "";
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(180deg, transparent 0 8px, rgba(80, 255, 130, 0.2) 8px 10px, transparent 10px 25px),
+    repeating-linear-gradient(180deg, transparent 0 17px, rgba(33, 196, 87, 0.16) 17px 20px, transparent 20px 39px),
+    repeating-linear-gradient(180deg, transparent 0 4px, rgba(155, 255, 185, 0.1) 4px 6px, transparent 6px 31px);
+  background-position: 18px -200px, 62px -195px, 101px -186px;
+  background-size: 92px 100%, 137px 100%, 173px 100%;
+  opacity: 0.14;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.86), transparent 96%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.86), transparent 96%);
+  animation: cc-matrix-rain 14s linear infinite;
+}
+
+html[data-theme="matrix"] .cc-music-now-playing-body {
+  position: relative;
+  z-index: 2;
 }
 
 html[data-theme="verse"] .cc-music-now-playing {

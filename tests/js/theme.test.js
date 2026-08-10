@@ -169,6 +169,10 @@ test("the early boot and standalone Appearance page use the same first-run defau
 test("Synthwave backdrop is continuous, animated, responsive, and remains behind full-screen Music", () => {
   assert.match(
     modernSource,
+    /html\[data-theme="synthwave"\] body \{(?=[^}]*repeating-linear-gradient\(0deg, rgba\(255, 255, 255, 0\.014\))(?=[^}]*radial-gradient\(circle at 8% 12%)(?=[^}]*radial-gradient\(circle at 91% 17%)[^}]*\}/,
+  );
+  assert.match(
+    modernSource,
     /html\[data-theme="synthwave"\] body::before \{(?=[^}]*position: fixed;)(?=[^}]*repeating-linear-gradient)(?=[^}]*perspective\(38rem\))(?=[^}]*animation: cc-synth-grid-drift 10s linear infinite;)[^}]*\}/,
   );
   assert.match(
@@ -182,6 +186,14 @@ test("Synthwave backdrop is continuous, animated, responsive, and remains behind
   assert.match(modernSource, /html\[data-theme="synthwave"\] body #tab-music \{\s*background: rgba\(3, 0, 12, 0\.24\);/);
   assert.match(modernSource, /html\[data-theme="synthwave"\] body \.cc-music \{\s*background: transparent;/);
   assert.match(modernSource, /html\[data-theme="synthwave"\] body \.cc-music-content \{\s*background: rgba\(2, 0, 9, 0\.16\);/);
+  assert.match(
+    modernSource,
+    /html\[data-theme="synthwave"\] :is\([\s\S]*?\.app-main > \.panel:not\(\.home-panel\)[\s\S]*?\) \{(?=[^}]*inset 0 1px 0 rgba\(67, 231, 255, 0\.12\))(?=[^}]*inset 0 -1px 0 rgba\(255, 79, 183, 0\.08\))(?=[^}]*backdrop-filter: blur\(9px\) saturate\(118%\);)[^}]*\}/,
+  );
+  assert.match(
+    modernSource,
+    /html\[data-theme="synthwave"\] :is\(\.workspace-heading h1, \.panel-h, \.appearance-header h1, \.cc-hero h1\) \{(?=[^}]*letter-spacing: 0\.025em;)(?=[^}]*text-shadow:[^}]*rgba\(255, 79, 183, 0\.16\))[^}]*\}/,
+  );
   assert.doesNotMatch(modernSource, /body\.cc-music-now-playing-open::before,[\s\S]*?body\.cc-music-now-playing-open::after \{\s*opacity: 0;/);
   assert.match(
     modernSource,
@@ -241,9 +253,12 @@ test("Matrix, Verse, and Aurora register complete persistent aesthetic palettes"
   assert.match(baseSource, /'synthwave', 'matrix', 'verse', 'aurora'/);
 });
 
-test("immersive themes have distinct static scenes and readable glass surfaces", () => {
-  assert.match(modernSource, /html\[data-theme="matrix"\] body::before \{(?=[^}]*repeating-linear-gradient)(?=[^}]*background-size: 92px 100%, 137px 100%, 173px 100%;)[^}]*\}/);
+test("immersive themes have distinct animated scenes and readable glass surfaces", () => {
+  assert.match(modernSource, /html\[data-theme="matrix"\] body::before \{(?=[^}]*repeating-linear-gradient)(?=[^}]*background-size: 92px 100%, 137px 100%, 173px 100%;)(?=[^}]*animation: cc-matrix-rain 14s linear infinite;)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="matrix"\] body::after \{(?=[^}]*repeating-linear-gradient\(0deg)(?=[^}]*radial-gradient\(ellipse at center)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="matrix"\] :is\(\.workspace-heading h1, \.panel-h, \.appearance-header h1, \.cc-hero h1, \.cc-nav-label\) \{(?=[^}]*Cascadia Mono)(?=[^}]*letter-spacing: 0\.055em;)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="matrix"\] :is\(\.btn-primary, button\[type="submit"\], input\[type="submit"\]\) \{(?=[^}]*background: linear-gradient\(180deg, #6dff99, #30df68\);)(?=[^}]*color: #011c08;)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="matrix"\] :is\(input, textarea, select\) \{(?=[^}]*border-color: rgba\(57, 255, 120, 0\.2\);)(?=[^}]*background: rgba\(1, 11, 4, 0\.86\);)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="verse"\] body::before \{(?=[^}]*radial-gradient\(circle)(?=[^}]*background-size: 14px 14px;)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="verse"\] body::after \{(?=[^}]*linear-gradient\(116deg)(?=[^}]*transform: rotate\(-2deg\);)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="aurora"\] body::before \{(?=[^}]*conic-gradient)(?=[^}]*filter: blur\(58px\);)[^}]*\}/);
