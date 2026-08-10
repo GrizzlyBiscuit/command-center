@@ -13,6 +13,7 @@ import threading
 from types import MappingProxyType
 from typing import Callable, Iterable, Mapping
 
+from .lyrics import LyricDescriptor, describe_lyrics, lyrics_for_track
 from .metadata import AUDIO_EXTENSIONS, Artwork, read_artwork, read_metadata
 from .settings import MusicSettings
 
@@ -59,6 +60,8 @@ class Track:
     sample_rate_hz: int
     bit_depth: int
     has_artwork: bool
+    has_lyrics: bool = False
+    lyrics_format: str = ""
 
     def public_dict(self) -> dict[str, object]:
         data = asdict(self)
@@ -66,6 +69,7 @@ class Track:
         data.pop("filename", None)
         data["audio_url"] = f"/api/music/audio/{self.id}"
         data["artwork_url"] = f"/api/music/art/{self.id}" if self.has_artwork else ""
+        data["lyrics_url"] = f"/api/music/lyrics/{self.id}" if self.has_lyrics else ""
         return data
 
 
@@ -85,6 +89,9 @@ class LibrarySnapshot:
     artwork_by_id: Mapping[str, Artwork | CachedArtwork] = field(
         default_factory=lambda: MappingProxyType({}), repr=False
     )
+    lyrics_by_id: Mapping[str, LyricDescriptor] = field(
+        default_factory=lambda: MappingProxyType({}), repr=False
+    )
     scanned_at: str = ""
 
     @classmethod
@@ -95,6 +102,7 @@ class LibrarySnapshot:
         root: Path,
         tracks: Iterable[Track],
         artwork: Mapping[str, Artwork | CachedArtwork],
+        lyrics: Mapping[str, LyricDescriptor] | None = None,
     ) -> "LibrarySnapshot":
         ordered = tuple(sorted(tracks, key=lambda item: (item.artist.casefold(), item.album.casefold(), item.title.casefold())))
         by_id = MappingProxyType({item.id: item for item in ordered})
@@ -104,6 +112,7 @@ class LibrarySnapshot:
             tracks=ordered,
             tracks_by_id=by_id,
             artwork_by_id=MappingProxyType(dict(artwork)),
+            lyrics_by_id=MappingProxyType(dict(lyrics or {})),
             scanned_at=_utc_now(),
         )
 
@@ -238,6 +247,7 @@ class MusicLibrary:
     def _scan_worker(self, settings: MusicSettings, root: Path, scan_id: int) -> None:
         tracks: list[Track] = []
         artwork: dict[str, Artwork | CachedArtwork] = {}
+        lyrics: dict[str, LyricDescriptor] = {}
         artwork_intern: dict[str, Artwork | CachedArtwork] = {}
         skipped = 0
         try:
@@ -248,7 +258,7 @@ class MusicLibrary:
             self._progress(scan_id, discovered=len(candidates))
             for path in candidates:
                 try:
-                    track, cover = self._read_track(settings, root, path)
+                    track, cover, lyric_descriptor = self._read_track(settings, root, path)
                 except (OSError, ValueError):
                     skipped += 1
                     self._progress(scan_id, scanned=len(tracks), skipped=skipped)
@@ -265,10 +275,16 @@ class MusicLibrary:
                         # A cache problem should not make playable audio vanish
                         # or advertise an artwork URL that will return 404.
                         track = replace(track, has_artwork=False)
+                if lyric_descriptor is not None:
+                    lyrics[track.id] = lyric_descriptor
                 tracks.append(track)
                 self._progress(scan_id, scanned=len(tracks), skipped=skipped)
             snapshot = LibrarySnapshot.build(
-                library_id=settings.library_id, root=root, tracks=tracks, artwork=artwork
+                library_id=settings.library_id,
+                root=root,
+                tracks=tracks,
+                artwork=artwork,
+                lyrics=lyrics,
             )
             with self._lock:
                 # Publish every map together so requests never observe a partial scan.
@@ -312,11 +328,14 @@ class MusicLibrary:
             if _inside_root(resolved, root):
                 yield resolved
 
-    def _read_track(self, settings: MusicSettings, root: Path, path: Path) -> tuple[Track, Artwork | None]:
+    def _read_track(
+        self, settings: MusicSettings, root: Path, path: Path
+    ) -> tuple[Track, Artwork | None, LyricDescriptor | None]:
         relative = path.relative_to(root)
         stat = path.stat()
         metadata = self._metadata_reader(path)
         cover = self._artwork_reader(path)
+        lyric_descriptor = describe_lyrics(path, root)
         suffix = path.suffix.lower()
         mime = mimetypes.guess_type(path.name)[0] or {
             ".flac": "audio/flac",
@@ -356,8 +375,11 @@ class MusicLibrary:
                 sample_rate_hz=int(number("sample_rate_hz", True)),
                 bit_depth=int(number("bit_depth", True)),
                 has_artwork=cover is not None,
+                has_lyrics=lyric_descriptor is not None,
+                lyrics_format=lyric_descriptor.format if lyric_descriptor else "",
             ),
             cover,
+            lyric_descriptor,
         )
 
     def resolve_track(self, track_id: str) -> Track | None:
@@ -397,3 +419,14 @@ class MusicLibrary:
     def artwork_for(self, track_id: str) -> Artwork | CachedArtwork | None:
         snapshot = self.snapshot()
         return snapshot.artwork_by_id.get(track_id) if track_id in snapshot.tracks_by_id else None
+
+    def lyrics_for(self, track_id: str) -> tuple[str, str] | None:
+        snapshot = self.snapshot()
+        track = snapshot.tracks_by_id.get(track_id)
+        descriptor = snapshot.lyrics_by_id.get(track_id)
+        if track is None or descriptor is None or snapshot.root is None:
+            return None
+        lyrics, lyric_format = lyrics_for_track(track.path, snapshot.root)
+        if not lyrics:
+            return None
+        return lyrics, lyric_format or descriptor.format

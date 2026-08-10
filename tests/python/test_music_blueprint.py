@@ -26,6 +26,7 @@ class MusicBlueprintTests(unittest.TestCase):
         self.music = self.root / "music"
         self.music.mkdir()
         (self.music / "song.mp3").write_bytes(b"0123456789")
+        (self.music / "song.lrc").write_text("[00:01.00]Local lyric", encoding="utf-8")
         library = MusicLibrary(
             metadata_reader=lambda _path: {
                 "title": "Server title",
@@ -108,6 +109,7 @@ class MusicBlueprintTests(unittest.TestCase):
             "/api/music/scan",
             f"/api/music/audio/{self.track.id}",
             f"/api/music/art/{self.track.id}",
+            f"/api/music/lyrics/{self.track.id}",
             "/api/music/stats?days=all",
         )
         for url in public_urls:
@@ -116,6 +118,11 @@ class MusicBlueprintTests(unittest.TestCase):
                     url, environ_base={"REMOTE_ADDR": "192.168.1.25"}
                 )
                 self.assertEqual(response.status_code, 200)
+
+        lyrics = self.client.get(f"/api/music/lyrics/{self.track.id}")
+        self.assertEqual(lyrics.json, {"lyrics": "[00:01.00]Local lyric", "format": "lrc"})
+        self.assertEqual(lyrics.headers["Cache-Control"], "private, no-cache")
+        self.assertEqual(self.client.get("/api/music/lyrics/not-a-track").status_code, 404)
 
         head = self.client.head(
             f"/api/music/audio/{self.track.id}",
@@ -144,6 +151,22 @@ class MusicBlueprintTests(unittest.TestCase):
             environ_base={"REMOTE_ADDR": "192.168.1.25"},
         )
         self.assertEqual(summary.json["summary"]["seconds"], 1)
+
+    def test_lyrics_are_read_on_demand_and_disappearance_is_optional(self) -> None:
+        lyric_path = self.music / "song.lrc"
+        lyric_path.write_text("[00:02.00]Updated without rescan", encoding="utf-8")
+
+        updated = self.client.get(f"/api/music/lyrics/{self.track.id}")
+        self.assertEqual(updated.status_code, 200)
+        self.assertEqual(
+            updated.json,
+            {"lyrics": "[00:02.00]Updated without rescan", "format": "lrc"},
+        )
+        self.assertEqual(updated.headers["Cache-Control"], "private, no-cache")
+
+        lyric_path.unlink()
+        self.assertEqual(self.client.get(f"/api/music/lyrics/{self.track.id}").status_code, 404)
+        self.assertIsNotNone(self.service.library.resolve_track(self.track.id))
 
     def test_remote_management_stays_blocked(self) -> None:
         remote = {"REMOTE_ADDR": "192.168.1.25"}

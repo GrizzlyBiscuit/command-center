@@ -6,13 +6,14 @@ const path = require("node:path");
 const appSource = fs.readFileSync(
   path.join(__dirname, "..", "..", "frontend", "static", "music", "music-app.js"),
   "utf8",
-);
+).replace(/\r\n?/g, "\n");
 const cssSource = fs.readFileSync(
   path.join(__dirname, "..", "..", "frontend", "static", "music", "music.css"),
   "utf8",
-);
+).replace(/\r\n?/g, "\n");
 const {
   dockVisibility,
+  isRenderedControl,
   readPlayerHiddenPreference,
   writePlayerHiddenPreference,
 } = require(path.join(__dirname, "..", "..", "frontend", "static", "music", "music-app.js"));
@@ -48,8 +49,39 @@ test("player visibility preference is local, guarded, and presentation-only", ()
   const handler = appSource.match(/function setPlayerHidden\(hidden\) \{([\s\S]*?)\n    \}/)?.[1] || "";
   assert.match(handler, /writePlayerHiddenPreference/);
   assert.match(handler, /aria-expanded", "false"/);
-  assert.match(handler, /focusTarget\.focus\(\)/);
+  assert.match(handler, /focusCandidates\.find\(canRestoreFocus\)/);
+  assert.match(handler, /focusTarget\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(handler, /nodes\.playerOpen/);
+  assert.doesNotMatch(handler, /nodes\.playerHide/);
   assert.doesNotMatch(handler, /pause\(|\.pause\(|stop|clearQueue|sendRemote/);
+});
+
+test("rendered-control checks reject CSS-hidden ancestors and zero-layout targets", () => {
+  const visibleStyle = { display: "block", visibility: "visible", contentVisibility: "visible" };
+  const parent = {
+    hidden: false,
+    inert: false,
+    parentElement: null,
+    getAttribute: () => null,
+  };
+  const control = {
+    hidden: false,
+    inert: false,
+    disabled: false,
+    isConnected: true,
+    parentElement: parent,
+    getAttribute: () => null,
+    getClientRects: () => [{ width: 20, height: 20 }],
+  };
+  const styles = new Map([[control, visibleStyle], [parent, visibleStyle]]);
+  const host = { getComputedStyle: node => styles.get(node) };
+
+  assert.equal(isRenderedControl(control, host), true);
+  styles.set(parent, { ...visibleStyle, display: "none" });
+  assert.equal(isRenderedControl(control, host), false);
+  styles.set(parent, visibleStyle);
+  control.getClientRects = () => [];
+  assert.equal(isRenderedControl(control, host), false);
 });
 
 test("remote music stays playable while host-only folder controls are disabled", () => {
@@ -60,7 +92,7 @@ test("remote music stays playable while host-only folder controls are disabled",
 });
 
 test("stats payload contains only trusted identity, time, boolean play count, and event id", () => {
-  const payloadMatch = appSource.match(/const payload = \{([\s\S]*?)\n\s*\};\n\s*request\(API\.stats/);
+  const payloadMatch = appSource.match(/const payload = \{([\s\S]*?)\r?\n\s*\};\r?\n\s*request\(API\.stats/);
   assert.ok(payloadMatch, "stats payload should be posted through API.stats");
   const payload = payloadMatch[1];
   assert.match(payload, /track_id: trackId/);
@@ -114,6 +146,51 @@ test("music queue keeps one stable row target and restores controller focus", ()
   assert.match(appSource, /function focusQueueItem/);
   assert.match(appSource, /if \(opening\) focusQueueItem\(\)/);
   assert.match(appSource, /"Now playing"/);
+});
+
+test("an empty queue temporarily reveals its host and closes back to dock preference", () => {
+  assert.match(appSource, /const queueOpen = Boolean\(nodes\.queue && !nodes\.queue\.hidden\)/);
+  assert.match(appSource, /nodes\.player\.hidden = queueOpen \? false : visibility\.playerHidden/);
+  assert.match(appSource, /nodes\.playerShow\.hidden = queueOpen \? true : visibility\.restoreHidden/);
+  assert.match(appSource, /nodes\.queue\.hidden = !opening;\n\s*syncDockVisibility\(\)/);
+  assert.match(appSource, /nodes\.queue\.querySelector\("\.cc-music-queue-play"\)\n\s*\|\| nodes\.queueClose/);
+  assert.doesNotMatch(appSource, /opening && nodes\.player\?\.hidden && currentTrack\(\)/);
+});
+
+test("successful library loads invalidate lyric state before stale requests can repopulate it", () => {
+  const loadStart = appSource.indexOf("async function load(");
+  const bridgeStart = appSource.indexOf("remoteBridge = Remote.createBridge", loadStart);
+  const loadBody = appSource.slice(loadStart, bridgeStart);
+  assert.match(loadBody, /const library = libraryPayload\(libraryRaw\);\n\s*invalidateLyricCache\(\);/);
+  assert.match(appSource, /function invalidateLyricCache\(\) \{\n\s*state\.lyricCache\.clear\(\);/);
+
+  const lyricsStart = appSource.indexOf("async function ensureNowPlayingLyrics(");
+  const surfaceStart = appSource.indexOf("function updateNowPlayingSurface(", lyricsStart);
+  const lyricsBody = appSource.slice(lyricsStart, surfaceStart);
+  const staleGuard = lyricsBody.indexOf("if (state.lyrics.requestToken !== requestToken");
+  const cacheWrite = lyricsBody.indexOf("state.lyricCache.set(track.id, result)");
+  assert.ok(staleGuard >= 0 && cacheWrite > staleGuard, "stale lyric responses must be rejected before caching");
+});
+
+test("Now Playing owns at most one scheduled visualizer frame", () => {
+  assert.match(
+    appSource,
+    /function requestNowPlayingVisualizerFrame\(\) \{\n\s*if \(nowPlayingFrame \|\| !nowPlayingIsOpen\(\) \|\| !nodes\.nowPlayingVisualizer\) return;/,
+  );
+  assert.match(appSource, /nowPlayingFrame = root\.requestAnimationFrame\(\(\) => \{\n\s*nowPlayingFrame = 0;/);
+  assert.match(appSource, /function openNowPlaying\(\)[\s\S]*?requestNowPlayingVisualizerFrame\(\);/);
+  const toggle = appSource.match(/nodes\.nowPlayingFullscreen\?\.addEventListener\("click", \(\) => \{([\s\S]*?)\n\s*\}\);/)?.[1] || "";
+  assert.match(toggle, /requestNowPlayingVisualizerFrame\(\)/);
+  assert.doesNotMatch(toggle, /drawNowPlayingVisualizer\(\)/);
+});
+
+test("synchronized lyric cues become native spatial buttons without manual key emulation", () => {
+  assert.match(appSource, /element\(interactive \? "button" : slot\.tag/);
+  assert.match(appSource, /replacement\.type = "button"/);
+  assert.match(appSource, /replacement\.dataset\.spatialKey = slot\.spatialKey/);
+  assert.match(appSource, /replacement\.addEventListener\("click", seekFromLyricLine\)/);
+  assert.match(appSource, /line\.setAttribute\("aria-label", `Seek to \$\{Domain\.formatTime\(slot\.time\)\}/);
+  assert.doesNotMatch(appSource, /addEventListener\("keydown", seekFromLyricLine/);
 });
 
 test("music transport updates fixed-size icons without text-heavy state labels", () => {

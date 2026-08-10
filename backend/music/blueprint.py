@@ -222,6 +222,18 @@ def create_music_blueprint(
         response.headers["X-Content-Type-Options"] = "nosniff"
         return response
 
+    @blueprint.get("/lyrics/<track_id>")
+    def get_lyrics(track_id: str) -> Response:
+        lyric_data = get_service().lyrics(track_id)
+        if lyric_data is None:
+            abort(404)
+        lyrics, lyric_format = lyric_data
+        response = jsonify({"lyrics": lyrics, "format": lyric_format})
+        # Track IDs stay stable across rescans, while a sidecar may change.
+        response.headers["Cache-Control"] = "private, no-cache"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        return response
+
     @blueprint.get("/stats")
     def get_stats() -> tuple[Response, int] | Response:
         value = request.args.get("days", "30").strip().lower()

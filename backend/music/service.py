@@ -84,6 +84,9 @@ class MusicService:
     def track(self, track_id: str) -> Track | None:
         return self.library.resolve_track(track_id)
 
+    def lyrics(self, track_id: str) -> tuple[str, str] | None:
+        return self.library.lyrics_for(track_id)
+
     def catalog_track_ids(self) -> Collection[str]:
         """Return one atomic, stat-free view of the current catalog IDs."""
         return self.library.snapshot().tracks_by_id.keys()
