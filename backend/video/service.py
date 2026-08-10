@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Collection
 from pathlib import Path
+import sqlite3
 import threading
 from typing import Any
 
@@ -73,19 +74,25 @@ class VideoService:
         result = snapshot.public_dict(query)
         settings = self.settings
         scan = self.library.status().public_dict()
+        recent: list[dict[str, object]] = []
+        if settings.configured:
+            try:
+                recent = self.progress.recent(
+                    settings.library_id,
+                    snapshot.videos_by_id,
+                    limit=recent_limit,
+                )
+            except (OSError, sqlite3.Error):
+                # Resume history is optional. A locked, read-only, or temporarily
+                # unavailable progress database must not hide the video catalog.
+                recent = []
         result.update(
             {
                 "configured": settings.configured,
                 "state": scan["state"],
                 "scan": scan,
                 "total": len(snapshot.videos),
-                "recent": self.progress.recent(
-                    settings.library_id,
-                    snapshot.videos_by_id,
-                    limit=recent_limit,
-                )
-                if settings.configured
-                else [],
+                "recent": recent,
             }
         )
         return result
@@ -113,20 +120,23 @@ class VideoService:
 
     def progress_payload(self, *, limit: int = 20) -> dict[str, object]:
         snapshot = self.library.snapshot()
+        if (
+            isinstance(limit, bool)
+            or not isinstance(limit, int)
+            or not 1 <= limit <= MAX_RECENT_ITEMS
+        ):
+            raise ValueError(f"limit must be between 1 and {MAX_RECENT_ITEMS}")
         if not self.settings.configured:
-            # Validate the public limit consistently without initializing SQLite.
-            if (
-                isinstance(limit, bool)
-                or not isinstance(limit, int)
-                or not 1 <= limit <= MAX_RECENT_ITEMS
-            ):
-                raise ValueError(f"limit must be between 1 and {MAX_RECENT_ITEMS}")
             return {"library_id": "", "items": []}
-        return {
-            "library_id": self.settings.library_id,
-            "items": self.progress.recent(
+        try:
+            items = self.progress.recent(
                 self.settings.library_id,
                 snapshot.videos_by_id,
                 limit=limit,
-            ),
+            )
+        except (OSError, sqlite3.Error):
+            items = []
+        return {
+            "library_id": self.settings.library_id,
+            "items": items,
         }
