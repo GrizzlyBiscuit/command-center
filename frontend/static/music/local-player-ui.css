@@ -518,12 +518,16 @@ html[data-theme="tropical"] .cc-music-now-playing::after {
   content: "";
   position: fixed;
   z-index: 1;
-  inset: 0;
+  inset: -2%;
   background: url("/static/tropical-palms.svg") center bottom / cover no-repeat;
   opacity: 0.76;
   pointer-events: none;
-  transform-origin: 50% 100%;
-  animation: cc-tropical-palms 10s ease-in-out infinite alternate;
+  /* A transformed/filter-animated viewport layer can flash at the edges in
+     Chromium when this scrollable full-screen dialog composites. The surf
+     keeps the scene alive while the oversized palm silhouette stays stable. */
+  transform: none;
+  filter: none;
+  animation: none;
 }
 
 html[data-theme="tropical"] .cc-music-now-playing-body {

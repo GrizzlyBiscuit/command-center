@@ -226,7 +226,7 @@ test("immersive themes tint the glass player and carry into Music surfaces", () 
   assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing\s*\{(?=[^}]*--cc-local-music-text:\s*#fbffff;)(?=[^}]*--cc-local-music-muted:\s*#c7dfdc;)(?=[^}]*radial-gradient\(circle at 72% 24%)(?=[^}]*linear-gradient\(to bottom)(?=[^}]*#bba66f 66%)[^}]*\}/);
   assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing :is\([\s\S]*?\.cc-music-now-playing-story,[\s\S]*?text-shadow:\s*0 2px 12px rgba\(0, 20, 24, 0\.88\);/);
   assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing::before\s*\{(?=[^}]*repeating-linear-gradient)(?=[^}]*cc-tropical-surf 7s)[^}]*\}/);
-  assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing::after\s*\{(?=[^}]*tropical-palms\.svg)(?=[^}]*cc-tropical-palms 10s)[^}]*\}/);
+  assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing::after\s*\{(?=[^}]*inset:\s*-2%;)(?=[^}]*tropical-palms\.svg)(?=[^}]*transform:\s*none;)(?=[^}]*filter:\s*none;)(?=[^}]*animation:\s*none;)[^}]*\}/);
   assert.match(css, /\.cc-music-now-playing-album\s*\{(?=[^}]*background:\s*transparent;)(?=[^}]*cursor:\s*pointer;)(?=[^}]*text-align:\s*left;)[^}]*\}/);
 });
 
