@@ -1,67 +1,52 @@
-// Theme Switcher — swaps the synthwave palette by setting data-theme on <html>.
-// Each theme overrides the :root CSS variables. Preference saved to localStorage.
+// Appearance picker — swaps a restrained accent/surface palette on <html>.
+// Legacy storage keys remain valid so existing installations migrate cleanly.
 (function () {
   var THEMES = {
-    outrun:    { label: 'Outrun',     vars: {} }, // default, uses :root
+    outrun: { label: 'Graphite', vars: {} },
     vaporwave: {
-      label: 'Vaporwave',
+      label: 'Indigo',
       vars: {
-        '--accent': '#ff71ce', '--accent-2': '#b967ff', '--accent-3': '#01cdfe',
-        '--sun-1': '#fff200', '--sun-2': '#ff9ff3', '--sun-3': '#ff2d95',
-        '--muted': '#c8b6ff', '--border': 'rgba(255,113,206,0.5)',
-        '--shadow': '0 25px 80px rgba(185,103,255,0.5)'
+        '--accent': '#8b7cf6', '--accent-2': '#b2a9ff', '--accent-3': '#8b7cf6',
+        '--accent-soft': 'rgba(139,124,246,0.13)'
       }
     },
     cyberpunk: {
-      label: 'Cyberpunk',
+      label: 'Sage',
       vars: {
-        '--accent': '#39ff14', '--accent-2': '#ffb000', '--accent-3': '#00e5ff',
-        '--sun-1': '#e8ff00', '--sun-2': '#ffb000', '--sun-3': '#ff3c00',
-        '--muted': '#a8ffcf', '--border': 'rgba(57,255,20,0.45)',
-        '--shadow': '0 25px 80px rgba(0,180,90,0.45)'
+        '--accent': '#5fa887', '--accent-2': '#83c4a5', '--accent-3': '#5fa887',
+        '--accent-soft': 'rgba(95,168,135,0.13)'
       }
     },
     bloodmoon: {
-      label: 'Blood Moon',
+      label: 'Clay',
       vars: {
-        '--accent': '#ff2d55', '--accent-2': '#ff6b3d', '--accent-3': '#ffd24a',
-        '--sun-1': '#ffd24a', '--sun-2': '#ff6b3d', '--sun-3': '#b3001b',
-        '--muted': '#ffb3a7', '--border': 'rgba(255,45,85,0.5)',
-        '--shadow': '0 25px 80px rgba(150,0,30,0.6)'
+        '--accent': '#c98267', '--accent-2': '#e2a28b', '--accent-3': '#c98267',
+        '--accent-soft': 'rgba(201,130,103,0.13)'
       }
     },
     ice: {
-      label: 'Ice',
+      label: 'Glacier',
       vars: {
-        '--accent': '#35c4ff', '--accent-2': '#5d7bff', '--accent-3': '#b6f0ff',
-        '--sun-1': '#eaffff', '--sun-2': '#7fd8ff', '--sun-3': '#2a7bff',
-        '--muted': '#b6e6ff', '--border': 'rgba(53,196,255,0.5)',
-        '--shadow': '0 25px 80px rgba(40,120,200,0.5)'
+        '--accent': '#559bd6', '--accent-2': '#7eb7e6', '--accent-3': '#559bd6',
+        '--accent-soft': 'rgba(85,155,214,0.13)'
       }
     },
-    // --- Dark Mode page presets: two synthwave looks, not a light/dark invert ---
     midnight: {
-      label: 'Midnight',
+      label: 'Ink',
       vars: {
-        '--bg': '#05010f',
-        '--panel': 'rgba(12, 4, 30, 0.82)',
-        '--panel-soft': 'rgba(18, 7, 42, 0.92)',
-        '--accent': '#ff2d95', '--accent-2': '#7b3fff', '--accent-3': '#2bd4ff',
-        '--sun-1': '#ffd24a', '--sun-2': '#ff6b9d', '--sun-3': '#7a1bff',
-        '--text': '#e9d8ff', '--muted': '#9a7fd6', '--border': 'rgba(123,63,255,0.32)',
-        '--shadow': '0 18px 60px rgba(40,0,90,0.5)'
+        '--bg': '#070a0f', '--bg-elevated': '#0c1118', '--panel': '#10161f',
+        '--panel-soft': '#151d28', '--surface-hover': '#192331',
+        '--accent': '#7483df', '--accent-2': '#9da8f2', '--accent-3': '#7483df',
+        '--accent-soft': 'rgba(116,131,223,0.13)', '--border': '#222d3b'
       }
     },
     neon: {
-      label: 'Neon',
+      label: 'Ocean',
       vars: {
-        '--bg': '#0c0220',
-        '--panel': 'rgba(28, 8, 56, 0.8)',
-        '--panel-soft': 'rgba(40, 12, 72, 0.9)',
-        '--accent': '#ff2d95', '--accent-2': '#b957ff', '--accent-3': '#35f0ff',
-        '--sun-1': '#fff200', '--sun-2': '#ff8a3c', '--sun-3': '#ff2d00',
-        '--text': '#fff0ff', '--muted': '#ffb3f0', '--border': 'rgba(255,45,149,0.6)',
-        '--shadow': '0 25px 90px rgba(255,45,149,0.55)'
+        '--bg': '#081015', '--bg-elevated': '#0d171e', '--panel': '#101c25',
+        '--panel-soft': '#162530', '--surface-hover': '#1a2c38',
+        '--accent': '#4c9faf', '--accent-2': '#76bdca', '--accent-3': '#4c9faf',
+        '--accent-soft': 'rgba(76,159,175,0.13)', '--border': '#243742'
       }
     }
   };
@@ -99,8 +84,8 @@
         b.className = 'theme-swatch';
         b.dataset.theme = k;
         b.setAttribute('data-tip', t.label + ' palette');
-        b.style.setProperty('--sw1', (t.vars && t.vars['--accent']) || '#ff2d95');
-        b.style.setProperty('--sw2', (t.vars && t.vars['--accent-3']) || '#35c4ff');
+        b.style.setProperty('--sw1', (t.vars && t.vars['--accent']) || '#7c8cff');
+        b.style.setProperty('--sw2', (t.vars && t.vars['--accent-2']) || '#98a5ff');
         b.innerHTML = '<span class="theme-dot"></span><span class="theme-name">' + t.label + '</span>';
         b.onclick = function () { apply(k); };
         wrap.appendChild(b);

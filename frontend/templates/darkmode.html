@@ -1,36 +1,78 @@
 {% extends "base.html" %}
 
-{% block title %}Dark Mode — Command Center{% endblock %}
+{% block title %}Appearance &mdash; Command Center{% endblock %}
 
 {% block content %}
-<section class="panel darkmode-panel">
+<section class="panel appearance-page">
   <div class="tab-panel" id="tab-darkmode" style="display:block">
-    <header class="cc-hero">
-      <h1 class="home-hero-title">DARK MODE</h1>
-      <p class="home-hero-sub">Two synthwave looks — pick your night.</p>
-      <nav class="cc-hero-nav" aria-label="Dark Mode">
+    <header class="appearance-header">
+      <div>
+        <p class="appearance-eyebrow">Settings</p>
+        <h1>Appearance</h1>
+        <p>Choose a calm surface and accent palette for this browser.</p>
+      </div>
+      <nav class="appearance-nav" aria-label="Appearance">
         <a href="{{ url_for('index') }}">Home</a>
-        <a href="{{ url_for('darkmode') }}" class="active">Dark Mode</a>
+        <a href="{{ url_for('darkmode') }}" class="active" aria-current="page">Appearance</a>
       </nav>
     </header>
 
     <div class="dm-wrap">
+      <div class="dm-section-heading">
+        <div>
+          <h2>Interface palette</h2>
+          <p>All palettes keep the same layout and contrast-led hierarchy.</p>
+        </div>
+        <span class="dm-current" id="appearance-current" aria-live="polite">Graphite selected</span>
+      </div>
+
       <div class="dm-cards">
-        <button class="dm-card" data-theme="midnight">
-          <span class="dm-swatch" style="--sw1:#7b3fff;--sw2:#ff2d95"></span>
-          <span class="dm-name">Midnight</span>
-          <span class="dm-desc">Deep, dim, low-glow. Easy on the eyes at 3am.</span>
-          <span class="dm-check">&#10003; active</span>
+        <button class="dm-card" type="button" data-theme="outrun" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#7c8cff;--sw2:#98a5ff" aria-hidden="true"></span>
+          <span class="dm-name">Graphite</span>
+          <span class="dm-desc">Neutral charcoal surfaces with a clear periwinkle accent.</span>
+          <span class="dm-check">Selected</span>
         </button>
-        <button class="dm-card" data-theme="neon">
-          <span class="dm-swatch" style="--sw1:#35f0ff;--sw2:#ff2d95"></span>
-          <span class="dm-name">Neon</span>
-          <span class="dm-desc">Bright, saturated, max glow. Turn it up.</span>
-          <span class="dm-check">&#10003; active</span>
+        <button class="dm-card" type="button" data-theme="vaporwave" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#8b7cf6;--sw2:#b2a9ff" aria-hidden="true"></span>
+          <span class="dm-name">Indigo</span>
+          <span class="dm-desc">A composed violet accent for focused, low-light work.</span>
+          <span class="dm-check">Selected</span>
+        </button>
+        <button class="dm-card" type="button" data-theme="cyberpunk" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#5fa887;--sw2:#83c4a5" aria-hidden="true"></span>
+          <span class="dm-name">Sage</span>
+          <span class="dm-desc">Soft green accents with a steady, natural tone.</span>
+          <span class="dm-check">Selected</span>
+        </button>
+        <button class="dm-card" type="button" data-theme="bloodmoon" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#c98267;--sw2:#e2a28b" aria-hidden="true"></span>
+          <span class="dm-name">Clay</span>
+          <span class="dm-desc">Warm mineral accents that stay understated.</span>
+          <span class="dm-check">Selected</span>
+        </button>
+        <button class="dm-card" type="button" data-theme="ice" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#559bd6;--sw2:#7eb7e6" aria-hidden="true"></span>
+          <span class="dm-name">Glacier</span>
+          <span class="dm-desc">Cool blue accents with crisp visual separation.</span>
+          <span class="dm-check">Selected</span>
+        </button>
+        <button class="dm-card" type="button" data-theme="midnight" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#7483df;--sw2:#9da8f2" aria-hidden="true"></span>
+          <span class="dm-name">Ink</span>
+          <span class="dm-desc">Deeper surfaces for a quieter nighttime workspace.</span>
+          <span class="dm-check">Selected</span>
+        </button>
+        <button class="dm-card" type="button" data-theme="neon" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#4c9faf;--sw2:#76bdca" aria-hidden="true"></span>
+          <span class="dm-name">Ocean</span>
+          <span class="dm-desc">Dark blue-green surfaces with a measured cyan accent.</span>
+          <span class="dm-check">Selected</span>
         </button>
       </div>
-      <p class="dm-note">Setting persists across restarts (saved to this browser).
-        The same palette is also available in <a href="/#settings">Themes</a>.</p>
+
+      <p class="dm-note">Your selection is saved in this browser and is also available under
+        <a href="/#settings">Settings &rsaquo; Appearance</a>.</p>
     </div>
   </div>
 </section>
@@ -38,48 +80,97 @@
 <script>
 (function () {
   var cards = document.querySelectorAll('.dm-card');
+  var labels = {
+    outrun: 'Graphite',
+    vaporwave: 'Indigo',
+    cyberpunk: 'Sage',
+    bloodmoon: 'Clay',
+    ice: 'Glacier',
+    midnight: 'Ink',
+    neon: 'Ocean'
+  };
+
   function sync() {
     var cur = null;
     try { cur = localStorage.getItem('cc_theme'); } catch (e) {}
-    cards.forEach(function (c) {
-      var on = (c.dataset.theme === cur) || (!cur && c.dataset.theme === 'midnight');
-      c.classList.toggle('active', on);
+    if (!labels[cur]) cur = 'outrun';
+    cards.forEach(function (card) {
+      var on = card.dataset.theme === cur;
+      card.classList.toggle('active', on);
+      card.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
+    var current = document.getElementById('appearance-current');
+    if (current) current.textContent = labels[cur] + ' selected';
   }
-  cards.forEach(function (c) {
-    c.addEventListener('click', function () {
-      if (window.CCTheme) window.CCTheme.apply(c.dataset.theme);
+
+  cards.forEach(function (card) {
+    card.addEventListener('click', function () {
+      if (window.CCTheme) window.CCTheme.apply(card.dataset.theme);
       sync();
     });
   });
-  // theme.js applies the saved theme on load; reflect after a tick
+
+  // theme.js applies the saved theme on load; reflect it after initialization.
   setTimeout(sync, 60);
 })();
 </script>
 
 <style>
-.darkmode-panel { padding: 0; }
-.dm-wrap { padding: 26px 30px 40px; }
-.dm-cards { display: flex; gap: 22px; flex-wrap: wrap; }
+.appearance-page { padding: 0; }
+.appearance-header {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 28px;
+  padding: 34px 36px 28px; border-bottom: 1px solid var(--border);
+}
+.appearance-eyebrow {
+  margin: 0 0 8px; color: var(--accent); font-size: .72rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+}
+.appearance-header h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.25rem); letter-spacing: -.04em; }
+.appearance-header p:not(.appearance-eyebrow) { margin: 10px 0 0; color: var(--muted); line-height: 1.6; }
+.appearance-nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.appearance-nav a {
+  padding: 9px 13px; border: 1px solid var(--border); border-radius: 9px;
+  color: var(--muted); text-decoration: none; font-size: .82rem; font-weight: 650;
+}
+.appearance-nav a:hover,
+.appearance-nav a.active { color: var(--text); border-color: var(--accent); background: var(--accent-soft); }
+.dm-wrap { padding: 30px 36px 42px; }
+.dm-section-heading {
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+  margin-bottom: 18px;
+}
+.dm-section-heading h2 { margin: 0; font-size: 1.05rem; }
+.dm-section-heading p { margin: 6px 0 0; color: var(--muted); font-size: .84rem; }
+.dm-current {
+  flex: 0 0 auto; padding: 7px 10px; border-radius: 8px; background: var(--accent-soft);
+  color: var(--accent-2); font-size: .75rem; font-weight: 700;
+}
+.dm-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
 .dm-card {
-  flex: 1 1 240px; max-width: 320px; cursor: pointer;
-  background: var(--panel); border: 1px solid var(--border);
-  border-radius: 14px; padding: 22px; text-align: left; color: var(--text);
-  display: flex; flex-direction: column; gap: 10px;
-  box-shadow: var(--shadow); transition: transform .15s, border-color .15s, box-shadow .15s;
+  min-width: 0; cursor: pointer; background: var(--panel); border: 1px solid var(--border);
+  border-radius: 12px; padding: 14px; text-align: left; color: var(--text);
+  display: grid; grid-template-columns: 40px minmax(0, 1fr) auto;
+  grid-template-areas: "swatch name check" "swatch desc desc"; column-gap: 12px; row-gap: 4px;
+  box-shadow: none; transition: background .15s ease, border-color .15s ease, transform .15s ease;
 }
-.dm-card:hover { transform: translateY(-3px); }
-.dm-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), var(--shadow); }
+.dm-card:hover { transform: translateY(-1px); background: var(--surface-hover); }
+.dm-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dm-card.active { border-color: var(--accent); background: var(--accent-soft); }
 .dm-swatch {
-  width: 100%; height: 64px; border-radius: 10px;
-  background: linear-gradient(120deg, var(--sw1), var(--sw2));
-  box-shadow: 0 0 22px rgba(255,45,149,0.4); margin-bottom: 4px;
+  grid-area: swatch; width: 40px; height: 40px; align-self: start; border-radius: 10px;
+  background: linear-gradient(135deg, var(--sw1), var(--sw2)); border: 1px solid rgba(255,255,255,.12);
 }
-.dm-name { font-family: 'Orbitron', sans-serif; font-size: 1.15rem; font-weight: 700; letter-spacing: .04em; }
-.dm-desc { font-size: .85rem; color: var(--muted); line-height: 1.4; }
-.dm-check { font-size: .78rem; color: var(--accent); opacity: 0; transition: opacity .15s; }
+.dm-name { grid-area: name; align-self: center; font-size: .9rem; font-weight: 750; }
+.dm-desc { grid-area: desc; color: var(--muted); font-size: .76rem; line-height: 1.45; }
+.dm-check { grid-area: check; align-self: center; color: var(--accent-2); font-size: .68rem; font-weight: 700; opacity: 0; }
 .dm-card.active .dm-check { opacity: 1; }
-.dm-note { margin-top: 22px; font-size: .82rem; color: var(--muted); }
-.dm-note a { color: var(--accent); }
+.dm-note { margin: 20px 0 0; color: var(--muted); font-size: .8rem; line-height: 1.6; }
+.dm-note a { color: var(--accent-2); }
+
+@media (max-width: 680px) {
+  .appearance-header { align-items: flex-start; flex-direction: column; padding: 26px 20px 22px; }
+  .dm-wrap { padding: 24px 20px 34px; }
+  .dm-section-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+}
 </style>
 {% endblock %}

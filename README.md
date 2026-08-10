@@ -1,6 +1,6 @@
 # Command Center
 
-Local-first, synthwave Command Center hub for Windows. It gives you a single home dashboard, a sidebar app launcher, local model controls, live monitoring, model competitions, automation tools, and optional mobile/LAN access.
+Local-first Command Center hub for Windows with a quiet, modern operations interface. It gives you a single home dashboard, a sidebar app launcher, local model controls, live monitoring, model competitions, automation tools, and optional mobile/LAN access.
 
 Testing the controller and media feature branches? See [FEATURE_CHANGES.md](FEATURE_CHANGES.md) for the short try-and-merge guide.
 
@@ -161,7 +161,7 @@ Local MP4/WebM library and player.
 - Direct browser streaming is intentionally limited to MP4 and WebM. Command Center does not transcode MKV/AVI files or generate thumbnails.
 
 ### Visualizer
-Audio-reactive neon visualizer.
+Audio-reactive ambient visualizer.
 
 - Driven by the active music player or titlebar audio menu.
 - Choose the original **Bars + scope** view or the music-reactive **Particle accelerator** mode.
@@ -180,7 +180,7 @@ Pin apps and open them with one click.
 - Stored locally.
 
 ### Arcade
-Retro synthwave games in one tab.
+Built-in games in one tab.
 
 - Snake
 - 2048
@@ -218,7 +218,7 @@ Shared task board for you and the agent.
 - Move tasks between columns
 
 ### Themes
-Synthwave palette switcher.
+Restrained interface palette switcher.
 
 - Pick a theme.
 - Persists across restarts.

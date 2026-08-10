@@ -81,7 +81,7 @@
 
 <script>
   const csrf = "{{ csrf_token() }}";
-  const dotColor = (ok) => ok ? '#39ff14' : '#ff2d55';
+  const dotColor = (ok) => ok ? 'var(--success)' : 'var(--danger)';
 
   async function refresh() {
     try {
@@ -106,8 +106,8 @@
       const pairDetail = document.getElementById('pair-detail');
       if (pairLabel) {
         pairLabel.textContent = s.pair_active ? 'ONLINE' : 'OFFLINE';
-        pairLabel.style.color = s.pair_active ? '#39ff14' : '#ff2d55';
-        pairLabel.style.textShadow = s.pair_active ? '0 0 12px #39ff14' : '0 0 12px #ff2d55';
+        pairLabel.style.color = s.pair_active ? 'var(--success)' : 'var(--danger)';
+        pairLabel.style.textShadow = 'none';
       }
       if (pairDetail) {
         pairDetail.textContent = s.pair_active

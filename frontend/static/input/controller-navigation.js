@@ -148,7 +148,11 @@
     }
 
     function sectionButtons(){
-      return Array.from(documentRef.querySelectorAll("button.tab-btn[data-tab]"));
+      return Array.from(documentRef.querySelectorAll("button.tab-btn[data-tab]")).filter(button => (
+        !button.hidden
+        && !button.closest?.("[hidden]")
+        && button.getAttribute?.("aria-hidden") !== "true"
+      ));
     }
 
     function moveSection(delta){
@@ -163,7 +167,8 @@
       const shell = documentRef.querySelector(".app-shell");
       const collapsed = shell?.classList.contains("sidebar-collapsed");
       if(collapsed) documentRef.getElementById("cc-side-reopen")?.click();
-      const target = documentRef.querySelector("button.tab-btn.active[data-tab]") || sectionButtons()[0];
+      const buttons = sectionButtons();
+      const target = buttons.find(button => button.classList.contains("active")) || buttons[0];
       windowRef.requestAnimationFrame?.(() => spatial.focus(target));
       return Boolean(target);
     }

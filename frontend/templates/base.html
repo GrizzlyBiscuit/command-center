@@ -4,10 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{% block title %}Agent UI{% endblock %}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>{% block title %}Command Center{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='synthwave.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='media/media-ui.css') }}">
@@ -16,75 +13,230 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='media/now-playing.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='banner.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='input/navigation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='modern.css') }}">
   </head>
   <body>
-    <div class="synth-sun"></div>
-    <div class="synth-stars"></div>
-    <div class="synth-horizon"></div>
-    <div class="synth-grid"></div>
     <div class="app-shell">
-      <!-- Global sidebar overlay: present on EVERY page, collapses out of the way -->
-      <button class="cc-side-reopen" id="cc-side-reopen" data-tip="Show the panel list" aria-controls="cc-sidebar" aria-expanded="false">&#187;</button>
-      <aside class="cc-sidebar" id="cc-sidebar" aria-label="Command Center panels">
+      <button class="cc-side-reopen" id="cc-side-reopen" type="button" data-tip="Show navigation" aria-label="Show navigation" aria-controls="cc-sidebar" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 5 7 7-7 7"/></svg>
+      </button>
+
+      <aside class="cc-sidebar" id="cc-sidebar" aria-label="Command Center navigation">
         <div class="cc-side-head">
-          <div class="cc-side-brand">Sidebar</div>
-        </div>
-        <nav class="cc-side-nav" role="tablist" aria-label="Command Center panels">
-          <button class="tab-btn" data-tab="home" role="tab" data-tip="Blank landing — pick a panel"><span class="glyph">&#8962;</span> <span class="label">Home</span></button>
-          <button class="tab-btn" data-tab="switches" role="tab" data-tip="On/off switches for Ollama &amp; the Discord bridge"><span class="glyph">&#9889;</span> <span class="label">Power Switches</span></button>
-          <button class="tab-btn" data-tab="control" role="tab" data-tip="The original agent dashboard &amp; console"><span class="glyph">&#128421;</span> <span class="label">Control Panel</span></button>
-          <button class="tab-btn" data-tab="sys" role="tab" data-tip="Live CPU / RAM / GPU / VRAM / disk / net monitor"><span class="glyph">&#9881;&#65039;</span> <span class="label">System</span></button>
-          <button class="tab-btn" data-tab="arena" role="tab" data-tip="Pit two local models against each other"><span class="glyph">&#9876;</span> <span class="label">Model Arena</span></button>
-          <button class="tab-btn" data-tab="maze" role="tab" data-tip="Watch local models solve a maze, live"><span class="glyph">&#128373;</span> <span class="label">Maze</span></button>
-          <button class="tab-btn" data-tab="fusion" role="tab" data-tip="Forge named model pairs you can call anywhere"><span class="glyph">&#9883;</span> <span class="label">Fusion Core</span></button>
-          <button class="tab-btn" data-tab="music" role="tab" data-tip="Play music stored on this computer"><span class="glyph">&#9835;</span> <span class="label">Music</span></button>
-          <button class="tab-btn" data-tab="video" role="tab" data-tip="Watch videos stored on this computer"><span class="glyph">&#127916;</span> <span class="label">Video</span></button>
-          <button class="tab-btn" data-tab="visualizer" role="tab" data-tip="Audio-reactive neon visualizer"><span class="glyph">&#127911;</span> <span class="label">Visualizer</span></button>
-          <button class="tab-btn" data-tab="pomodoro" role="tab" data-tip="Focus timer with a charging sun"><span class="glyph">&#9202;</span> <span class="label">Focus</span></button>
-          <button class="tab-btn" data-tab="launchpad" role="tab" data-tip="Pin your favorite apps"><span class="glyph">&#128640;</span> <span class="label">Launchpad</span></button>
-          <button class="tab-btn" data-tab="arcade" role="tab" data-tip="Retro synthwave games"><span class="glyph">&#127918;</span> <span class="label">Arcade</span></button>
-          <button class="tab-btn" data-tab="chat" role="tab" data-tip="Talk to your local model (offline)"><span class="glyph">&#128172;</span> <span class="label">AI Chat</span></button>
-          <button class="tab-btn" data-tab="notes" role="tab" data-tip="Local markdown scratchpad"><span class="glyph">&#128221;</span> <span class="label">Notes</span></button>
-          <button class="tab-btn" data-tab="discord" role="tab" data-tip="Discord bot &amp; gateway console"><span class="glyph">&#128483;</span> <span class="label">Discord</span></button>
-          <button class="tab-btn" data-tab="webhooks" role="tab" data-tip="Catch incoming local webhooks live"><span class="glyph">&#128225;</span> <span class="label">Webhooks</span></button>
-          <button class="tab-btn" data-tab="kanban" role="tab" data-tip="Shared task board (you + agent)"><span class="glyph">&#128221;</span> <span class="label">Kanban</span></button>
-          <button class="tab-btn" data-tab="settings" role="tab" data-tip="Swap the synthwave palette"><span class="glyph">&#9881;</span> <span class="label">Themes</span></button>
-          <a href="/changelog" class="tab-btn" data-tab="changelog" data-tip="Full change history by topic"><span class="glyph">&#128197;</span> <span class="label">Changelog</span></a>
-        </nav>
-      </aside>
-      <button class="cc-side-toggle cc-side-toggle-outside" id="cc-side-toggle" data-tip="Hide the panel list" aria-controls="cc-sidebar" aria-expanded="true">&#171;</button>
-      <div class="bg-overlay"></div>
-      <div class="app-titlebar" id="app-titlebar">
-        <div class="tb-drag pywebview-drag-region">
-          <span class="tb-title">COMMAND CENTER</span>
-        </div>
-        <div class="tb-controls">
-        <div class="tb-audio-wrap" id="tb-audio-wrap">
-          <button class="tb-btn" id="tb-audio" data-tip="Audio — hum / lo-fi synthwave">&#128266;</button>
-          <div class="tb-audio-menu" id="tb-audio-menu">
-            <button class="tb-audio-opt" data-audio="hum" data-tip="Warm synthwave hum pad">&#9835; Hum</button>
-            <button class="tb-audio-opt" data-audio="lofi" data-tip="Chill generated lo-fi synthwave loop">&#127925; Lo-Fi Synthwave</button>
-            <div class="tb-audio-vol" id="tb-audio-vol">
-              <span class="tb-vol-ico">&#128264;</span>
-              <input type="range" id="tb-vol" min="0" max="100" value="35" aria-label="Volume">
-            </div>
+          <a class="cc-brand-mark" href="/" aria-label="Command Center home">
+            <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+              <rect x="4" y="4" width="24" height="24" rx="7"/>
+              <path d="M10 12h12M10 16h7M10 20h10"/>
+            </svg>
+          </a>
+          <div class="cc-side-brand">
+            <span>Command Center</span>
+            <small>Local workspace</small>
           </div>
         </div>
-          <button class="tb-btn" id="tb-input-help" data-tip="Keyboard &amp; controller shortcuts" aria-label="Keyboard and controller shortcuts">?</button>
-          <button class="tb-btn" id="tb-refresh" data-tip="Reload — see latest changes">&#10227;</button>
-          <button class="tb-btn" id="tb-min" data-tip="Minimize — tuck it away">&#8211;</button>
-          <button class="tb-btn" id="tb-max" data-tip="Fullscreen — go big">&#9633;</button>
-          <button class="tb-btn tb-close" id="tb-close" data-tip="Exit — blow it up">&#10005;</button>
+
+        <label class="cc-nav-search cc-nav-search-wrap" for="cc-nav-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+          <input id="cc-nav-search" type="search" aria-label="Search navigation" placeholder="Find a tool" autocomplete="off" spellcheck="false">
+        </label>
+
+        <nav class="cc-side-nav" role="tablist" aria-label="Command Center panels">
+          <section class="cc-nav-section cc-nav-group" data-nav-group="overview" role="presentation">
+            <h2 class="cc-nav-heading cc-nav-label">Overview</h2>
+            <button class="tab-btn" data-tab="home" role="tab" data-tip="Workspace overview">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 11.5 12 5l8 6.5V20h-5v-5H9v5H4z"/></svg>
+              <span class="label">Overview</span>
+            </button>
+          </section>
+
+          <section class="cc-nav-section cc-nav-group" data-nav-group="runtime" role="presentation">
+            <h2 class="cc-nav-heading cc-nav-label">Runtime</h2>
+            <button class="tab-btn" data-tab="switches" role="tab" data-tip="Manage local services">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v8M7.1 6.8a8 8 0 1 0 9.8 0"/></svg>
+              <span class="label">Services</span>
+            </button>
+            <button class="tab-btn" data-tab="sys" role="tab" data-tip="Inspect live system resources">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg>
+              <span class="label">System</span>
+            </button>
+            <button class="tab-btn" data-tab="control" role="tab" data-tip="Manage agents and console tasks">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h10M18 7h2M4 12h3M11 12h9M4 17h8M16 17h4"/><circle cx="16" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="14" cy="17" r="2"/></svg>
+              <span class="label">Agents</span>
+            </button>
+          </section>
+
+          <section class="cc-nav-section cc-nav-group" data-nav-group="ai" role="presentation">
+            <h2 class="cc-nav-heading cc-nav-label">AI Lab</h2>
+            <button class="tab-btn" data-tab="chat" role="tab" data-tip="Chat with a local model">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7l-5 3v-3H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path d="M7.5 9.5h9M7.5 13h6"/></svg>
+              <span class="label">Chat</span>
+            </button>
+            <button class="tab-btn" data-tab="arena" role="tab" data-tip="Compare local models side by side">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 4 12 16M18 4 6 20M4 6l2-2 2 2M16 18l2 2 2-2M16 6l2-2 2 2M4 18l2 2 2-2"/></svg>
+              <span class="label">Arena</span>
+            </button>
+            <button class="tab-btn" data-tab="fusion" role="tab" data-tip="Build reusable model pairs">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="6" cy="7" r="3"/><circle cx="18" cy="7" r="3"/><circle cx="12" cy="18" r="3"/><path d="m8.5 8.5 2 6.5M15.5 8.5l-2 6.5M9 7h6"/></svg>
+              <span class="label">Fusion</span>
+            </button>
+            <button class="tab-btn" data-tab="maze" role="tab" data-tip="Watch models solve a live maze">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 4h16v16H4zM8 4v5h4v4H8v3h4v4M16 4v4h4M16 12v8"/></svg>
+              <span class="label">Maze</span>
+            </button>
+          </section>
+
+          <section class="cc-nav-section cc-nav-group" data-nav-group="media" role="presentation">
+            <h2 class="cc-nav-heading cc-nav-label">Media</h2>
+            <button class="tab-btn" data-tab="music" role="tab" data-tip="Browse and play local music">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 18V6l10-2v12M9 9l10-2"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
+              <span class="label">Music</span>
+            </button>
+            <button class="tab-btn" data-tab="video" role="tab" data-tip="Browse and play local video">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>
+              <span class="label">Video</span>
+            </button>
+            <button class="tab-btn" data-tab="visualizer" role="tab" data-tip="Open the audio visualizer">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 15v4M9 10v9M13 5v14M17 8v11M21 12v7"/></svg>
+              <span class="label">Visualizer</span>
+            </button>
+          </section>
+
+          <section class="cc-nav-section cc-nav-group" data-nav-group="workspace" role="presentation">
+            <h2 class="cc-nav-heading cc-nav-label">Workspace</h2>
+            <button class="tab-btn" data-tab="kanban" role="tab" data-tip="Organize shared tasks">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16M5.5 8h1M11.5 8h1M17.5 8h1"/></svg>
+              <span class="label">Kanban</span>
+            </button>
+            <button class="tab-btn" data-tab="notes" role="tab" data-tip="Open the local scratchpad">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 3h9l4 4v14H6zM15 3v5h4M9 12h7M9 16h7"/></svg>
+              <span class="label">Notes</span>
+            </button>
+            <button class="tab-btn" data-tab="pomodoro" role="tab" data-tip="Start a focused work session">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="13" r="8"/><path d="M12 13V9M9 3h6M18 6l1.5-1.5"/></svg>
+              <span class="label">Focus</span>
+            </button>
+            <button class="tab-btn" data-tab="launchpad" role="tab" data-tip="Open pinned local applications">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M14 5c2-2 5-2 5-2s0 3-2 5l-5 5-4-4zM8 9l-3 1-2 3 5 1M12 13l1 5 3-2 1-4M7 17l-3 3M9 17l-4 4"/></svg>
+              <span class="label">Launchpad</span>
+            </button>
+          </section>
+
+          <section class="cc-nav-section cc-nav-group" data-nav-group="integrations" role="presentation">
+            <h2 class="cc-nav-heading cc-nav-label">Integrations</h2>
+            <button class="tab-btn" data-tab="discord" role="tab" data-tip="Manage the Discord relay">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 7a13 13 0 0 1 10 0l2 10a15 15 0 0 1-4 2l-1-2H10l-1 2a15 15 0 0 1-4-2z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
+              <span class="label">Discord</span>
+            </button>
+            <button class="tab-btn" data-tab="webhooks" role="tab" data-tip="Inspect incoming local webhooks">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8.5 13.5 6 16a3 3 0 0 0 4 4l3-3M15.5 10.5 18 8a3 3 0 0 0-4-4l-3 3M8 12h8"/></svg>
+              <span class="label">Webhooks</span>
+            </button>
+          </section>
+
+          <section class="cc-nav-section cc-nav-group" data-nav-group="more" role="presentation">
+            <h2 class="cc-nav-heading cc-nav-label">More</h2>
+            <button class="tab-btn" data-tab="arcade" role="tab" data-tip="Open local games">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 8h10a5 5 0 0 1 4.5 7.2l-1.2 2.5a2 2 0 0 1-3.2.6L15 16H9l-2.1 2.3a2 2 0 0 1-3.2-.6l-1.2-2.5A5 5 0 0 1 7 8Z"/><path d="M7 11v4M5 13h4M16 12h.01M19 14h.01"/></svg>
+              <span class="label">Arcade</span>
+            </button>
+            <button class="tab-btn" data-tab="settings" role="tab" data-tip="Adjust workspace appearance">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1l2-1.5-2-3.4-2.4 1A8 8 0 0 0 15 6l-.3-2.5h-4L10.5 6A8 8 0 0 0 9 7.1l-2.4-1-2 3.4 2 1.5a7 7 0 0 0 0 2l-2 1.5 2 3.4 2.4-1A8 8 0 0 0 10.5 18l.3 2.5h4L15 18a8 8 0 0 0 1.5-1.1l2.4 1 2-3.4-2-1.5a7 7 0 0 0 .1-1Z"/></svg>
+              <span class="label">Appearance</span>
+            </button>
+            <a href="/changelog" class="tab-btn" data-tab="changelog" data-tip="Review release history">
+              <svg class="glyph" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.5M4 4v4.5h4.5M12 8v5l3 2"/></svg>
+              <span class="label">Changelog</span>
+            </a>
+          </section>
+
+          <p class="cc-nav-empty" id="cc-nav-empty" hidden>No tools match your search.</p>
+        </nav>
+
+        <div class="cc-sidebar-foot">
+          <span class="cc-local-indicator" aria-hidden="true"></span>
+          <span>Private and local</span>
+        </div>
+      </aside>
+
+      <button class="cc-side-toggle cc-side-toggle-outside" id="cc-side-toggle" type="button" data-tip="Collapse navigation" aria-label="Collapse navigation" aria-controls="cc-sidebar" aria-expanded="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M15 7l-5 5 5 5"/></svg>
+      </button>
+
+      <div class="app-titlebar" id="app-titlebar">
+        <div class="tb-drag pywebview-drag-region">
+          <span class="tb-title">Command Center</span>
+        </div>
+        <div class="tb-controls">
+          <div class="tb-audio-wrap" id="tb-audio-wrap">
+            <button class="tb-btn" id="tb-audio" type="button" data-tip="Ambient audio" aria-label="Ambient audio">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9v6h4l5 4V5L9 9zM18 9a5 5 0 0 1 0 6M20.5 6.5a8.5 8.5 0 0 1 0 11"/></svg>
+            </button>
+            <div class="tb-audio-menu" id="tb-audio-menu">
+              <button class="tb-audio-opt" type="button" data-audio="hum" data-tip="Warm ambient hum">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12c2-5 4 5 6 0s4 5 6 0 4 5 4 0"/></svg>
+                <span>Ambient hum</span>
+              </button>
+              <button class="tb-audio-opt" type="button" data-audio="lofi" data-tip="Generated lo-fi loop">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 18V6l10-2v12M9 9l10-2"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg>
+                <span>Lo-fi loop</span>
+              </button>
+              <div class="tb-audio-vol" id="tb-audio-vol">
+                <svg class="tb-vol-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 9v6h4l5 4V5L9 9zM18 10a3 3 0 0 1 0 4"/></svg>
+                <input type="range" id="tb-vol" min="0" max="100" value="35" aria-label="Volume">
+              </div>
+            </div>
+          </div>
+          <button class="tb-btn" id="tb-input-help" type="button" data-tip="Keyboard and controller shortcuts" aria-label="Keyboard and controller shortcuts">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 1 1 3.8 2c-1 .7-1.6 1.2-1.6 2.5M12 17h.01"/></svg>
+          </button>
+          <button class="tb-btn" id="tb-refresh" type="button" data-tip="Restart and reload" aria-label="Restart and reload">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 7v5h-5M4 17v-5h5M18.5 9A7 7 0 0 0 6 7l-2 5M5.5 15A7 7 0 0 0 18 17l2-5"/></svg>
+          </button>
+          <span class="tb-separator" aria-hidden="true"></span>
+          <button class="tb-btn" id="tb-min" type="button" data-tip="Minimize" aria-label="Minimize">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 17h12"/></svg>
+          </button>
+          <button class="tb-btn" id="tb-max" type="button" data-tip="Toggle fullscreen" aria-label="Toggle fullscreen">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+          </button>
+          <button class="tb-btn tb-close" id="tb-close" type="button" data-tip="Close Command Center" aria-label="Close Command Center">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m7 7 10 10M17 7 7 17"/></svg>
+          </button>
         </div>
       </div>
 
+      <header class="workspace-topbar" id="workspace-topbar">
+        <div class="workspace-heading">
+          <button class="cc-mobile-menu" id="cc-mobile-menu" type="button" aria-label="Open navigation" aria-controls="cc-sidebar" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
+          <div class="workspace-view-copy workspace-heading-copy">
+            <div class="workspace-heading-row">
+              <span class="view-eyebrow" id="view-eyebrow">Command Center</span>
+              <h1 class="view-title" id="view-title">Overview</h1>
+            </div>
+            <p class="view-description" id="view-description">A clear view of local services, activity, and tools.</p>
+          </div>
+        </div>
+        <div class="workspace-meta workspace-topbar-side">
+          <div class="workspace-status topbar-status-pill" id="workspace-status" role="status">
+            <i class="workspace-status-dot" aria-hidden="true"></i>
+            <span id="workspace-status-label">Local workspace</span>
+          </div>
+          <div class="workspace-time topbar-clock" id="workspace-time" aria-label="Local date and time">
+            <time id="workspace-time-value"></time>
+            <span id="workspace-date-value"></span>
+          </div>
+        </div>
+      </header>
+
       <div class="kill-confirm" id="kill-confirm">
         <div class="kill-box" role="dialog" aria-modal="true" aria-labelledby="kill-confirm-title">
-          <h3 id="kill-confirm-title">Kill hub?</h3>
-          <p>This stops the Command Center backend process. Restart it with your Command Center launcher or by running <code>python backend/app.py</code> from the project folder.</p>
+          <h3 id="kill-confirm-title">Stop Command Center?</h3>
+          <p>This stops the local backend process. Restart it with the Command Center launcher or run <code>python backend/app.py</code> from the project folder.</p>
           <div class="kill-acts">
-            <button class="btn-ghost" id="kill-no">Cancel</button>
-            <button class="btn-danger" id="kill-yes">Kill hub</button>
+            <button class="btn-ghost" id="kill-no" type="button">Cancel</button>
+            <button class="btn-danger" id="kill-yes" type="button">Stop hub</button>
           </div>
         </div>
       </div>
@@ -95,9 +247,10 @@
 
       <footer class="app-footer">
         <span>Command Center</span>
-        <span>Local • Encrypted logging • Synthwave theme</span>
+        <span>Local-first workspace</span>
       </footer>
     </div>
+
     <script src="{{ url_for('static', filename='fx.js') }}"></script>
     <script src="{{ url_for('static', filename='banner.js') }}"></script>
     <script src="{{ url_for('static', filename='chess.js') }}"></script>
@@ -132,174 +285,194 @@
     <script src="{{ url_for('static', filename='input/spatial-navigation.js') }}"></script>
     <script src="{{ url_for('static', filename='input/gamepad-controller.js') }}"></script>
     <script src="{{ url_for('static', filename='input/controller-navigation.js') }}"></script>
+
     <script>
-      // Custom frameless titlebar -> pywebview window controls + FX
+      // Native frameless window controls, ambient audio, and persistent sidebar.
       (function () {
         function bind(id, fn) {
           var el = document.getElementById(id);
           if (el) el.onclick = fn;
         }
-        function api() { return (window.pywebview && window.pywebview.api) ? window.pywebview.api : null; }
+
+        function api() {
+          return (window.pywebview && window.pywebview.api) ? window.pywebview.api : null;
+        }
 
         bind('tb-refresh', function () {
-          // FULL restart: reboot the hub server, then reload once it's back.
           var btn = document.getElementById('tb-refresh');
-          if (btn) { btn.disabled = true; btn.style.opacity = '0.4'; }
+          if (btn) {
+            btn.disabled = true;
+            btn.style.opacity = '0.4';
+          }
           var fd = new FormData();
           fd.append('csrf_token', "{{ csrf_token() }}");
-          fetch('/app/restart', { method: 'POST', body: fd }).catch(function(){});
-          // poll until the new hub answers, then hard reload (cache-bust)
+          fetch('/app/restart', { method: 'POST', body: fd }).catch(function () {});
           var tries = 0;
           var iv = setInterval(function () {
             tries++;
-            fetch('/', { method: 'HEAD', cache: 'no-store' }).then(function (r) {
-              if (r.ok) { clearInterval(iv); window.location.replace('/?_r=' + Date.now()); }
+            fetch('/', { method: 'HEAD', cache: 'no-store' }).then(function (response) {
+              if (response.ok) {
+                clearInterval(iv);
+                window.location.replace('/?_r=' + Date.now());
+              }
             }).catch(function () {});
-            if (tries > 60) { clearInterval(iv); window.location.replace('/?_r=' + Date.now()); }
+            if (tries > 60) {
+              clearInterval(iv);
+              window.location.replace('/?_r=' + Date.now());
+            }
           }, 500);
         });
+
         bind('tb-min', function () {
-          var a = api();
-          if (a && window.CCFX) window.CCFX.minimize(function () { a.minimize(); });
-          else if (a) a.minimize();
+          var nativeApi = api();
+          if (nativeApi && window.CCFX) window.CCFX.minimize(function () { nativeApi.minimize(); });
+          else if (nativeApi) nativeApi.minimize();
         });
+
         bind('tb-max', function () {
-          var a = api();
-          if (a && window.CCFX) window.CCFX.resize(function () { a.toggle_max(); });
-          else if (a) a.toggle_max();
+          var nativeApi = api();
+          if (nativeApi && window.CCFX) window.CCFX.resize(function () { nativeApi.toggle_max(); });
+          else if (nativeApi) nativeApi.toggle_max();
         });
+
         bind('tb-close', function () {
-          var a = api();
-          if (a && window.CCFX) window.CCFX.exit(function () { a.close(); });
-          else if (a) a.close();
+          var nativeApi = api();
+          if (nativeApi && window.CCFX) window.CCFX.exit(function () { nativeApi.close(); });
+          else if (nativeApi) nativeApi.close();
           else window.close();
         });
 
-        // ---- Synthwave audio: icon toggles the current mode; the hover
-        // dropdown lets you pick Hum or Lo-Fi Synthwave, plus a volume slider
-        // that only appears while audio is playing (mute=false). ----
         function markAudioActive() {
           var btn = document.getElementById('tb-audio');
-          if (btn && window.CCAudio) btn.classList.toggle('active', window.CCAudio.isOn());
-          document.querySelectorAll('.tb-audio-opt').forEach(function (o) {
-            if (window.CCAudio) o.classList.toggle('active', o.dataset.audio === window.CCAudio.getMode());
+          if (btn && window.CCAudio) {
+            var playing = window.CCAudio.isOn();
+            btn.classList.toggle('active', playing);
+            btn.setAttribute('aria-pressed', playing ? 'true' : 'false');
+          }
+          document.querySelectorAll('.tb-audio-opt').forEach(function (option) {
+            if (window.CCAudio) option.classList.toggle('active', option.dataset.audio === window.CCAudio.getMode());
           });
-          // volume slider visible only when playing
           var vol = document.getElementById('tb-audio-vol');
           if (vol && window.CCAudio) vol.classList.toggle('show', window.CCAudio.isOn());
         }
+
         bind('tb-audio', function () {
           if (!window.CCAudio) return;
           var on = window.CCAudio.toggle();
-          try { localStorage.setItem('cc_audio_on', on ? '1' : '0'); } catch (e) {}
+          try { localStorage.setItem('cc_audio_on', on ? '1' : '0'); } catch (error) {}
           markAudioActive();
         });
-        // option clicks: switch mode (and start playing if off)
-        document.querySelectorAll('.tb-audio-opt').forEach(function (opt) {
-          opt.addEventListener('click', function () {
+
+        document.querySelectorAll('.tb-audio-opt').forEach(function (option) {
+          option.addEventListener('click', function () {
             if (!window.CCAudio) return;
-            var m = opt.dataset.audio;
-            window.CCAudio.setMode(m);
+            var mode = option.dataset.audio;
+            window.CCAudio.setMode(mode);
             if (!window.CCAudio.isOn()) window.CCAudio.toggle();
-            try { localStorage.setItem('cc_audio_mode', m); } catch (e) {}
+            try { localStorage.setItem('cc_audio_mode', mode); } catch (error) {}
             markAudioActive();
           });
         });
-        // volume slider
+
         var volEl = document.getElementById('tb-vol');
         if (volEl) {
           if (window.CCAudio) volEl.value = Math.round(window.CCAudio.getVolume() * 100);
           volEl.addEventListener('input', function () {
-            if (!window.CCAudio) return;
-            window.CCAudio.setVolume(volEl.value / 100);
+            if (window.CCAudio) window.CCAudio.setVolume(volEl.value / 100);
           });
-          // keep slider usable without the wrapper hover stealing it
-          volEl.addEventListener('click', function (e) { e.stopPropagation(); });
+          volEl.addEventListener('click', function (event) { event.stopPropagation(); });
         }
-        // hover-intent for the audio dropdown: keep it open while the pointer is
-        // over the button OR the menu, and only close after a short grace period
-        // when the pointer truly leaves (so moving into the menu never snaps it shut).
+
         (function () {
           var wrap = document.getElementById('tb-audio-wrap');
           var menu = document.getElementById('tb-audio-menu');
           if (!wrap || !menu) return;
           var closeTimer = null;
-          function open() { if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; } wrap.classList.add('open'); }
-          function scheduleClose() { if (closeTimer) clearTimeout(closeTimer); closeTimer = setTimeout(function () { wrap.classList.remove('open'); }, 220); }
+          function open() {
+            if (closeTimer) clearTimeout(closeTimer);
+            closeTimer = null;
+            wrap.classList.add('open');
+          }
+          function scheduleClose() {
+            if (closeTimer) clearTimeout(closeTimer);
+            closeTimer = setTimeout(function () { wrap.classList.remove('open'); }, 220);
+          }
           wrap.addEventListener('mouseenter', open);
           wrap.addEventListener('mouseleave', scheduleClose);
+          wrap.addEventListener('focusin', open);
+          wrap.addEventListener('focusout', scheduleClose);
           menu.addEventListener('mouseenter', open);
           menu.addEventListener('mouseleave', scheduleClose);
-          // clicking an option shouldn't close until the pointer leaves
-          menu.addEventListener('click', function (e) { e.stopPropagation(); });
+          menu.addEventListener('click', function (event) { event.stopPropagation(); });
         })();
-        // restore previous mode (button highlight only; sound still needs a click)
+
         try {
           var savedMode = localStorage.getItem('cc_audio_mode');
           if (savedMode === 'lofi' && window.CCAudio) window.CCAudio.setMode('lofi');
           markAudioActive();
-        } catch (e) {}
+        } catch (error) {}
 
-        // Hero banner acts as "Home" -> reset to the blank page.
         var brand = document.getElementById('cc-hero');
-        if (brand) brand.onclick = function (e) {
-          if (e.target.closest('a, button')) return; // let nav links / buttons work
-          if (window.showTab) window.showTab('home');
-        };
+        if (brand) {
+          brand.onclick = function (event) {
+            if (event.target.closest('a, button')) return;
+            if (window.showTab) window.showTab('home');
+          };
+        }
 
-        // ---- collapsible sidebar (global: lives in base.html now) ----
         (function () {
           var shell = document.querySelector('.app-shell');
-          var sb = document.getElementById('cc-sidebar');
-          var tog = document.getElementById('cc-side-toggle');
-          var reo = document.getElementById('cc-side-reopen');
-          if (!shell || !sb) return;
+          var sidebar = document.getElementById('cc-sidebar');
+          var toggle = document.getElementById('cc-side-toggle');
+          var reopen = document.getElementById('cc-side-reopen');
+          if (!shell || !sidebar) return;
+
           function apply(collapsed) {
             shell.classList.toggle('sidebar-collapsed', collapsed);
-            sb.classList.toggle('collapsed', collapsed);
-            sb.inert = collapsed;
-            sb.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
-            if (tog) tog.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-            // clear any inline display set by the idle auto-collapse so the
-            // CSS class rule (.app-shell.sidebar-collapsed .cc-side-reopen)
-            // fully governs visibility.
-            var reo = document.getElementById('cc-side-reopen');
-            if (reo) {
-              reo.style.display = '';
-              reo.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-              if (collapsed && sb.contains(document.activeElement)) {
-                requestAnimationFrame(function () { try { reo.focus(); } catch (e) {} });
+            sidebar.classList.toggle('collapsed', collapsed);
+            sidebar.inert = collapsed;
+            sidebar.setAttribute('aria-hidden', collapsed ? 'true' : 'false');
+            if (toggle) toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+            if (reopen) {
+              reopen.style.display = '';
+              reopen.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+              if (collapsed && sidebar.contains(document.activeElement)) {
+                requestAnimationFrame(function () {
+                  try { reopen.focus(); } catch (error) {}
+                });
               }
             }
           }
-          // Fresh start (no saved pref) => default CLOSED. Only an explicit '0' keeps it open.
-          var saved = localStorage.getItem('cc_sidebar_collapsed');
-          try { apply(saved !== '0'); } catch (e) {}
+
+          var saved = null;
+          try { saved = localStorage.getItem('cc_sidebar_collapsed'); } catch (error) {}
+          apply(saved === '1');
+
           function flip() {
-            var c = !shell.classList.contains('sidebar-collapsed');
-            apply(c);
-            try { localStorage.setItem('cc_sidebar_collapsed', c ? '1' : '0'); } catch (e) {}
+            var collapsed = !shell.classList.contains('sidebar-collapsed');
+            apply(collapsed);
+            try { localStorage.setItem('cc_sidebar_collapsed', collapsed ? '1' : '0'); } catch (error) {}
           }
-          if (tog) tog.onclick = flip;
-          if (reo) reo.onclick = flip;
+
+          if (toggle) toggle.onclick = flip;
+          if (reopen) reopen.onclick = flip;
         })();
 
-        // Sidebar tabs work on EVERY page: switch here if the SPA is loaded,
-        // otherwise jump to the home page with the tab in the URL hash.
-        document.querySelectorAll('.tab-btn').forEach(function (btn) {
-          btn.addEventListener('click', function () {
-            if (typeof window.showTab === 'function') window.showTab(btn.dataset.tab);
-            else window.location.href = '/#' + btn.dataset.tab;
+        document.querySelectorAll('button.tab-btn[data-tab]').forEach(function (button) {
+          button.addEventListener('click', function () {
+            if (typeof window.showTab === 'function') window.showTab(button.dataset.tab);
+            else window.location.href = '/#' + button.dataset.tab;
           });
         });
-        })();
-        </script>
+      })();
+    </script>
+
     <div class="cc-controller-status" id="cc-controller-status" role="status" aria-live="polite"></div>
     <div class="cc-input-help" id="cc-input-help" role="dialog" aria-modal="true" aria-labelledby="cc-input-help-title" hidden>
       <div class="cc-input-help-panel">
         <div class="cc-input-help-head">
           <div>
-            <h2 id="cc-input-help-title">Keyboard &amp; controller</h2>
+            <h2 id="cc-input-help-title">Keyboard and controller</h2>
             <p>Navigate every Command Center panel without reaching for the mouse.</p>
           </div>
           <button id="cc-input-help-close" class="btn-ghost" type="button">Close</button>
@@ -330,5 +503,7 @@
         </div>
       </div>
     </div>
-</body>
+
+    <script src="{{ url_for('static', filename='modern-ui.js') }}"></script>
+  </body>
 </html>

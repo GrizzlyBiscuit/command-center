@@ -12,11 +12,11 @@
     <input type="password" name="password" placeholder="Admin password" aria-describedby="password-error">
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <p id="password-error" class="form-error">Get fucked</p>
+        <p id="password-error" class="form-error">That password was not accepted. Please try again.</p>
       {% endif %}
     {% endwith %}
     <button type="submit">Login</button>
   </form>
-  <p><a href="/">Back to Agents</a></p>
+  <p><a href="/">Back to Command Center</a></p>
 </section>
 {% endblock %}
