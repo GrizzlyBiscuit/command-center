@@ -607,6 +607,16 @@ html[data-theme="synthwave"] .cc-music-now-playing {
   grid-row: auto;
 }
 
+.cc-music-album.is-expanded .cc-music-album-cover .cc-music-album-artwork {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.cc-music-album.is-expanded .cc-music-album-cover .cc-music-group-copy {
+  grid-column: 1;
+  grid-row: 2;
+}
+
 .cc-music-album.is-expanded .cc-music-group-actions {
   grid-column: 1;
 }

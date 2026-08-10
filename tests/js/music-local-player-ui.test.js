@@ -156,6 +156,14 @@ test("the late CSS owns the black artwork-first library and focused album view",
     css,
     /\.cc-music-album\.is-expanded\s*\{(?=[^}]*grid-column:\s*1\s*\/\s*-1;)(?=[^}]*grid-template-columns:\s*minmax\(260px,\s*360px\)\s*minmax\(520px,\s*760px\);)[^}]*\}/,
   );
+  assert.match(
+    css,
+    /\.cc-music-album\.is-expanded \.cc-music-album-cover \.cc-music-album-artwork\s*\{(?=[^}]*grid-column:\s*1;)(?=[^}]*grid-row:\s*1;)[^}]*\}/,
+  );
+  assert.match(
+    css,
+    /\.cc-music-album\.is-expanded \.cc-music-album-cover \.cc-music-group-copy\s*\{(?=[^}]*grid-column:\s*1;)(?=[^}]*grid-row:\s*2;)[^}]*\}/,
+  );
   assert.match(css, /\.cc-music-album-grid:has\(> \.cc-music-album\.is-expanded\)[^{]*\{\s*display:\s*none;/);
 
   const narrowStart = css.indexOf("@media (max-width: 860px)");
