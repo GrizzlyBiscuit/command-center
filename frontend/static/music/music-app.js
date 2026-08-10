@@ -1735,6 +1735,29 @@
       nowPlayingReturnFocus = null;
     }
 
+    function openCurrentAlbum() {
+      const track = currentTrack();
+      if (!track) return;
+      closeNowPlaying({ restoreFocus: false });
+      if (typeof root.showTab === "function") root.showTab("music");
+      state.query = "";
+      if (nodes.search) nodes.search.value = "";
+      setView("albums");
+
+      const focusAlbum = () => {
+        const card = Array.from(nodes.content.querySelectorAll(".cc-music-album")).find(candidate => (
+          Array.from(candidate.querySelectorAll(".cc-music-track[data-track-id]"))
+            .some(row => opaqueTrackId(row.dataset.trackId) === track.id)
+        ));
+        const album = card?.querySelector(".cc-music-album-cover");
+        if (!album) return;
+        if (album.getAttribute("aria-expanded") !== "true") album.click();
+        album.focus?.({ preventScroll: true });
+      };
+      if (root.requestAnimationFrame) root.requestAnimationFrame(focusAlbum);
+      else focusAlbum();
+    }
+
     function nowPlayingStoryNodes() {
       return storyLineSlots.map(slot => nodes[slot.nodeKey]).filter(Boolean);
     }
@@ -1992,7 +2015,17 @@
       }
       if (nodes.nowPlayingArtFallback) nodes.nowPlayingArtFallback.hidden = Boolean(source);
       if (nodes.nowPlayingTitle) nodes.nowPlayingTitle.textContent = track?.title || "Nothing playing";
-      if (nodes.nowPlayingMeta) nodes.nowPlayingMeta.textContent = track?.album || "Choose a track, album, or artist.";
+      if (nodes.nowPlayingMeta) {
+        nodes.nowPlayingMeta.textContent = track?.album || "Choose a track, album, or artist.";
+        nodes.nowPlayingMeta.disabled = !track;
+        if (track) {
+          nodes.nowPlayingMeta.setAttribute("aria-label", `Open album ${track.album} by ${track.artist}`);
+          nodes.nowPlayingMeta.title = `Open ${track.album}`;
+        } else {
+          nodes.nowPlayingMeta.removeAttribute("aria-label");
+          nodes.nowPlayingMeta.removeAttribute("title");
+        }
+      }
       renderNowPlayingStory(track);
       fullscreenVisualizer?.setArtwork?.(source);
 
@@ -2857,6 +2890,7 @@
         openNowPlaying();
       });
       nodes.nowPlayingClose?.addEventListener("click", () => closeNowPlaying());
+      nodes.nowPlayingMeta?.addEventListener("click", openCurrentAlbum);
       nodes.nowPlayingPlay?.addEventListener("click", () => !playbackIsPlaying() ? play().catch(error => setStatus(error.message, "error")) : pause());
       nodes.nowPlayingPrevious?.addEventListener("click", previous);
       nodes.nowPlayingNext?.addEventListener("click", () => next());

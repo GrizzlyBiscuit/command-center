@@ -77,6 +77,10 @@ test("the mini player opens an accessible full-screen Now Playing dialog", () =>
     panel,
     /<button[^>]*id="cc-music-now-playing-close"[^>]*aria-label="Collapse Now Playing"/,
   );
+  assert.match(
+    panel,
+    /<button[^>]*class="cc-music-now-playing-album"[^>]*id="cc-music-now-playing-meta"[^>]*data-spatial-key="music-now-playing-album"[^>]*disabled>/,
+  );
   for (const id of [
     "cc-music-now-playing-art",
     "cc-music-now-playing-title",
@@ -107,6 +111,9 @@ test("music defaults to sorted albums and synchronizes every playback surface", 
   assert.match(app, /function closeNowPlaying\(\{ restoreFocus = true \} = \{\}\)/);
   assert.match(app, /nodes\.playerOpen\?\.addEventListener\("click", openNowPlaying\)/);
   assert.match(app, /nodes\.nowPlayingClose\?\.addEventListener\("click", \(\) => closeNowPlaying\(\)\)/);
+  assert.match(app, /nodes\.nowPlayingMeta\?\.addEventListener\("click", openCurrentAlbum\)/);
+  assert.match(app, /function openCurrentAlbum\(\)[\s\S]*?closeNowPlaying\(\{ restoreFocus: false \}\)[\s\S]*?root\.showTab\("music"\)[\s\S]*?setView\("albums"\)/);
+  assert.match(app, /querySelectorAll\("\.cc-music-track\[data-track-id\]"\)[\s\S]*?album\.click\(\)[\s\S]*?album\.focus/);
   assert.match(app, /root\.document\.addEventListener\("keydown", handleModalKeydown\)/);
   assert.match(app, /if \(queueIsOpen\(\)\) setQueueOpen\(false\)/);
   assert.match(app, /function applyModalInert\(\)/);
@@ -195,14 +202,19 @@ test("immersive themes tint the glass player and carry into Music surfaces", () 
   );
   assert.match(css, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="verse"\], \[data-theme="aurora"\]\) \.cc-music-content\s*\{(?=[^}]*background:\s*color-mix)(?=[^}]*backdrop-filter:\s*blur\(3px\) saturate\(108%\);)[^}]*\}/);
   assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing\s*\{(?=[^}]*isolation:\s*isolate;)(?=[^}]*radial-gradient\(circle at 84% 13%)(?=[^}]*backdrop-filter:\s*blur\(4px\) saturate\(92%\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing\s*\{[^}]*linear-gradient\(#020610, #030814\);/);
   assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing::before\s*\{(?=[^}]*background-size:\s*113px 127px, 181px 163px, 239px 211px;)(?=[^}]*animation:\s*cc-starlight-drift 28s ease-in-out infinite alternate;)[^}]*\}/);
   assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing::after\s*\{(?=[^}]*linear-gradient\(90deg, transparent)(?=[^}]*animation:\s*cc-starlight-meteor 10s cubic-bezier)[^}]*\}/);
   assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing-body\s*\{(?=[^}]*position:\s*relative;)(?=[^}]*z-index:\s*2;)[^}]*\}/);
   assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing\s*\{(?=[^}]*isolation:\s*isolate;)(?=[^}]*repeating-linear-gradient)(?=[^}]*rgba\(57, 255, 120, 0\.1\))[^}]*\}/);
+  assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing\s*\{[^}]*linear-gradient\(#010703, #010703\);/);
   assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing::before\s*\{(?=[^}]*position:\s*fixed;)(?=[^}]*z-index:\s*1;)(?=[^}]*opacity:\s*0\.14;)(?=[^}]*animation:\s*cc-matrix-rain 14s linear infinite;)[^}]*\}/);
   assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing-body\s*\{(?=[^}]*position:\s*relative;)(?=[^}]*z-index:\s*2;)[^}]*\}/);
   assert.match(css, /html\[data-theme="verse"\] \.cc-music-now-playing\s*\{(?=[^}]*14px 14px)(?=[^}]*rgba\(63, 231, 255, 0\.1\))[^}]*\}/);
+  assert.match(css, /html\[data-theme="verse"\] \.cc-music-now-playing\s*\{[^}]*linear-gradient\(145deg, #080819, #0c0d23\);/);
   assert.match(css, /html\[data-theme="aurora"\] \.cc-music-now-playing\s*\{(?=[^}]*rgba\(101, 245, 191, 0\.1\))(?=[^}]*rgba\(196, 147, 255, 0\.09\))[^}]*\}/);
+  assert.match(css, /html\[data-theme="aurora"\] \.cc-music-now-playing\s*\{[^}]*linear-gradient\(#030e12, #030e12\);/);
+  assert.match(css, /\.cc-music-now-playing-album\s*\{(?=[^}]*background:\s*transparent;)(?=[^}]*cursor:\s*pointer;)(?=[^}]*text-align:\s*left;)[^}]*\}/);
 });
 
 test("desktop and mobile mini-player sizing remain deliberate", () => {
