@@ -164,6 +164,7 @@ html[data-theme="synthwave"] .cc-music-now-playing::before {
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.9) 54%, transparent 100%);
   transform: perspective(38rem) rotateX(62deg) scale(1.16);
   transform-origin: top center;
+  animation: cc-synth-grid-drift 10s linear infinite;
 }
 
 html[data-theme="synthwave"] .cc-music-now-playing::after {
@@ -185,6 +186,7 @@ html[data-theme="synthwave"] .cc-music-now-playing::after {
   opacity: 0.3;
   pointer-events: none;
   transform: translate(-50%, -50%);
+  animation: cc-synth-sun-breathe 6s ease-in-out infinite;
 }
 
 html[data-theme="synthwave"] .cc-music-now-playing-body {

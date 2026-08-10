@@ -181,8 +181,8 @@ test("Synthwave carries its wallpaper through darkened album and Now Playing sur
   );
   assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-content\s*\{[^}]*background:\s*rgba\(2, 3, 14, 0\.08\);/);
   assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing\s*\{(?=[^}]*isolation:\s*isolate;)(?=[^}]*linear-gradient\(rgba\(3, 0, 13, 0\.78\), rgba\(3, 0, 13, 0\.82\)\))(?=[^}]*backdrop-filter:\s*blur\(5px\) saturate\(88%\);)[^}]*\}/);
-  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing::before\s*\{(?=[^}]*repeating-linear-gradient)(?=[^}]*opacity:\s*0\.24;)(?=[^}]*transform:\s*perspective\(38rem\) rotateX\(62deg\) scale\(1\.16\);)[^}]*\}/);
-  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing::after\s*\{(?=[^}]*width:\s*clamp\(340px, 40vw, 640px\);)(?=[^}]*repeating-linear-gradient\(to bottom)(?=[^}]*opacity:\s*0\.3;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing::before\s*\{(?=[^}]*repeating-linear-gradient)(?=[^}]*opacity:\s*0\.24;)(?=[^}]*transform:\s*perspective\(38rem\) rotateX\(62deg\) scale\(1\.16\);)(?=[^}]*animation:\s*cc-synth-grid-drift 10s linear infinite;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing::after\s*\{(?=[^}]*width:\s*clamp\(340px, 40vw, 640px\);)(?=[^}]*repeating-linear-gradient\(to bottom)(?=[^}]*opacity:\s*0\.3;)(?=[^}]*animation:\s*cc-synth-sun-breathe 6s ease-in-out infinite;)[^}]*\}/);
   assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing-body\s*\{(?=[^}]*position:\s*relative;)(?=[^}]*z-index:\s*2;)[^}]*\}/);
   assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-album\.is-expanded\s*\{(?=[^}]*background:\s*linear-gradient)(?=[^}]*backdrop-filter:\s*blur\(4px\) saturate\(92%\);)[^}]*\}/);
   assert.match(css, /html\[data-theme="synthwave"\] #cc-music-player\s*\{(?=[^}]*background:\s*rgba\(8, 2, 22, 0\.58\);)(?=[^}]*border-color:\s*rgba\(103, 232, 255, 0\.25\);)[^}]*\}/);

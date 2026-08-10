@@ -166,14 +166,14 @@ test("the early boot and standalone Appearance page use the same first-run defau
   assert.match(appearanceSource, /if \(!labels\[cur\]\) cur = 'synthwave';/);
 });
 
-test("Synthwave backdrop is continuous, static, responsive, and remains behind full-screen Music", () => {
+test("Synthwave backdrop is continuous, animated, responsive, and remains behind full-screen Music", () => {
   assert.match(
     modernSource,
-    /html\[data-theme="synthwave"\] body::before \{(?=[^}]*position: fixed;)(?=[^}]*repeating-linear-gradient)(?=[^}]*perspective\(38rem\))[^}]*\}/,
+    /html\[data-theme="synthwave"\] body::before \{(?=[^}]*position: fixed;)(?=[^}]*repeating-linear-gradient)(?=[^}]*perspective\(38rem\))(?=[^}]*animation: cc-synth-grid-drift 10s linear infinite;)[^}]*\}/,
   );
   assert.match(
     modernSource,
-    /html\[data-theme="synthwave"\] body::after \{(?=[^}]*position: fixed;)(?=[^}]*width: clamp\(340px, 40vw, 640px\);)(?=[^}]*repeating-linear-gradient)[^}]*\}/,
+    /html\[data-theme="synthwave"\] body::after \{(?=[^}]*position: fixed;)(?=[^}]*width: clamp\(340px, 40vw, 640px\);)(?=[^}]*repeating-linear-gradient)[^}]*\}[\s\S]*?body::after \{\s*animation: cc-synth-sun-breathe 6s ease-in-out infinite;/,
   );
   assert.match(
     modernSource,

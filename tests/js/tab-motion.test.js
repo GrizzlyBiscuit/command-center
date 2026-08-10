@@ -39,7 +39,10 @@ test("immersive palettes have distinct reduced-motion-safe tab entrances", () =>
   assert.match(modern, /@keyframes\s+cc-verse-tab-in\b/);
   assert.match(modern, /@keyframes\s+cc-aurora-tab-in\b/);
   assert.match(modern, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?animation:\s*none !important;/);
-  assert.match(modern, /body::after \{\s*animation:\s*cc-synth-sun-breathe 8s ease-in-out infinite;/);
+  assert.match(modern, /body::before \{[\s\S]*?animation:\s*cc-synth-grid-drift 10s linear infinite;/);
+  assert.match(modern, /body::after \{\s*animation:\s*cc-synth-sun-breathe 6s ease-in-out infinite;/);
+  assert.match(modern, /@keyframes\s+cc-synth-sun-breathe[\s\S]*?scale\(0\.97\)[\s\S]*?scale\(1\.035\)/);
+  assert.match(modern, /@keyframes\s+cc-synth-grid-drift[\s\S]*?center 54px;/);
 });
 
 test("removing tab motion preserves interaction and visualizer animation", () => {

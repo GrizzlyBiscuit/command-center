@@ -2440,6 +2440,7 @@ html[data-theme="synthwave"] body::before {
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.9) 54%, transparent 100%);
   transform: perspective(38rem) rotateX(62deg) scale(1.16);
   transform-origin: top center;
+  animation: cc-synth-grid-drift 10s linear infinite;
 }
 
 html[data-theme="synthwave"] body::after {
@@ -2478,7 +2479,7 @@ html[data-theme="synthwave"] body:has(#tab-home:not([hidden]))::after {
 }
 
 html[data-theme="synthwave"] body::after {
-  animation: cc-synth-sun-breathe 8s ease-in-out infinite;
+  animation: cc-synth-sun-breathe 6s ease-in-out infinite;
 }
 
 html[data-theme="synthwave"] ::selection {
@@ -3056,8 +3057,19 @@ html[data-theme="aurora"] .tab-panel:not([hidden]) {
 }
 
 @keyframes cc-synth-sun-breathe {
-  0%, 100% { filter: saturate(96%) brightness(96%); }
-  50% { filter: saturate(108%) brightness(104%); }
+  0%, 100% {
+    filter: saturate(88%) brightness(90%);
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+  50% {
+    filter: saturate(118%) brightness(108%);
+    transform: translate(-50%, -50%) scale(1.035);
+  }
+}
+
+@keyframes cc-synth-grid-drift {
+  from { background-position: center 0, center 0; }
+  to { background-position: center 0, center 54px; }
 }
 
 @keyframes cc-synth-tab-in {
@@ -3081,7 +3093,10 @@ html[data-theme="aurora"] .tab-panel:not([hidden]) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html[data-theme="synthwave"] body::before,
   html[data-theme="synthwave"] body::after,
+  html[data-theme="synthwave"] .cc-music-now-playing::before,
+  html[data-theme="synthwave"] .cc-music-now-playing::after,
   html:is([data-theme="synthwave"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .tab-panel:not([hidden]) {
     animation: none !important;
   }
