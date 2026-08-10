@@ -10,7 +10,7 @@
         var selectedTheme = 'synthwave';
         try {
           var savedTheme = localStorage.getItem('cc_theme');
-          var knownThemes = ['outrun', 'ice', 'midnight', 'synthwave', 'starlight', 'matrix', 'iceage', 'aurora'];
+          var knownThemes = ['outrun', 'ice', 'midnight', 'synthwave', 'starlight', 'matrix', 'iceage', 'aurora', 'forest', 'ember'];
           if (knownThemes.indexOf(savedTheme) !== -1) selectedTheme = savedTheme;
         } catch (error) {}
         document.documentElement.setAttribute('data-theme', selectedTheme);

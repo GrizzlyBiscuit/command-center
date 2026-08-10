@@ -235,12 +235,14 @@ test("the final restrained and animated theme set registers complete persistent 
     matrix: { label: "Matrix", accent: "#39ff78", accent2: "#b4ffca", bg: "#020704" },
     iceage: { label: "Ice Age", accent: "#72e6ff", accent2: "#e9fcff", bg: "#020a12" },
     aurora: { label: "Aurora", accent: "#65f5bf", accent2: "#8eb8ff", bg: "#041014" },
+    forest: { label: "Forest", accent: "#78e89f", accent2: "#e4ff9a", bg: "#030b08" },
+    ember: { label: "Ember", accent: "#ff7b32", accent2: "#ffd36a", bg: "#100402" },
   };
   const harness = loadTheme();
 
   assert.deepEqual(
     Array.from(harness.api.list()),
-    ["outrun", "ice", "midnight", "synthwave", "starlight", "matrix", "iceage", "aurora"],
+    ["outrun", "ice", "midnight", "synthwave", "starlight", "matrix", "iceage", "aurora", "forest", "ember"],
   );
 
   for (const [id, palette] of Object.entries(expected)) {
@@ -256,7 +258,7 @@ test("the final restrained and animated theme set registers complete persistent 
     assert.equal(swatchFor(harness, id).classList.contains("active"), true);
   }
 
-  assert.match(baseSource, /'outrun', 'ice', 'midnight', 'synthwave', 'starlight', 'matrix', 'iceage', 'aurora'/);
+  assert.match(baseSource, /'outrun', 'ice', 'midnight', 'synthwave', 'starlight', 'matrix', 'iceage', 'aurora', 'forest', 'ember'/);
   for (const removed of ["vaporwave", "cyberpunk", "bloodmoon", "neon", "verse"]) {
     assert.equal(harness.api.list().includes(removed), false);
   }
@@ -277,7 +279,11 @@ test("immersive themes have distinct animated scenes and readable glass surfaces
   assert.match(modernSource, /@keyframes\s+cc-iceage-glint\b/);
   assert.match(modernSource, /html\[data-theme="aurora"\] body::before \{(?=[^}]*conic-gradient)(?=[^}]*filter: blur\(58px\);)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="aurora"\] body::after \{(?=[^}]*radial-gradient\(circle at 18% 24%)(?=[^}]*opacity: 0\.28;)[^}]*\}/);
-  assert.match(modernSource, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\]\) :is\([\s\S]*?\.app-titlebar,[\s\S]*?background: var\(--theme-shell\);/);
+  assert.match(modernSource, /html\[data-theme="forest"\] body::before \{(?=[^}]*radial-gradient\(circle)(?=[^}]*cc-forest-fireflies 11s)(?=[^}]*cc-forest-flicker 3\.8s)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="forest"\] body::after \{(?=[^}]*radial-gradient\(ellipse at 59% 51%)(?=[^}]*clip-path: polygon)(?=[^}]*cc-forest-sway 9s)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="ember"\] body::before \{(?=[^}]*radial-gradient\(circle)(?=[^}]*cc-ember-rise 9s linear infinite)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="ember"\] body::after \{(?=[^}]*conic-gradient)(?=[^}]*cc-ember-breathe 4\.6s)[^}]*\}/);
+  assert.match(modernSource, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\], \[data-theme="forest"\], \[data-theme="ember"\]\) :is\([\s\S]*?\.app-titlebar,[\s\S]*?background: var\(--theme-shell\);/);
 });
 
 test("a saved Synthwave preference is restored while building picker controls", () => {
@@ -327,5 +333,5 @@ test("the standalone Appearance cards match the runtime theme registry", () => {
 
   assert.deepEqual(cardIds, registryIds);
   assert.ok(cardIds.includes("synthwave"));
-  assert.deepEqual(cardIds.slice(-3), ["matrix", "iceage", "aurora"]);
+  assert.deepEqual(cardIds.slice(-4), ["iceage", "aurora", "forest", "ember"]);
 });

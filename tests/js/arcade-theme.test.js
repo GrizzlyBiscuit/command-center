@@ -43,3 +43,10 @@ test("Ice Age carries animated snow and crystalline ice behind Arcade", () => {
   assert.match(modern, /@keyframes cc-iceage-snow\b/);
   assert.match(modern, /@keyframes cc-iceage-glint\b/);
 });
+
+test("Forest and Ember keep their atmospheric animation behind Arcade", () => {
+  assert.match(modern, /html\[data-theme="forest"\] body::before\s*\{(?=[^}]*cc-forest-fireflies 11s)(?=[^}]*cc-forest-flicker 3\.8s)[^}]*\}/);
+  assert.match(modern, /html\[data-theme="forest"\] body::after\s*\{[^}]*animation:\s*cc-forest-sway 9s/);
+  assert.match(modern, /html\[data-theme="ember"\] body::before\s*\{[^}]*animation:\s*cc-ember-rise 9s linear infinite;/);
+  assert.match(modern, /html\[data-theme="ember"\] body::after\s*\{[^}]*animation:\s*cc-ember-breathe 4\.6s/);
+});

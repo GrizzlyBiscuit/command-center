@@ -2931,16 +2931,16 @@ html[data-theme="synthwave"] :is(.cc-music-card, .cc-music-row, .cc-video-card, 
    These keep the modern layout contract while adding restrained,
    theme-specific atmosphere behind readable glass surfaces. */
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) body {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) body {
   isolation: isolate;
   background-attachment: fixed;
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .app-shell {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) .app-shell {
   z-index: 2;
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) :is(
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) :is(
   .app-titlebar,
   .cc-sidebar,
   .workspace-topbar
@@ -2951,7 +2951,7 @@ html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], 
   -webkit-backdrop-filter: blur(20px) saturate(120%);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) :is(
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) :is(
   .app-main > .panel:not(.home-panel),
   .dashboard-card,
   .cc-hero,
@@ -2978,7 +2978,7 @@ html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], 
   -webkit-backdrop-filter: blur(10px) saturate(112%);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) :is(
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) :is(
   .home-time-card,
   .hub-card,
   .switch-block,
@@ -2996,20 +2996,20 @@ html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], 
   background: var(--theme-card-glass);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .cc-side-nav .tab-btn.active {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) .cc-side-nav .tab-btn.active {
   border-color: var(--border);
   background: linear-gradient(90deg, var(--accent-soft), transparent);
   box-shadow: inset 3px 0 0 var(--accent), 0 0 24px var(--theme-glow);
   color: var(--text);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .theme-swatch.active {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) .theme-swatch.active {
   border-color: var(--accent);
   background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--accent-2) 8%, transparent));
   box-shadow: 0 0 24px var(--theme-glow);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .home-hero-title {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) .home-hero-title {
   background: linear-gradient(96deg, var(--text) 0%, var(--accent) 52%, var(--accent-2) 100%);
   background-clip: text;
   -webkit-background-clip: text;
@@ -3317,6 +3317,144 @@ html[data-theme="aurora"] body::after {
   pointer-events: none;
 }
 
+html[data-theme="forest"] body {
+  background:
+    radial-gradient(circle at 72% 18%, rgba(208, 255, 174, 0.12), transparent 17rem),
+    radial-gradient(ellipse at 20% 70%, rgba(50, 147, 102, 0.17), transparent 36rem),
+    radial-gradient(ellipse at 86% 74%, rgba(33, 108, 79, 0.16), transparent 38rem),
+    linear-gradient(158deg, #020906 0%, #092116 52%, #04110c 100%);
+}
+
+html[data-theme="forest"] body::before {
+  content: "";
+  position: fixed;
+  z-index: 1;
+  inset: -10%;
+  background-image:
+    radial-gradient(circle, rgba(230, 255, 142, 0.92) 0 1.4px, transparent 2.6px),
+    radial-gradient(circle, rgba(120, 232, 159, 0.72) 0 1px, transparent 2.1px),
+    radial-gradient(circle, rgba(255, 239, 137, 0.56) 0 1.8px, transparent 3px);
+  background-position: 21px 43px, 91px 17px, 153px 106px;
+  background-size: 193px 181px, 263px 239px, 337px 311px;
+  opacity: 0.74;
+  pointer-events: none;
+  filter: drop-shadow(0 0 5px rgba(228, 255, 154, 0.64));
+  mask-image: linear-gradient(to bottom, transparent 2%, #000 20%, #000 88%, transparent 108%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 2%, #000 20%, #000 88%, transparent 108%);
+  animation:
+    cc-forest-fireflies 11s ease-in-out infinite alternate,
+    cc-forest-flicker 3.8s ease-in-out infinite;
+}
+
+html[data-theme="forest"] body::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  right: -4%;
+  bottom: -3%;
+  left: -4%;
+  height: 54vh;
+  min-height: 310px;
+  background:
+    radial-gradient(ellipse at 3% 74%, rgba(2, 18, 10, 0.96) 0 16%, transparent 16.5%),
+    radial-gradient(ellipse at 18% 54%, rgba(3, 28, 15, 0.95) 0 18%, transparent 18.5%),
+    radial-gradient(ellipse at 37% 70%, rgba(2, 20, 11, 0.96) 0 20%, transparent 20.5%),
+    radial-gradient(ellipse at 59% 51%, rgba(4, 32, 18, 0.94) 0 22%, transparent 22.5%),
+    radial-gradient(ellipse at 79% 68%, rgba(2, 21, 12, 0.96) 0 20%, transparent 20.5%),
+    radial-gradient(ellipse at 98% 49%, rgba(4, 29, 17, 0.96) 0 19%, transparent 19.5%),
+    linear-gradient(to top, rgba(2, 14, 8, 0.98) 0 26%, transparent 67%);
+  clip-path: polygon(0 68%, 4% 42%, 7% 66%, 11% 22%, 15% 66%, 21% 35%, 25% 68%, 31% 17%, 36% 66%, 42% 39%, 47% 70%, 53% 24%, 58% 66%, 64% 34%, 69% 70%, 75% 13%, 81% 68%, 87% 36%, 92% 66%, 96% 28%, 100% 62%, 100% 100%, 0 100%);
+  opacity: 0.9;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  animation: cc-forest-sway 9s ease-in-out infinite alternate;
+}
+
+html[data-theme="forest"] :is(.cc-brand-mark, .tb-drag::before) {
+  border-color: rgba(228, 255, 154, 0.34);
+  background: linear-gradient(145deg, rgba(120, 232, 159, 0.23), rgba(228, 255, 154, 0.08));
+  color: #efffc0;
+  filter: drop-shadow(0 0 10px rgba(120, 232, 159, 0.3));
+}
+
+html[data-theme="forest"] :is(.btn-primary, button[type="submit"], input[type="submit"]) {
+  border-color: rgba(228, 255, 154, 0.28);
+  background: linear-gradient(145deg, #bff58c, #5bd18d 58%, #43b899);
+  box-shadow: 0 9px 28px rgba(120, 232, 159, 0.16);
+  color: #041b0d;
+}
+
+html[data-theme="forest"] :is(input, textarea, select) {
+  border-color: rgba(120, 232, 159, 0.2);
+  background: rgba(3, 21, 13, 0.82);
+}
+
+html[data-theme="ember"] body {
+  background:
+    radial-gradient(ellipse at 50% 110%, rgba(255, 83, 32, 0.34), transparent 44rem),
+    radial-gradient(circle at 12% 72%, rgba(177, 42, 16, 0.17), transparent 32rem),
+    radial-gradient(circle at 88% 46%, rgba(255, 144, 48, 0.12), transparent 34rem),
+    linear-gradient(158deg, #0b0201 0%, #210804 54%, #100301 100%);
+}
+
+html[data-theme="ember"] body::before {
+  content: "";
+  position: fixed;
+  z-index: 1;
+  inset: -12% 0 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 219, 112, 0.94) 0 1.2px, transparent 2.3px),
+    radial-gradient(circle, rgba(255, 107, 38, 0.84) 0 1.7px, transparent 3px),
+    radial-gradient(circle, rgba(255, 61, 32, 0.6) 0 1px, transparent 2.1px);
+  background-position: 23px calc(100vh + 120px), 97px calc(100vh + 210px), 157px calc(100vh + 168px);
+  background-size: 149px 181px, 227px 263px, 311px 337px;
+  opacity: 0.76;
+  pointer-events: none;
+  filter: drop-shadow(0 0 5px rgba(255, 107, 38, 0.72));
+  mask-image: linear-gradient(to top, #000 0 72%, transparent 108%);
+  -webkit-mask-image: linear-gradient(to top, #000 0 72%, transparent 108%);
+  animation: cc-ember-rise 9s linear infinite;
+}
+
+html[data-theme="ember"] body::after {
+  content: "";
+  position: fixed;
+  z-index: 0;
+  right: -14%;
+  bottom: -32%;
+  left: -14%;
+  height: 72vh;
+  min-height: 430px;
+  border-radius: 50% 50% 0 0;
+  background:
+    conic-gradient(from 202deg at 50% 100%, transparent 0 13%, rgba(255, 58, 25, 0.13) 18%, transparent 24%, rgba(255, 168, 54, 0.11) 31%, transparent 39% 100%),
+    radial-gradient(ellipse at 50% 100%, rgba(255, 116, 34, 0.25), rgba(154, 31, 8, 0.09) 42%, transparent 68%);
+  opacity: 0.9;
+  pointer-events: none;
+  filter: blur(10px) saturate(120%);
+  transform-origin: 50% 100%;
+  animation: cc-ember-breathe 4.6s ease-in-out infinite alternate;
+}
+
+html[data-theme="ember"] :is(.cc-brand-mark, .tb-drag::before) {
+  border-color: rgba(255, 211, 106, 0.36);
+  background: linear-gradient(145deg, rgba(255, 123, 50, 0.28), rgba(255, 61, 46, 0.1));
+  color: #ffe3a0;
+  filter: drop-shadow(0 0 11px rgba(255, 92, 38, 0.42));
+}
+
+html[data-theme="ember"] :is(.btn-primary, button[type="submit"], input[type="submit"]) {
+  border-color: rgba(255, 211, 106, 0.3);
+  background: linear-gradient(145deg, #ffd36a, #ff7b32 56%, #ff3d2e);
+  box-shadow: 0 9px 30px rgba(255, 76, 30, 0.22);
+  color: #250702;
+}
+
+html[data-theme="ember"] :is(input, textarea, select) {
+  border-color: rgba(255, 123, 50, 0.22);
+  background: rgba(30, 7, 3, 0.84);
+}
+
 /* Only the expressive palettes animate between tools. The restrained
    palettes intentionally keep the instant, clean tab switch. */
 html[data-theme="synthwave"] .tab-panel:not([hidden]) {
@@ -3339,6 +3477,16 @@ html[data-theme="iceage"] .tab-panel:not([hidden]) {
 
 html[data-theme="aurora"] .tab-panel:not([hidden]) {
   animation: cc-aurora-tab-in 360ms cubic-bezier(0.2, 0.74, 0.22, 1) both;
+}
+
+html[data-theme="forest"] .tab-panel:not([hidden]) {
+  animation: cc-forest-tab-in 380ms cubic-bezier(0.2, 0.75, 0.2, 1) both;
+  transform-origin: 50% 100%;
+}
+
+html[data-theme="ember"] .tab-panel:not([hidden]) {
+  animation: cc-ember-tab-in 300ms cubic-bezier(0.18, 0.78, 0.2, 1) both;
+  transform-origin: 50% 100%;
 }
 
 @keyframes cc-synth-sun-breathe {
@@ -3421,6 +3569,42 @@ html[data-theme="aurora"] .tab-panel:not([hidden]) {
   to { opacity: 1; transform: translateY(0); filter: blur(0) saturate(1); }
 }
 
+@keyframes cc-forest-fireflies {
+  from { background-position: 21px 43px, 91px 17px, 153px 106px; transform: translate3d(-1%, 1.5%, 0); }
+  to { background-position: 74px 9px, 37px 82px, 211px 43px; transform: translate3d(1.2%, -1.4%, 0); }
+}
+
+@keyframes cc-forest-flicker {
+  0%, 100% { opacity: 0.46; filter: brightness(0.8) drop-shadow(0 0 4px rgba(228, 255, 154, 0.42)); }
+  48% { opacity: 0.88; filter: brightness(1.35) drop-shadow(0 0 7px rgba(228, 255, 154, 0.76)); }
+  72% { opacity: 0.62; filter: brightness(1.02) drop-shadow(0 0 5px rgba(120, 232, 159, 0.58)); }
+}
+
+@keyframes cc-forest-sway {
+  from { transform: translateX(-0.8%) skewX(-0.35deg) scale(1.01); filter: brightness(0.88); }
+  to { transform: translateX(0.8%) skewX(0.35deg) scale(1.015); filter: brightness(1.08); }
+}
+
+@keyframes cc-forest-tab-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.997); filter: blur(4px) saturate(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) saturate(1); }
+}
+
+@keyframes cc-ember-rise {
+  from { background-position: 23px calc(100vh + 120px), 97px calc(100vh + 210px), 157px calc(100vh + 168px); }
+  to { background-position: 68px -181px, 33px -263px, 219px -337px; }
+}
+
+@keyframes cc-ember-breathe {
+  from { opacity: 0.62; transform: scaleX(0.96) scaleY(0.9); filter: blur(13px) saturate(105%) brightness(0.86); }
+  to { opacity: 1; transform: scaleX(1.04) scaleY(1.08); filter: blur(8px) saturate(135%) brightness(1.2); }
+}
+
+@keyframes cc-ember-tab-in {
+  from { opacity: 0; transform: translateY(11px) scale(0.995); filter: blur(3px) brightness(1.28); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(1); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html[data-theme="synthwave"] body::before,
   html[data-theme="synthwave"] body::after,
@@ -3436,7 +3620,15 @@ html[data-theme="aurora"] .tab-panel:not([hidden]) {
   html[data-theme="starlight"] body::after,
   html[data-theme="starlight"] .cc-music-now-playing::before,
   html[data-theme="starlight"] .cc-music-now-playing::after,
-  html:is([data-theme="synthwave"], [data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .tab-panel:not([hidden]) {
+  html[data-theme="forest"] body::before,
+  html[data-theme="forest"] body::after,
+  html[data-theme="forest"] .cc-music-now-playing::before,
+  html[data-theme="forest"] .cc-music-now-playing::after,
+  html[data-theme="ember"] body::before,
+  html[data-theme="ember"] body::after,
+  html[data-theme="ember"] .cc-music-now-playing::before,
+  html[data-theme="ember"] .cc-music-now-playing::after,
+  html:is([data-theme="synthwave"], [data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"], [data-theme="forest"], [data-theme="ember"]) .tab-panel:not([hidden]) {
     animation: none !important;
   }
 }
@@ -3471,6 +3663,21 @@ html[data-theme="aurora"] .tab-panel:not([hidden]) {
   html[data-theme="aurora"] body::before {
     inset: -18% -70% 28%;
     filter: blur(42px);
+  }
+
+  html[data-theme="forest"] body::after {
+    right: -18%;
+    left: -18%;
+    height: 46vh;
+  }
+
+  html[data-theme="ember"] body::before {
+    background-size: 119px 153px, 181px 221px, 251px 281px;
+  }
+
+  html[data-theme="ember"] body::after {
+    right: -34%;
+    left: -34%;
   }
 }
 

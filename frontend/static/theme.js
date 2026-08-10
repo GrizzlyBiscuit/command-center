@@ -111,6 +111,44 @@
         '--theme-card-glass': 'rgba(12,35,42,0.76)', '--theme-player': 'rgba(4,18,23,0.62)',
         '--theme-player-edge': 'rgba(101,245,191,0.3)', '--theme-glow': 'rgba(142,184,255,0.2)'
       }
+    },
+    forest: {
+      label: 'Forest',
+      vars: {
+        '--bg': '#030b08', '--bg-elevated': '#07150f', '--panel': '#0b1d15',
+        '--panel-soft': '#112a1e', '--surface-hover': '#183927', '--surface-active': '#215036',
+        '--accent': '#78e89f', '--accent-2': '#e4ff9a', '--accent-3': '#55c9a5',
+        '--accent-soft': 'rgba(120,232,159,0.14)', '--text': '#f5fff7',
+        '--text-soft': '#d7eddd', '--muted': '#82a58d', '--muted-strong': '#accbb4',
+        '--border': 'rgba(120,232,159,0.27)', '--border-soft': 'rgba(188,238,159,0.15)',
+        '--success': '#78e89f', '--success-soft': 'rgba(120,232,159,0.13)',
+        '--warning': '#e4ff9a', '--warning-soft': 'rgba(228,255,154,0.13)',
+        '--danger': '#ff7f82', '--danger-soft': 'rgba(255,127,130,0.13)',
+        '--info': '#72d7c1', '--shadow': '0 22px 58px rgba(0,18,9,0.52)',
+        '--shadow-soft': '0 10px 28px rgba(0,18,9,0.36)',
+        '--theme-shell': 'rgba(3,15,10,0.88)', '--theme-panel-glass': 'rgba(8,29,19,0.76)',
+        '--theme-card-glass': 'rgba(12,38,25,0.72)', '--theme-player': 'rgba(4,22,14,0.6)',
+        '--theme-player-edge': 'rgba(120,232,159,0.32)', '--theme-glow': 'rgba(228,255,154,0.18)'
+      }
+    },
+    ember: {
+      label: 'Ember',
+      vars: {
+        '--bg': '#100402', '--bg-elevated': '#1b0804', '--panel': '#271008',
+        '--panel-soft': '#35160c', '--surface-hover': '#472013', '--surface-active': '#5e2a17',
+        '--accent': '#ff7b32', '--accent-2': '#ffd36a', '--accent-3': '#ff3d2e',
+        '--accent-soft': 'rgba(255,123,50,0.15)', '--text': '#fff8f2',
+        '--text-soft': '#f2ddd0', '--muted': '#b18f7e', '--muted-strong': '#d3b09d',
+        '--border': 'rgba(255,123,50,0.3)', '--border-soft': 'rgba(255,193,103,0.17)',
+        '--success': '#8de19e', '--success-soft': 'rgba(141,225,158,0.13)',
+        '--warning': '#ffd36a', '--warning-soft': 'rgba(255,211,106,0.14)',
+        '--danger': '#ff5546', '--danger-soft': 'rgba(255,85,70,0.14)',
+        '--info': '#ff9d5c', '--shadow': '0 22px 58px rgba(32,5,0,0.56)',
+        '--shadow-soft': '0 10px 28px rgba(32,5,0,0.4)',
+        '--theme-shell': 'rgba(20,6,3,0.89)', '--theme-panel-glass': 'rgba(38,12,6,0.77)',
+        '--theme-card-glass': 'rgba(49,17,8,0.73)', '--theme-player': 'rgba(27,8,3,0.62)',
+        '--theme-player-edge': 'rgba(255,123,50,0.36)', '--theme-glow': 'rgba(255,92,38,0.22)'
+      }
     }
   };
 
