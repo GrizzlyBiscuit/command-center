@@ -100,6 +100,12 @@ test("the mini player opens an accessible full-screen Now Playing dialog", () =>
   assert.match(css, /\.cc-music-now-playing-close\s*\{(?=[^}]*position:\s*fixed;)(?=[^}]*z-index:\s*4;)[^}]*\}/);
 });
 
+test("the mini player advertises and wires non-destructive right-click hiding", () => {
+  assert.match(panel, /id="cc-music-player-hide"[^>]*title="Hide music player \(or right-click the player\)"/);
+  assert.match(app, /nodes\.player\?\.addEventListener\("contextmenu", event => \{\s*event\.preventDefault\(\);\s*setPlayerHidden\(true\);\s*\}\);/);
+  assert.match(app, /nodes\.playerShow\?\.addEventListener\("click", \(\) => setPlayerHidden\(false\)\)/);
+});
+
 test("music defaults to sorted albums and synchronizes every playback surface", () => {
   assert.match(app, /view:\s*"albums"/);
   assert.match(app, /sort:\s*"newest"/);

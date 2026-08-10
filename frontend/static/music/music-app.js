@@ -2896,6 +2896,10 @@
       nodes.libraryQueue?.addEventListener("click", () => setQueueOpen(nodes.queue?.hidden, nodes.libraryQueue));
       nodes.queueClose?.addEventListener("click", () => setQueueOpen(false));
       nodes.playerHide?.addEventListener("click", () => setPlayerHidden(true));
+      nodes.player?.addEventListener("contextmenu", event => {
+        event.preventDefault();
+        setPlayerHidden(true);
+      });
       nodes.playerShow?.addEventListener("click", () => setPlayerHidden(false));
       nodes.playerOpen?.addEventListener("click", openNowPlaying);
       nodes.playerOpen?.addEventListener("keydown", event => {

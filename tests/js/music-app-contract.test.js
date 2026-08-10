@@ -54,6 +54,8 @@ test("player visibility preference is local, guarded, and presentation-only", ()
   assert.match(handler, /nodes\.playerOpen/);
   assert.doesNotMatch(handler, /nodes\.playerHide/);
   assert.doesNotMatch(handler, /pause\(|\.pause\(|stop|clearQueue|sendRemote/);
+  assert.match(appSource, /nodes\.player\?\.addEventListener\("contextmenu", event => \{\s*event\.preventDefault\(\);\s*setPlayerHidden\(true\);\s*\}\);/);
+  assert.match(appSource, /nodes\.playerShow\?\.addEventListener\("click", \(\) => setPlayerHidden\(false\)\)/);
 });
 
 test("rendered-control checks reject CSS-hidden ancestors and zero-layout targets", () => {
