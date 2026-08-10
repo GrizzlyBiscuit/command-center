@@ -9,7 +9,7 @@
       <div>
         <p class="appearance-eyebrow">Settings</p>
         <h1>Appearance</h1>
-        <p>Choose a calm surface and accent palette for this browser.</p>
+        <p>Choose a restrained palette or switch on the full Synthwave aesthetic.</p>
       </div>
       <nav class="appearance-nav" aria-label="Appearance">
         <a href="{{ url_for('index') }}">Home</a>
@@ -69,6 +69,12 @@
           <span class="dm-desc">Dark blue-green surfaces with a measured cyan accent.</span>
           <span class="dm-check">Selected</span>
         </button>
+        <button class="dm-card" type="button" data-theme="synthwave" aria-pressed="false">
+          <span class="dm-swatch" style="--sw1:#ff4fb7;--sw2:#43e7ff" aria-hidden="true"></span>
+          <span class="dm-name">Synthwave</span>
+          <span class="dm-desc">Neon glow, sunset color, and a horizon grid on the same modern layout.</span>
+          <span class="dm-check">Selected</span>
+        </button>
       </div>
 
       <p class="dm-note">Your selection is saved in this browser and is also available under
@@ -87,7 +93,8 @@
     bloodmoon: 'Clay',
     ice: 'Glacier',
     midnight: 'Ink',
-    neon: 'Ocean'
+    neon: 'Ocean',
+    synthwave: 'Synthwave'
   };
 
   function sync() {

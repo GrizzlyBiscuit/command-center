@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}Command Center{% endblock %}</title>
+    <script>
+      (function () {
+        try {
+          var savedTheme = localStorage.getItem('cc_theme');
+          var knownThemes = ['outrun', 'vaporwave', 'cyberpunk', 'bloodmoon', 'ice', 'midnight', 'neon', 'synthwave'];
+          if (knownThemes.indexOf(savedTheme) !== -1) document.documentElement.setAttribute('data-theme', savedTheme);
+        } catch (error) {}
+      })();
+    </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='synthwave.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='media/media-ui.css') }}">

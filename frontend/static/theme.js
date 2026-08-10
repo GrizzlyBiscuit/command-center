@@ -1,4 +1,4 @@
-// Appearance picker — swaps a restrained accent/surface palette on <html>.
+// Appearance picker - swaps a complete accent/surface palette on <html>.
 // Legacy storage keys remain valid so existing installations migrate cleanly.
 (function () {
   var THEMES = {
@@ -48,6 +48,22 @@
         '--accent': '#4c9faf', '--accent-2': '#76bdca', '--accent-3': '#4c9faf',
         '--accent-soft': 'rgba(76,159,175,0.13)', '--border': '#243742'
       }
+    },
+    synthwave: {
+      label: 'Synthwave',
+      vars: {
+        '--bg': '#080315', '--bg-elevated': '#100722', '--panel': '#170b30',
+        '--panel-soft': '#21103d', '--surface-hover': '#2b174b', '--surface-active': '#38205f',
+        '--accent': '#ff4fb7', '--accent-2': '#43e7ff', '--accent-3': '#a56dff',
+        '--accent-soft': 'rgba(255,79,183,0.14)', '--text': '#fff7ff',
+        '--text-soft': '#eadff3', '--muted': '#aa9cbd', '--muted-strong': '#c8b9d7',
+        '--border': 'rgba(67,231,255,0.28)', '--border-soft': 'rgba(193,119,255,0.18)',
+        '--success': '#58efaa', '--success-soft': 'rgba(88,239,170,0.13)',
+        '--warning': '#ffd166', '--warning-soft': 'rgba(255,209,102,0.14)',
+        '--danger': '#ff6685', '--danger-soft': 'rgba(255,102,133,0.13)',
+        '--info': '#43e7ff', '--shadow': '0 22px 58px rgba(20,2,48,0.42)',
+        '--shadow-soft': '0 10px 28px rgba(20,2,48,0.32)'
+      }
     }
   };
 
@@ -64,7 +80,9 @@
     try { localStorage.setItem('cc_theme', name); } catch (e) {}
     // refresh active state in the picker if present
     document.querySelectorAll('.theme-swatch').forEach(function (s) {
-      s.classList.toggle('active', s.dataset.theme === name);
+      var active = s.dataset.theme === name;
+      s.classList.toggle('active', active);
+      s.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
     var out = document.getElementById('theme-current');
     if (out) out.textContent = t.label;
@@ -81,8 +99,10 @@
       Object.keys(THEMES).forEach(function (k) {
         var t = THEMES[k];
         var b = document.createElement('button');
+        b.type = 'button';
         b.className = 'theme-swatch';
         b.dataset.theme = k;
+        b.setAttribute('aria-pressed', 'false');
         b.setAttribute('data-tip', t.label + ' palette');
         b.style.setProperty('--sw1', (t.vars && t.vars['--accent']) || '#7c8cff');
         b.style.setProperty('--sw2', (t.vars && t.vars['--accent-2']) || '#98a5ff');

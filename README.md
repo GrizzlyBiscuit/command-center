@@ -218,9 +218,10 @@ Shared task board for you and the agent.
 - Move tasks between columns
 
 ### Themes
-Restrained interface palette switcher.
+Interface palette and aesthetic switcher.
 
 - Pick a theme.
+- Includes an optional Synthwave treatment without changing the modern layout.
 - Persists across restarts.
 
 ### Changelog

@@ -2385,6 +2385,365 @@ body[data-input-mode="gamepad"] :focus {
   box-shadow: 0 0 0 4px rgba(124, 140, 255, 0.14);
 }
 
+/* --- Optional Synthwave aesthetic -----------------------------------
+   Paint-only overrides: the modern shell, spacing, and responsive
+   behavior remain identical while the surfaces pick up sunset color,
+   neon edge light, and a static horizon grid. */
+
+html[data-theme="synthwave"] {
+  --bg: #080315;
+  --bg-elevated: #100722;
+  --panel: #170b30;
+  --panel-soft: #21103d;
+  --surface-hover: #2b174b;
+  --surface-active: #38205f;
+  --accent: #ff4fb7;
+  --accent-2: #43e7ff;
+  --accent-3: #a56dff;
+  --accent-soft: rgba(255, 79, 183, 0.14);
+  --text: #fff7ff;
+  --text-soft: #eadff3;
+  --muted: #aa9cbd;
+  --muted-strong: #c8b9d7;
+  --border: rgba(67, 231, 255, 0.28);
+  --border-soft: rgba(193, 119, 255, 0.18);
+  --success: #58efaa;
+  --success-soft: rgba(88, 239, 170, 0.13);
+  --warning: #ffd166;
+  --warning-soft: rgba(255, 209, 102, 0.14);
+  --danger: #ff6685;
+  --danger-soft: rgba(255, 102, 133, 0.13);
+  --info: #43e7ff;
+  --shadow: 0 22px 58px rgba(20, 2, 48, 0.42);
+  --shadow-soft: 0 10px 28px rgba(20, 2, 48, 0.32);
+  scrollbar-color: #684a83 transparent;
+}
+
+html[data-theme="synthwave"] body {
+  background:
+    radial-gradient(circle at 78% 10%, rgba(67, 231, 255, 0.11), transparent 32rem),
+    radial-gradient(circle at 72% 82%, rgba(255, 79, 183, 0.18), transparent 34rem),
+    linear-gradient(155deg, #070211 0%, #12052a 52%, #080315 100%);
+}
+
+html[data-theme="synthwave"] body::before {
+  z-index: 0;
+  inset: 0;
+  background-image:
+    linear-gradient(to bottom, transparent 0 46%, rgba(165, 109, 255, 0.08) 100%),
+    repeating-linear-gradient(90deg, rgba(67, 231, 255, 0.22) 0 1px, transparent 1px 48px),
+    repeating-linear-gradient(0deg, rgba(255, 79, 183, 0.18) 0 1px, transparent 1px 48px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+  opacity: 0.24;
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.12) 36%, #000 100%);
+  transform: none;
+}
+
+html[data-theme="synthwave"] ::selection {
+  background: rgba(255, 79, 183, 0.38);
+  color: #fff;
+}
+
+html[data-theme="synthwave"] * {
+  scrollbar-color: #684a83 transparent;
+}
+
+html[data-theme="synthwave"] *::-webkit-scrollbar-thumb,
+html[data-theme="synthwave"] *::-webkit-scrollbar-thumb:hover {
+  background: #684a83;
+  background-clip: padding-box;
+}
+
+html[data-theme="synthwave"] .app-titlebar {
+  border-bottom-color: rgba(67, 231, 255, 0.16);
+  background: rgba(7, 2, 18, 0.96);
+  box-shadow: 0 1px 24px rgba(255, 79, 183, 0.08);
+}
+
+html[data-theme="synthwave"] .tb-drag::before {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 12px rgba(67, 231, 255, 0.55);
+}
+
+html[data-theme="synthwave"] .tb-btn:hover,
+html[data-theme="synthwave"] .tb-btn:focus-visible,
+html[data-theme="synthwave"] .cc-side-toggle:hover,
+html[data-theme="synthwave"] .cc-side-reopen:hover {
+  background: rgba(165, 109, 255, 0.16);
+  color: var(--text);
+}
+
+html[data-theme="synthwave"] .tb-btn.tb-close:hover {
+  background: var(--danger);
+  color: #18051f;
+}
+
+html[data-theme="synthwave"] .cc-sidebar {
+  border-right-color: rgba(67, 231, 255, 0.16);
+  background: rgba(10, 4, 26, 0.95);
+  box-shadow: 16px 0 56px rgba(34, 3, 68, 0.22);
+}
+
+html[data-theme="synthwave"] .cc-brand-mark {
+  border-color: rgba(255, 79, 183, 0.48);
+  background: linear-gradient(145deg, rgba(255, 79, 183, 0.24), rgba(67, 231, 255, 0.1));
+  box-shadow: 0 0 22px rgba(255, 79, 183, 0.15);
+  color: var(--accent-2);
+}
+
+html[data-theme="synthwave"] .cc-nav-label {
+  color: #957eac;
+}
+
+html[data-theme="synthwave"] #cc-nav-search,
+html[data-theme="synthwave"] input[type="search"] {
+  border-color: rgba(165, 109, 255, 0.24);
+  background: rgba(19, 9, 39, 0.9);
+}
+
+html[data-theme="synthwave"] #cc-nav-search:focus,
+html[data-theme="synthwave"] input[type="search"]:focus {
+  border-color: rgba(67, 231, 255, 0.66);
+  box-shadow: 0 0 0 3px rgba(67, 231, 255, 0.1), 0 0 22px rgba(255, 79, 183, 0.1);
+}
+
+html[data-theme="synthwave"] .cc-side-nav .tab-btn:hover,
+html[data-theme="synthwave"] .cc-side-nav .tab-btn:focus-visible {
+  border-color: rgba(67, 231, 255, 0.1);
+  background: rgba(67, 231, 255, 0.06);
+  color: var(--text);
+}
+
+html[data-theme="synthwave"] .cc-side-nav .tab-btn.active {
+  border-color: rgba(255, 79, 183, 0.34);
+  background: linear-gradient(90deg, rgba(255, 79, 183, 0.17), rgba(67, 231, 255, 0.07));
+  box-shadow: inset 3px 0 0 var(--accent), 0 0 24px rgba(255, 79, 183, 0.08);
+  color: #fff7ff;
+}
+
+html[data-theme="synthwave"] .cc-side-nav .tab-btn.active .glyph {
+  color: var(--accent-2);
+  filter: drop-shadow(0 0 5px rgba(67, 231, 255, 0.38));
+}
+
+html[data-theme="synthwave"] :is(.cc-side-toggle-outside, .cc-side-reopen) {
+  border-color: rgba(67, 231, 255, 0.2);
+  background: #160b2d;
+  color: var(--accent-2);
+}
+
+html[data-theme="synthwave"] .workspace-topbar {
+  border-bottom-color: rgba(165, 109, 255, 0.16);
+  background: rgba(9, 4, 24, 0.86);
+  box-shadow: 0 12px 36px rgba(14, 2, 36, 0.16);
+}
+
+html[data-theme="synthwave"] .topbar-status-pill {
+  border-color: rgba(67, 231, 255, 0.2);
+  background: rgba(22, 10, 44, 0.82);
+}
+
+html[data-theme="synthwave"] .app-main > .panel:not(.home-panel),
+html[data-theme="synthwave"] :is(
+  .dashboard-card,
+  .sys-wrap,
+  .arena,
+  .maze-wrap,
+  .fusion,
+  .viz-wrap,
+  .pomo-wrap,
+  .lp-wrap,
+  .arc-wrap,
+  .chat-wrap,
+  .notes-wrap,
+  .dc-wrap,
+  .wh-wrap,
+  .kb-wrap,
+  .theme-wrap,
+  .cc-music,
+  .cc-video
+) {
+  border-color: rgba(165, 109, 255, 0.22);
+  background: linear-gradient(145deg, rgba(24, 11, 48, 0.94), rgba(12, 6, 30, 0.92));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 16px 44px rgba(18, 2, 42, 0.2);
+}
+
+html[data-theme="synthwave"] .cc-hero {
+  border-color: rgba(255, 79, 183, 0.26);
+  background:
+    radial-gradient(circle at 88% 26%, rgba(255, 196, 92, 0.16), transparent 17rem),
+    radial-gradient(circle at 68% 110%, rgba(255, 79, 183, 0.18), transparent 26rem),
+    linear-gradient(145deg, rgba(28, 12, 55, 0.98), rgba(11, 6, 29, 0.96));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 18px 54px rgba(26, 2, 57, 0.24);
+}
+
+html[data-theme="synthwave"] .cc-hero::after {
+  border: 0;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 13px, rgba(24, 4, 44, 0.66) 13px 18px),
+    linear-gradient(180deg, #ffe17a 0%, #ff9873 36%, #ff4fb7 70%, #9158ff 100%);
+  box-shadow: 0 0 70px rgba(255, 79, 183, 0.24);
+  opacity: 0.34;
+}
+
+html[data-theme="synthwave"] .home-hero-title {
+  background: linear-gradient(94deg, #fff8ff 0%, #ff9bd3 46%, #65efff 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+  text-shadow: 0 0 24px rgba(255, 79, 183, 0.12);
+}
+
+html[data-theme="synthwave"] :is(.cc-eyebrow, .section-kicker, .appearance-eyebrow) {
+  color: var(--accent-2);
+  text-shadow: 0 0 12px rgba(67, 231, 255, 0.2);
+}
+
+html[data-theme="synthwave"] :is(
+  .home-time-card,
+  .hub-card,
+  .switch-block,
+  .agent-card,
+  .terminal-panel,
+  .sys-head,
+  .arena-controls,
+  .maze-controls,
+  .fusion-create,
+  .viz-toolbar,
+  .chat-model-row,
+  .dc-row,
+  .wh-row,
+  .kb-bar,
+  .sys-card,
+  .arena-card,
+  .maze-board,
+  .maze-score,
+  .fusion-card,
+  .kb-col,
+  .lp-card,
+  .chat-msg,
+  .theme-swatch
+) {
+  border-color: rgba(193, 119, 255, 0.18);
+  background: rgba(19, 9, 39, 0.82);
+}
+
+html[data-theme="synthwave"] :is(
+  .preview-box,
+  .chat-log,
+  .notes-area,
+  .arena-pair-out,
+  .maze-canvas,
+  .viz-canvas,
+  .arc-stage,
+  .cc-board,
+  .terminal-output
+) {
+  border-color: rgba(67, 231, 255, 0.16);
+  background: rgba(8, 3, 21, 0.88);
+}
+
+html[data-theme="synthwave"] :where(
+  button:not(.tab-btn):not(.tb-btn):not(.cc-media-icon-button):not(.btn-primary):not(.btn-ghost):not(.btn-danger):not([type="submit"]):not(.active):not([aria-pressed="true"])
+) {
+  border-color: rgba(193, 119, 255, 0.2);
+  background: #2a1748;
+}
+
+html[data-theme="synthwave"] :where(
+  button:not(.tab-btn):not(.tb-btn):not(.cc-media-icon-button):not(.btn-primary):not(.btn-ghost):not(.btn-danger):not([type="submit"]):not(.active):not([aria-pressed="true"])
+):hover {
+  border-color: rgba(67, 231, 255, 0.28);
+  background: #38205d;
+}
+
+html[data-theme="synthwave"] :is(.btn-primary, button[type="submit"], input[type="submit"]) {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, #ff5aa9, #9d68ff);
+  box-shadow: 0 8px 22px rgba(255, 79, 183, 0.16);
+  color: #13051d;
+}
+
+html[data-theme="synthwave"] :is(.btn-primary, button[type="submit"], input[type="submit"]):hover {
+  background: linear-gradient(135deg, #ff79bb, #b285ff);
+  box-shadow: 0 10px 28px rgba(255, 79, 183, 0.22);
+  color: #13051d;
+}
+
+html[data-theme="synthwave"] .btn-ghost {
+  border-color: rgba(67, 231, 255, 0.2);
+  background: rgba(28, 14, 52, 0.86);
+  color: var(--text-soft);
+}
+
+html[data-theme="synthwave"] .btn-ghost:hover {
+  border-color: rgba(67, 231, 255, 0.4);
+  background: rgba(67, 231, 255, 0.09);
+}
+
+html[data-theme="synthwave"] :is(
+  input[type="text"],
+  input[type="password"],
+  input[type="url"],
+  input[type="number"],
+  input[type="email"],
+  textarea,
+  select,
+  .arena-sel,
+  .fusion-input,
+  .chat-model-sel
+) {
+  border-color: rgba(193, 119, 255, 0.24);
+  background: rgba(9, 4, 23, 0.9);
+}
+
+html[data-theme="synthwave"] :is(input, textarea, select):focus {
+  border-color: rgba(67, 231, 255, 0.68);
+  box-shadow: 0 0 0 3px rgba(67, 231, 255, 0.1), 0 0 24px rgba(255, 79, 183, 0.09);
+}
+
+html[data-theme="synthwave"] :is(button, input, textarea, select, a):focus-visible,
+html[data-theme="synthwave"] body[data-input-mode="keyboard"] :focus-visible,
+html[data-theme="synthwave"] body[data-input-mode="gamepad"] :focus {
+  outline-color: var(--accent-2);
+  box-shadow: 0 0 0 4px rgba(67, 231, 255, 0.12), 0 0 20px rgba(255, 79, 183, 0.12);
+}
+
+html[data-theme="synthwave"] .theme-swatch.active {
+  border-color: rgba(255, 79, 183, 0.58);
+  background: linear-gradient(135deg, rgba(255, 79, 183, 0.17), rgba(67, 231, 255, 0.08));
+  box-shadow: 0 0 22px rgba(255, 79, 183, 0.11);
+}
+
+html[data-theme="synthwave"] .cc-music,
+html[data-theme="synthwave"] .cc-video {
+  --music-bg: var(--panel);
+  --music-panel: #120827;
+  --music-border: rgba(193, 119, 255, 0.18);
+  --music-cyan: var(--accent-2);
+  --music-pink: var(--accent);
+}
+
+html[data-theme="synthwave"] :is(
+  .cc-music-content,
+  .cc-video-content,
+  .cc-video-player,
+  .cc-music-player,
+  .cc-music-queue
+) {
+  border-color: rgba(67, 231, 255, 0.18);
+  background: rgba(9, 4, 23, 0.94);
+  box-shadow: 0 0 32px rgba(255, 79, 183, 0.08);
+}
+
+html[data-theme="synthwave"] :is(.cc-music-card, .cc-music-row, .cc-video-card, .cc-video-row) {
+  border-color: rgba(193, 119, 255, 0.2);
+  background: rgba(24, 11, 46, 0.9);
+}
+
 /* --- Responsive shell ------------------------------------------------ */
 
 @media (min-width: 1500px) {
