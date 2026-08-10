@@ -4,27 +4,6 @@
   var DEFAULT_THEME = 'synthwave';
   var THEMES = {
     outrun: { label: 'Graphite', vars: {} },
-    vaporwave: {
-      label: 'Indigo',
-      vars: {
-        '--accent': '#8b7cf6', '--accent-2': '#b2a9ff', '--accent-3': '#8b7cf6',
-        '--accent-soft': 'rgba(139,124,246,0.13)'
-      }
-    },
-    cyberpunk: {
-      label: 'Sage',
-      vars: {
-        '--accent': '#5fa887', '--accent-2': '#83c4a5', '--accent-3': '#5fa887',
-        '--accent-soft': 'rgba(95,168,135,0.13)'
-      }
-    },
-    bloodmoon: {
-      label: 'Clay',
-      vars: {
-        '--accent': '#c98267', '--accent-2': '#e2a28b', '--accent-3': '#c98267',
-        '--accent-soft': 'rgba(201,130,103,0.13)'
-      }
-    },
     ice: {
       label: 'Glacier',
       vars: {
@@ -39,15 +18,6 @@
         '--panel-soft': '#151d28', '--surface-hover': '#192331',
         '--accent': '#7483df', '--accent-2': '#9da8f2', '--accent-3': '#7483df',
         '--accent-soft': 'rgba(116,131,223,0.13)', '--border': '#222d3b'
-      }
-    },
-    neon: {
-      label: 'Ocean',
-      vars: {
-        '--bg': '#081015', '--bg-elevated': '#0d171e', '--panel': '#101c25',
-        '--panel-soft': '#162530', '--surface-hover': '#1a2c38',
-        '--accent': '#4c9faf', '--accent-2': '#76bdca', '--accent-3': '#4c9faf',
-        '--accent-soft': 'rgba(76,159,175,0.13)', '--border': '#243742'
       }
     },
     synthwave: {
@@ -104,23 +74,23 @@
         '--theme-player-edge': 'rgba(57,255,120,0.32)', '--theme-glow': 'rgba(57,255,120,0.18)'
       }
     },
-    verse: {
-      label: 'Verse',
+    iceage: {
+      label: 'Ice Age',
       vars: {
-        '--bg': '#060713', '--bg-elevated': '#0c0d20', '--panel': '#11132a',
-        '--panel-soft': '#181b38', '--surface-hover': '#20254a', '--surface-active': '#2a315b',
-        '--accent': '#ff365f', '--accent-2': '#3fe7ff', '--accent-3': '#a56cff',
-        '--accent-soft': 'rgba(255,54,95,0.14)', '--text': '#fff8fb',
-        '--text-soft': '#e8e5f2', '--muted': '#9b9bb5', '--muted-strong': '#c1bfd1',
-        '--border': 'rgba(63,231,255,0.3)', '--border-soft': 'rgba(255,54,95,0.18)',
-        '--success': '#5cf0ad', '--success-soft': 'rgba(92,240,173,0.13)',
-        '--warning': '#ffd35c', '--warning-soft': 'rgba(255,211,92,0.14)',
-        '--danger': '#ff365f', '--danger-soft': 'rgba(255,54,95,0.14)',
-        '--info': '#3fe7ff', '--shadow': '0 22px 58px rgba(2,4,26,0.52)',
-        '--shadow-soft': '0 10px 28px rgba(2,4,26,0.38)',
-        '--theme-shell': 'rgba(7,8,24,0.9)', '--theme-panel-glass': 'rgba(12,14,36,0.82)',
-        '--theme-card-glass': 'rgba(18,21,48,0.78)', '--theme-player': 'rgba(7,8,25,0.64)',
-        '--theme-player-edge': 'rgba(63,231,255,0.32)', '--theme-glow': 'rgba(255,54,95,0.2)'
+        '--bg': '#020a12', '--bg-elevated': '#061520', '--panel': '#0a1c29',
+        '--panel-soft': '#102938', '--surface-hover': '#173849', '--surface-active': '#205066',
+        '--accent': '#72e6ff', '--accent-2': '#e9fcff', '--accent-3': '#8baeff',
+        '--accent-soft': 'rgba(114,230,255,0.14)', '--text': '#f5fdff',
+        '--text-soft': '#d9f2f7', '--muted': '#83a8b4', '--muted-strong': '#b2d4dc',
+        '--border': 'rgba(134,230,255,0.3)', '--border-soft': 'rgba(188,240,255,0.17)',
+        '--success': '#79f0d0', '--success-soft': 'rgba(121,240,208,0.13)',
+        '--warning': '#e9f7ad', '--warning-soft': 'rgba(233,247,173,0.13)',
+        '--danger': '#ff829d', '--danger-soft': 'rgba(255,130,157,0.13)',
+        '--info': '#9adfff', '--shadow': '0 22px 58px rgba(0,12,24,0.54)',
+        '--shadow-soft': '0 10px 28px rgba(0,12,24,0.38)',
+        '--theme-shell': 'rgba(3,15,24,0.88)', '--theme-panel-glass': 'rgba(7,27,40,0.72)',
+        '--theme-card-glass': 'rgba(11,36,50,0.7)', '--theme-player': 'rgba(3,20,30,0.58)',
+        '--theme-player-edge': 'rgba(134,230,255,0.36)', '--theme-glow': 'rgba(114,230,255,0.22)'
       }
     },
     aurora: {

@@ -15,7 +15,7 @@ test("clean palettes stay instant while legacy full-window FX remains removed", 
   assert.doesNotMatch(tabPanel, /\banimation\s*:/);
   assert.doesNotMatch(modern, /@keyframes\s+cc-view-in\b/);
   assert.doesNotMatch(index, /CCFX\s*\.\s*whoosh|CCFX\s*&&[\s\S]*?whoosh/);
-  for (const id of ["outrun", "vaporwave", "cyberpunk", "bloodmoon", "ice", "midnight", "neon"]) {
+  for (const id of ["outrun", "ice", "midnight"]) {
     assert.doesNotMatch(modern, new RegExp(`data-theme=["']${id}["'][^}]*tab-panel[^}]*animation`));
   }
 });
@@ -25,7 +25,7 @@ test("immersive palettes have distinct reduced-motion-safe tab entrances", () =>
     synthwave: "cc-synth-tab-in 280ms",
     starlight: "cc-starlight-tab-in 380ms",
     matrix: "cc-matrix-tab-in 230ms",
-    verse: "cc-verse-tab-in 260ms",
+    iceage: "cc-iceage-tab-in 340ms",
     aurora: "cc-aurora-tab-in 360ms",
   };
 
@@ -38,7 +38,7 @@ test("immersive palettes have distinct reduced-motion-safe tab entrances", () =>
   assert.match(modern, /@keyframes\s+cc-synth-tab-in\b/);
   assert.match(modern, /@keyframes\s+cc-starlight-tab-in\b/);
   assert.match(modern, /@keyframes\s+cc-matrix-tab-in\b/);
-  assert.match(modern, /@keyframes\s+cc-verse-tab-in\b/);
+  assert.match(modern, /@keyframes\s+cc-iceage-tab-in\b/);
   assert.match(modern, /@keyframes\s+cc-aurora-tab-in\b/);
   assert.match(modern, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?animation:\s*none !important;/);
   assert.match(modern, /body::before \{[\s\S]*?animation:\s*cc-synth-grid-drift 10s linear infinite;/);
@@ -50,7 +50,10 @@ test("immersive palettes have distinct reduced-motion-safe tab entrances", () =>
   assert.match(modern, /@keyframes\s+cc-starlight-meteor[\s\S]*?translate3d\(68vw, 38vh, 0\)/);
   assert.match(modern, /@keyframes\s+cc-matrix-rain[\s\S]*?18px 175px, 62px 195px, 101px 186px;/);
   assert.match(modern, /html\[data-theme="matrix"\] body::before \{[^}]*animation:\s*cc-matrix-rain 14s linear infinite;/);
+  assert.match(modern, /html\[data-theme="iceage"\] body::before \{[^}]*animation:\s*cc-iceage-snow 13s linear infinite;/);
+  assert.match(modern, /html\[data-theme="iceage"\] body::after \{[^}]*animation:\s*cc-iceage-glint 7s ease-in-out infinite alternate;/);
   assert.match(modern, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?html\[data-theme="matrix"\] body::before,[\s\S]*?html\[data-theme="matrix"\] \.cc-music-now-playing::before,[\s\S]*?animation:\s*none !important;/);
+  assert.match(modern, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?html\[data-theme="iceage"\] body::before,[\s\S]*?html\[data-theme="iceage"\] body::after,[\s\S]*?animation:\s*none !important;/);
 });
 
 test("removing tab motion preserves interaction and visualizer animation", () => {

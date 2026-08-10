@@ -201,13 +201,13 @@ html[data-theme="synthwave"] .cc-music-album.is-expanded {
   -webkit-backdrop-filter: blur(4px) saturate(92%);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) :is(#tab-music, .cc-music) {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) :is(#tab-music, .cc-music) {
   border-color: var(--border-soft);
   background: transparent;
   box-shadow: none;
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .cc-music-content {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .cc-music-content {
   border-color: var(--border-soft);
   background: color-mix(in srgb, var(--theme-panel-glass) 58%, transparent);
   box-shadow: none;
@@ -215,13 +215,13 @@ html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [
   -webkit-backdrop-filter: blur(3px) saturate(108%);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) #cc-music-player {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) #cc-music-player {
   border-color: var(--theme-player-edge);
   background: var(--theme-player);
   box-shadow: 0 -12px 34px rgba(0, 0, 0, 0.36), 0 -1px 24px var(--theme-glow), inset 0 1px rgba(255, 255, 255, 0.05);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .cc-music-album.is-expanded {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .cc-music-album.is-expanded {
   border-color: var(--border-soft);
   background: color-mix(in srgb, var(--theme-panel-glass) 78%, transparent);
   box-shadow: 0 18px 64px rgba(0, 0, 0, 0.3);
@@ -252,9 +252,11 @@ html[data-theme="starlight"] .cc-music-now-playing::before {
     radial-gradient(circle, rgba(220, 205, 255, 0.5) 0 0.7px, transparent 1.4px);
   background-position: 11px 17px, 47px 31px, 83px 9px;
   background-size: 113px 127px, 181px 163px, 239px 211px;
-  opacity: 0.54;
+  opacity: 0.76;
   pointer-events: none;
-  animation: cc-starlight-drift 28s ease-in-out infinite alternate;
+  animation:
+    cc-starlight-drift 16s linear infinite alternate,
+    cc-starlight-twinkle 3.6s ease-in-out infinite;
 }
 
 html[data-theme="starlight"] .cc-music-now-playing::after {
@@ -263,8 +265,8 @@ html[data-theme="starlight"] .cc-music-now-playing::after {
   z-index: 1;
   top: 11%;
   left: 34%;
-  width: clamp(140px, 18vw, 260px);
-  height: 2px;
+  width: clamp(180px, 22vw, 320px);
+  height: 3px;
   border-radius: 999px;
   background: linear-gradient(90deg, transparent, rgba(159, 201, 255, 0.2) 38%, rgba(246, 250, 255, 0.94));
   filter: drop-shadow(0 0 5px rgba(141, 187, 255, 0.74));
@@ -272,7 +274,7 @@ html[data-theme="starlight"] .cc-music-now-playing::after {
   pointer-events: none;
   transform: rotate(-24deg) translate3d(-48vw, -10vh, 0);
   transform-origin: right center;
-  animation: cc-starlight-meteor 10s cubic-bezier(0.18, 0.72, 0.28, 1) infinite;
+  animation: cc-starlight-meteor 6.8s cubic-bezier(0.18, 0.72, 0.28, 1) infinite;
 }
 
 html[data-theme="starlight"] .cc-music-now-playing-body {
@@ -311,11 +313,54 @@ html[data-theme="matrix"] .cc-music-now-playing-body {
   z-index: 2;
 }
 
-html[data-theme="verse"] .cc-music-now-playing {
+html[data-theme="iceage"] .cc-music-now-playing {
+  isolation: isolate;
   background:
-    radial-gradient(circle, rgba(255, 54, 95, 0.08) 0 1px, transparent 1.5px) 0 0 / 14px 14px,
-    radial-gradient(circle at 74% 22%, rgba(63, 231, 255, 0.1), transparent 34rem),
-    linear-gradient(145deg, #080819, #0c0d23);
+    radial-gradient(circle at 50% -8%, rgba(234, 252, 255, 0.2), transparent 24rem),
+    radial-gradient(ellipse at 16% 72%, rgba(85, 198, 235, 0.13), transparent 34rem),
+    radial-gradient(ellipse at 86% 34%, rgba(122, 158, 244, 0.12), transparent 38rem),
+    linear-gradient(#020b13, #031521);
+  box-shadow: inset 0 0 0 1px rgba(134, 230, 255, 0.09);
+}
+
+html[data-theme="iceage"] .cc-music-now-playing::before {
+  content: "";
+  position: fixed;
+  z-index: 1;
+  inset: -18% 0 0;
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.88) 0 1.3px, transparent 1.8px),
+    radial-gradient(circle, rgba(184, 239, 255, 0.68) 0 2px, transparent 2.6px),
+    radial-gradient(circle, rgba(221, 249, 255, 0.52) 0 0.9px, transparent 1.5px);
+  background-position: 18px -120px, 74px -210px, 132px -168px;
+  background-size: 126px 154px, 211px 247px, 173px 201px;
+  opacity: 0.62;
+  pointer-events: none;
+  animation: cc-iceage-snow 13s linear infinite;
+}
+
+html[data-theme="iceage"] .cc-music-now-playing::after {
+  content: "";
+  position: fixed;
+  z-index: 1;
+  right: -8%;
+  bottom: -8%;
+  left: -8%;
+  height: 38vh;
+  min-height: 230px;
+  background:
+    linear-gradient(126deg, transparent 0 18%, rgba(197, 244, 255, 0.13) 18.4% 19.1%, transparent 19.5% 38%, rgba(120, 214, 244, 0.12) 38.4% 39.2%, transparent 39.6%),
+    linear-gradient(54deg, transparent 0 28%, rgba(234, 252, 255, 0.1) 28.4% 29.3%, transparent 29.7% 63%, rgba(114, 174, 239, 0.11) 63.4% 64.2%, transparent 64.6%),
+    linear-gradient(180deg, rgba(150, 232, 255, 0.1), rgba(50, 137, 183, 0.035));
+  clip-path: polygon(0 72%, 7% 45%, 16% 64%, 27% 27%, 37% 57%, 49% 12%, 61% 54%, 72% 24%, 83% 60%, 92% 36%, 100% 68%, 100% 100%, 0 100%);
+  opacity: 0.78;
+  pointer-events: none;
+  animation: cc-iceage-glint 7s ease-in-out infinite alternate;
+}
+
+html[data-theme="iceage"] .cc-music-now-playing-body {
+  position: relative;
+  z-index: 2;
 }
 
 html[data-theme="aurora"] .cc-music-now-playing {

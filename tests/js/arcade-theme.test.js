@@ -36,3 +36,10 @@ test("Starlight visibly drifts, twinkles, and sends frequent meteors", () => {
   assert.match(modern, /html\[data-theme="starlight"\] body::after\s*\{[^}]*cc-starlight-meteor 6\.8s/);
   assert.match(modern, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?html\[data-theme="starlight"\] body::before,[\s\S]*?html\[data-theme="starlight"\] body::after,[\s\S]*?animation: none !important;/);
 });
+
+test("Ice Age carries animated snow and crystalline ice behind Arcade", () => {
+  assert.match(modern, /html\[data-theme="iceage"\] body::before\s*\{(?=[^}]*radial-gradient\(circle)(?=[^}]*animation:\s*cc-iceage-snow 13s linear infinite;)[^}]*\}/);
+  assert.match(modern, /html\[data-theme="iceage"\] body::after\s*\{(?=[^}]*clip-path:\s*polygon)(?=[^}]*animation:\s*cc-iceage-glint 7s ease-in-out infinite alternate;)[^}]*\}/);
+  assert.match(modern, /@keyframes cc-iceage-snow\b/);
+  assert.match(modern, /@keyframes cc-iceage-glint\b/);
+});

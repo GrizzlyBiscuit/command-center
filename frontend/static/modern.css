@@ -2931,16 +2931,16 @@ html[data-theme="synthwave"] :is(.cc-music-card, .cc-music-row, .cc-video-card, 
    These keep the modern layout contract while adding restrained,
    theme-specific atmosphere behind readable glass surfaces. */
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) body {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) body {
   isolation: isolate;
   background-attachment: fixed;
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .app-shell {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .app-shell {
   z-index: 2;
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) :is(
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) :is(
   .app-titlebar,
   .cc-sidebar,
   .workspace-topbar
@@ -2951,7 +2951,7 @@ html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [
   -webkit-backdrop-filter: blur(20px) saturate(120%);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) :is(
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) :is(
   .app-main > .panel:not(.home-panel),
   .dashboard-card,
   .cc-hero,
@@ -2978,7 +2978,7 @@ html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [
   -webkit-backdrop-filter: blur(10px) saturate(112%);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) :is(
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) :is(
   .home-time-card,
   .hub-card,
   .switch-block,
@@ -2996,20 +2996,20 @@ html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [
   background: var(--theme-card-glass);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .cc-side-nav .tab-btn.active {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .cc-side-nav .tab-btn.active {
   border-color: var(--border);
   background: linear-gradient(90deg, var(--accent-soft), transparent);
   box-shadow: inset 3px 0 0 var(--accent), 0 0 24px var(--theme-glow);
   color: var(--text);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .theme-swatch.active {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .theme-swatch.active {
   border-color: var(--accent);
   background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--accent-2) 8%, transparent));
   box-shadow: 0 0 24px var(--theme-glow);
 }
 
-html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .home-hero-title {
+html:is([data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .home-hero-title {
   background: linear-gradient(96deg, var(--text) 0%, var(--accent) 52%, var(--accent-2) 100%);
   background-clip: text;
   -webkit-background-clip: text;
@@ -3206,49 +3206,80 @@ html[data-theme="matrix"] ::selection {
   color: #effff3;
 }
 
-html[data-theme="verse"] body {
+html[data-theme="iceage"] body {
   background:
-    radial-gradient(circle at 16% 12%, rgba(255, 54, 95, 0.2), transparent 28rem),
-    radial-gradient(circle at 82% 78%, rgba(63, 231, 255, 0.17), transparent 34rem),
-    linear-gradient(145deg, #070713 0%, #11142d 52%, #08091a 100%);
+    radial-gradient(circle at 50% -12%, rgba(234, 252, 255, 0.3), transparent 24rem),
+    radial-gradient(ellipse at 14% 68%, rgba(85, 198, 235, 0.18), transparent 34rem),
+    radial-gradient(ellipse at 88% 42%, rgba(122, 158, 244, 0.18), transparent 38rem),
+    linear-gradient(160deg, #010811 0%, #062033 52%, #03111e 100%);
 }
 
-html[data-theme="verse"] body::before {
+html[data-theme="iceage"] body::before {
   content: "";
   position: fixed;
   z-index: 0;
-  inset: 0;
+  inset: -18% 0 0;
   background-image:
-    radial-gradient(circle, rgba(255, 78, 111, 0.34) 0 1.2px, transparent 1.5px),
-    radial-gradient(circle, rgba(63, 231, 255, 0.22) 0 1px, transparent 1.4px);
-  background-position: 0 0, 7px 7px;
-  background-size: 14px 14px;
-  opacity: 0.27;
+    radial-gradient(circle, rgba(255, 255, 255, 0.92) 0 1.3px, transparent 1.8px),
+    radial-gradient(circle, rgba(184, 239, 255, 0.72) 0 2px, transparent 2.6px),
+    radial-gradient(circle, rgba(221, 249, 255, 0.58) 0 0.9px, transparent 1.5px);
+  background-position: 18px -120px, 74px -210px, 132px -168px;
+  background-size: 126px 154px, 211px 247px, 173px 201px;
+  opacity: 0.76;
   pointer-events: none;
-  mask-image: linear-gradient(112deg, #000 0 28%, transparent 58%, #000 100%);
-  -webkit-mask-image: linear-gradient(112deg, #000 0 28%, transparent 58%, #000 100%);
+  filter: drop-shadow(0 0 3px rgba(114, 230, 255, 0.42));
+  animation: cc-iceage-snow 13s linear infinite;
 }
 
-html[data-theme="verse"] body::after {
+html[data-theme="iceage"] body::after {
   content: "";
   position: fixed;
   z-index: 1;
-  inset: -14%;
+  right: -8%;
+  bottom: -8%;
+  left: -8%;
+  height: 39vh;
+  min-height: 240px;
   background:
-    linear-gradient(116deg, transparent 0 31%, rgba(255, 54, 95, 0.1) 31% 35%, transparent 35% 62%, rgba(63, 231, 255, 0.08) 62% 65%, transparent 65%),
-    repeating-linear-gradient(116deg, transparent 0 108px, rgba(255, 255, 255, 0.022) 108px 110px);
+    linear-gradient(126deg, transparent 0 18%, rgba(197, 244, 255, 0.14) 18.4% 19.1%, transparent 19.5% 38%, rgba(120, 214, 244, 0.13) 38.4% 39.2%, transparent 39.6%),
+    linear-gradient(54deg, transparent 0 28%, rgba(234, 252, 255, 0.11) 28.4% 29.3%, transparent 29.7% 63%, rgba(114, 174, 239, 0.12) 63.4% 64.2%, transparent 64.6%),
+    linear-gradient(180deg, rgba(150, 232, 255, 0.11), rgba(50, 137, 183, 0.04));
+  clip-path: polygon(0 72%, 7% 45%, 16% 64%, 27% 27%, 37% 57%, 49% 12%, 61% 54%, 72% 24%, 83% 60%, 92% 36%, 100% 68%, 100% 100%, 0 100%);
+  opacity: 0.86;
   pointer-events: none;
-  transform: rotate(-2deg);
+  filter: drop-shadow(0 -12px 30px rgba(114, 230, 255, 0.12));
+  animation: cc-iceage-glint 7s ease-in-out infinite alternate;
 }
 
-html[data-theme="verse"] .cc-brand-mark {
-  border-color: rgba(63, 231, 255, 0.4);
-  background: linear-gradient(145deg, rgba(255, 54, 95, 0.28), rgba(63, 231, 255, 0.14));
-  box-shadow: -3px 3px 0 rgba(255, 54, 95, 0.22), 3px -3px 0 rgba(63, 231, 255, 0.18);
+html[data-theme="iceage"] :is(.cc-brand-mark, .tb-drag::before) {
+  border-color: rgba(190, 242, 255, 0.42);
+  background: linear-gradient(145deg, rgba(220, 250, 255, 0.26), rgba(100, 184, 237, 0.11));
+  color: #ecfcff;
+  filter: drop-shadow(0 0 10px rgba(114, 230, 255, 0.36));
 }
 
-html[data-theme="verse"] .cc-side-nav .tab-btn.active {
-  box-shadow: inset 3px 0 0 var(--accent), 3px 3px 0 rgba(63, 231, 255, 0.1), -3px -3px 0 rgba(255, 54, 95, 0.08);
+html[data-theme="iceage"] :is(.app-main > .panel:not(.home-panel), .dashboard-card, .cc-hero, .terminal-panel) {
+  box-shadow:
+    inset 0 1px 0 rgba(234, 252, 255, 0.2),
+    inset 0 0 0 1px rgba(114, 230, 255, 0.035),
+    0 20px 54px rgba(0, 15, 29, 0.38);
+}
+
+html[data-theme="iceage"] :is(.btn-primary, button[type="submit"], input[type="submit"]) {
+  border-color: rgba(233, 252, 255, 0.34);
+  background: linear-gradient(145deg, #e9fcff, #72e6ff 58%, #8baeff);
+  box-shadow: 0 9px 28px rgba(114, 230, 255, 0.2);
+  color: #031521;
+}
+
+html[data-theme="iceage"] :is(input, textarea, select) {
+  border-color: rgba(134, 230, 255, 0.22);
+  background: rgba(3, 19, 29, 0.82);
+}
+
+html[data-theme="iceage"] ::selection {
+  background: rgba(114, 230, 255, 0.36);
+  color: #fff;
 }
 
 html[data-theme="aurora"] body {
@@ -3301,9 +3332,9 @@ html[data-theme="matrix"] .tab-panel:not([hidden]) {
   animation: cc-matrix-tab-in 230ms cubic-bezier(0.18, 0.78, 0.22, 1) both;
 }
 
-html[data-theme="verse"] .tab-panel:not([hidden]) {
-  animation: cc-verse-tab-in 260ms cubic-bezier(0.18, 0.84, 0.24, 1) both;
-  transform-origin: 20% 20%;
+html[data-theme="iceage"] .tab-panel:not([hidden]) {
+  animation: cc-iceage-tab-in 340ms cubic-bezier(0.18, 0.8, 0.22, 1) both;
+  transform-origin: 50% 0;
 }
 
 html[data-theme="aurora"] .tab-panel:not([hidden]) {
@@ -3370,9 +3401,19 @@ html[data-theme="aurora"] .tab-panel:not([hidden]) {
   to { background-position: 18px 175px, 62px 195px, 101px 186px; }
 }
 
-@keyframes cc-verse-tab-in {
-  from { opacity: 0; transform: translateX(12px) skewX(-0.8deg); filter: saturate(1.35); }
-  to { opacity: 1; transform: translateX(0) skewX(0); filter: saturate(1); }
+@keyframes cc-iceage-snow {
+  from { background-position: 18px -120px, 74px -210px, 132px -168px; }
+  to { background-position: 42px calc(100vh + 154px), 28px calc(100vh + 247px), 168px calc(100vh + 201px); }
+}
+
+@keyframes cc-iceage-glint {
+  from { opacity: 0.68; filter: brightness(0.86) drop-shadow(0 -12px 30px rgba(114, 230, 255, 0.1)); }
+  to { opacity: 0.96; filter: brightness(1.24) drop-shadow(0 -18px 42px rgba(114, 230, 255, 0.2)); }
+}
+
+@keyframes cc-iceage-tab-in {
+  from { opacity: 0; transform: translateY(-9px) scale(0.996); filter: blur(4px) brightness(1.24); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0) brightness(1); }
 }
 
 @keyframes cc-aurora-tab-in {
@@ -3387,11 +3428,15 @@ html[data-theme="aurora"] .tab-panel:not([hidden]) {
   html[data-theme="synthwave"] .cc-music-now-playing::after,
   html[data-theme="matrix"] body::before,
   html[data-theme="matrix"] .cc-music-now-playing::before,
+  html[data-theme="iceage"] body::before,
+  html[data-theme="iceage"] body::after,
+  html[data-theme="iceage"] .cc-music-now-playing::before,
+  html[data-theme="iceage"] .cc-music-now-playing::after,
   html[data-theme="starlight"] body::before,
   html[data-theme="starlight"] body::after,
   html[data-theme="starlight"] .cc-music-now-playing::before,
   html[data-theme="starlight"] .cc-music-now-playing::after,
-  html:is([data-theme="synthwave"], [data-theme="starlight"], [data-theme="matrix"], [data-theme="verse"], [data-theme="aurora"]) .tab-panel:not([hidden]) {
+  html:is([data-theme="synthwave"], [data-theme="starlight"], [data-theme="matrix"], [data-theme="iceage"], [data-theme="aurora"]) .tab-panel:not([hidden]) {
     animation: none !important;
   }
 }
@@ -3412,8 +3457,15 @@ html[data-theme="aurora"] .tab-panel:not([hidden]) {
     opacity: 0.2;
   }
 
-  html[data-theme="verse"] body::after {
-    inset: -8% -42%;
+  html[data-theme="iceage"] body::before {
+    background-size: 98px 128px, 164px 204px, 137px 169px;
+    opacity: 0.68;
+  }
+
+  html[data-theme="iceage"] body::after {
+    right: -36%;
+    left: -36%;
+    height: 32vh;
   }
 
   html[data-theme="aurora"] body::before {

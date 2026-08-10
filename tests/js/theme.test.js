@@ -229,14 +229,19 @@ test("Synthwave is registered and apply updates palette state", () => {
   }
 });
 
-test("Starlight, Matrix, Verse, and Aurora register complete persistent aesthetic palettes", () => {
+test("the final restrained and animated theme set registers complete persistent palettes", () => {
   const expected = {
     starlight: { label: "Starlight", accent: "#8dbbff", accent2: "#edf5ff", bg: "#030712" },
     matrix: { label: "Matrix", accent: "#39ff78", accent2: "#b4ffca", bg: "#020704" },
-    verse: { label: "Verse", accent: "#ff365f", accent2: "#3fe7ff", bg: "#060713" },
+    iceage: { label: "Ice Age", accent: "#72e6ff", accent2: "#e9fcff", bg: "#020a12" },
     aurora: { label: "Aurora", accent: "#65f5bf", accent2: "#8eb8ff", bg: "#041014" },
   };
   const harness = loadTheme();
+
+  assert.deepEqual(
+    Array.from(harness.api.list()),
+    ["outrun", "ice", "midnight", "synthwave", "starlight", "matrix", "iceage", "aurora"],
+  );
 
   for (const [id, palette] of Object.entries(expected)) {
     assert.ok(harness.api.list().includes(id));
@@ -251,7 +256,10 @@ test("Starlight, Matrix, Verse, and Aurora register complete persistent aestheti
     assert.equal(swatchFor(harness, id).classList.contains("active"), true);
   }
 
-  assert.match(baseSource, /'synthwave', 'starlight', 'matrix', 'verse', 'aurora'/);
+  assert.match(baseSource, /'outrun', 'ice', 'midnight', 'synthwave', 'starlight', 'matrix', 'iceage', 'aurora'/);
+  for (const removed of ["vaporwave", "cyberpunk", "bloodmoon", "neon", "verse"]) {
+    assert.equal(harness.api.list().includes(removed), false);
+  }
 });
 
 test("immersive themes have distinct animated scenes and readable glass surfaces", () => {
@@ -263,11 +271,13 @@ test("immersive themes have distinct animated scenes and readable glass surfaces
   assert.match(modernSource, /html\[data-theme="matrix"\] :is\(\.workspace-heading h1, \.panel-h, \.appearance-header h1, \.cc-hero h1, \.cc-nav-label\) \{(?=[^}]*Cascadia Mono)(?=[^}]*letter-spacing: 0\.055em;)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="matrix"\] :is\(\.btn-primary, button\[type="submit"\], input\[type="submit"\]\) \{(?=[^}]*background: linear-gradient\(180deg, #6dff99, #30df68\);)(?=[^}]*color: #011c08;)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="matrix"\] :is\(input, textarea, select\) \{(?=[^}]*border-color: rgba\(57, 255, 120, 0\.2\);)(?=[^}]*background: rgba\(1, 11, 4, 0\.86\);)[^}]*\}/);
-  assert.match(modernSource, /html\[data-theme="verse"\] body::before \{(?=[^}]*radial-gradient\(circle)(?=[^}]*background-size: 14px 14px;)[^}]*\}/);
-  assert.match(modernSource, /html\[data-theme="verse"\] body::after \{(?=[^}]*linear-gradient\(116deg)(?=[^}]*transform: rotate\(-2deg\);)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="iceage"\] body::before \{(?=[^}]*radial-gradient\(circle)(?=[^}]*background-size: 126px 154px, 211px 247px, 173px 201px;)(?=[^}]*cc-iceage-snow 13s linear infinite)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="iceage"\] body::after \{(?=[^}]*clip-path: polygon)(?=[^}]*cc-iceage-glint 7s ease-in-out infinite alternate)[^}]*\}/);
+  assert.match(modernSource, /@keyframes\s+cc-iceage-snow\b/);
+  assert.match(modernSource, /@keyframes\s+cc-iceage-glint\b/);
   assert.match(modernSource, /html\[data-theme="aurora"\] body::before \{(?=[^}]*conic-gradient)(?=[^}]*filter: blur\(58px\);)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="aurora"\] body::after \{(?=[^}]*radial-gradient\(circle at 18% 24%)(?=[^}]*opacity: 0\.28;)[^}]*\}/);
-  assert.match(modernSource, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="verse"\], \[data-theme="aurora"\]\) :is\([\s\S]*?\.app-titlebar,[\s\S]*?background: var\(--theme-shell\);/);
+  assert.match(modernSource, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\]\) :is\([\s\S]*?\.app-titlebar,[\s\S]*?background: var\(--theme-shell\);/);
 });
 
 test("a saved Synthwave preference is restored while building picker controls", () => {
@@ -317,5 +327,5 @@ test("the standalone Appearance cards match the runtime theme registry", () => {
 
   assert.deepEqual(cardIds, registryIds);
   assert.ok(cardIds.includes("synthwave"));
-  assert.deepEqual(cardIds.slice(-3), ["matrix", "verse", "aurora"]);
+  assert.deepEqual(cardIds.slice(-3), ["matrix", "iceage", "aurora"]);
 });
