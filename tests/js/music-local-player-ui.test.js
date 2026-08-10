@@ -102,6 +102,7 @@ test("the mini player opens an accessible full-screen Now Playing dialog", () =>
 
 test("the mini player advertises and wires non-destructive right-click hiding", () => {
   assert.match(panel, /id="cc-music-player-hide"[^>]*title="Hide music player \(or right-click the player\)"/);
+  assert.match(base, /<dt>Hide music mini player<\/dt><dd>Right-click the mini player<\/dd>/);
   assert.match(app, /nodes\.player\?\.addEventListener\("contextmenu", event => \{\s*event\.preventDefault\(\);\s*setPlayerHidden\(true\);\s*\}\);/);
   assert.match(app, /nodes\.playerShow\?\.addEventListener\("click", \(\) => setPlayerHidden\(false\)\)/);
 });
