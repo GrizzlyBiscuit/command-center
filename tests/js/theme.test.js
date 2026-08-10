@@ -6,9 +6,14 @@ const vm = require("node:vm");
 
 const root = path.resolve(__dirname, "../..");
 const themePath = path.join(root, "frontend", "static", "theme.js");
+const basePath = path.join(root, "frontend", "templates", "base.html");
 const appearancePath = path.join(root, "frontend", "templates", "darkmode.html");
-const themeSource = fs.readFileSync(themePath, "utf8");
-const appearanceSource = fs.readFileSync(appearancePath, "utf8");
+const modernPath = path.join(root, "frontend", "static", "modern.css");
+const read = file => fs.readFileSync(file, "utf8").replace(/\r\n?/g, "\n");
+const themeSource = read(themePath);
+const baseSource = read(basePath);
+const appearanceSource = read(appearancePath);
+const modernSource = read(modernPath);
 
 function createStyle() {
   const values = new Map();
@@ -134,6 +139,58 @@ function loadTheme({ savedTheme = null, withPicker = true } = {}) {
 function swatchFor(harness, themeId) {
   return harness.picker.children.find(button => button.dataset.theme === themeId);
 }
+
+test("Synthwave is the first-run default while valid saved themes remain authoritative", () => {
+  const firstRun = loadTheme();
+  assert.equal(firstRun.documentElement.getAttribute("data-theme"), "synthwave");
+  assert.equal(firstRun.storage.get("cc_theme"), "synthwave");
+  assert.equal(firstRun.currentLabel.textContent, "Synthwave");
+  assert.equal(swatchFor(firstRun, "synthwave").classList.contains("active"), true);
+
+  const restored = loadTheme({ savedTheme: "midnight" });
+  assert.equal(restored.documentElement.getAttribute("data-theme"), "midnight");
+  assert.equal(restored.storage.get("cc_theme"), "midnight");
+  assert.equal(restored.currentLabel.textContent, "Ink");
+  assert.equal(swatchFor(restored, "midnight").classList.contains("active"), true);
+
+  const invalid = loadTheme({ savedTheme: "unknown-theme" });
+  assert.equal(invalid.documentElement.getAttribute("data-theme"), "synthwave");
+  assert.equal(invalid.storage.get("cc_theme"), "synthwave");
+});
+
+test("the early boot and standalone Appearance page use the same first-run default", () => {
+  assert.match(baseSource, /var selectedTheme = 'synthwave';/);
+  assert.match(baseSource, /if \(knownThemes\.indexOf\(savedTheme\) !== -1\) selectedTheme = savedTheme;/);
+  assert.match(baseSource, /document\.documentElement\.setAttribute\('data-theme', selectedTheme\);/);
+  assert.match(appearanceSource, /id="appearance-current"[^>]*>Synthwave selected</);
+  assert.match(appearanceSource, /if \(!labels\[cur\]\) cur = 'synthwave';/);
+});
+
+test("Synthwave backdrop is continuous, static, responsive, and isolated below full-screen media", () => {
+  assert.match(
+    modernSource,
+    /html\[data-theme="synthwave"\] body::before \{(?=[^}]*position: fixed;)(?=[^}]*repeating-linear-gradient)(?=[^}]*perspective\(38rem\))[^}]*\}/,
+  );
+  assert.match(
+    modernSource,
+    /html\[data-theme="synthwave"\] body::after \{(?=[^}]*position: fixed;)(?=[^}]*width: clamp\(340px, 40vw, 640px\);)(?=[^}]*repeating-linear-gradient)[^}]*\}/,
+  );
+  assert.match(
+    modernSource,
+    /body:has\(#tab-home:not\(\[hidden\]\)\)::after \{(?=[^}]*width: clamp\(560px, 64vw, 980px\);)(?=[^}]*opacity: 0\.9;)[^}]*\}/,
+  );
+  assert.match(modernSource, /html\[data-theme="synthwave"\] body #tab-music \{\s*background: rgba\(3, 0, 12, 0\.24\);/);
+  assert.match(modernSource, /html\[data-theme="synthwave"\] body \.cc-music \{\s*background: transparent;/);
+  assert.match(modernSource, /html\[data-theme="synthwave"\] body \.cc-music-content \{\s*background: rgba\(2, 0, 9, 0\.16\);/);
+  assert.match(modernSource, /body\.cc-music-now-playing-open::before,[\s\S]*?body\.cc-music-now-playing-open::after \{\s*opacity: 0;/);
+  assert.match(
+    modernSource,
+    /@media \(max-width: 900px\) \{[\s\S]*?body::before \{[\s\S]*?background-size: 48px 42px, 48px 42px;[\s\S]*?body:has\(#tab-home:not\(\[hidden\]\)\)::after \{[\s\S]*?width: clamp\(440px, 118vw, 720px\);/,
+  );
+
+  const tabPanelRule = modernSource.match(/\.tab-panel \{([^}]*)\}/)?.[1] || "";
+  assert.doesNotMatch(tabPanelRule, /animation|transition/);
+});
 
 test("Synthwave is registered and apply updates palette state", () => {
   const harness = loadTheme();

@@ -1,4 +1,7 @@
 <!-- Local music library. Playback surfaces stay outside the tab so music continues across views. -->
+<script src="{{ url_for('static', filename='music/music-orbit-bloom-ambient-scenes.js') }}"></script>
+<script src="{{ url_for('static', filename='music/music-orbit-bloom.js') }}"></script>
+<script src="{{ url_for('static', filename='music/music-now-playing-visualizer.js') }}"></script>
 <div class="tab-panel" id="tab-music" style="display:none">
   <div class="cc-music" id="cc-music-root">
     <header class="cc-music-head">
@@ -88,20 +91,21 @@
             data-spatial-key="music-player-hide" title="Hide music player">Hide</button>
   </div>
 
-  <aside class="cc-music-queue" id="cc-music-queue" aria-label="Music queue" hidden>
-    <header class="cc-music-queue-head">
-      <div>
-        <strong>Music Queue</strong>
-        <span id="cc-music-queue-summary">0 tracks</span>
-      </div>
-      <div class="cc-music-queue-head-actions">
-        <button type="button" id="cc-music-queue-clear" aria-label="Clear queue" title="Clear queue">Clear</button>
-        <button type="button" id="cc-music-queue-close" aria-label="Close queue" title="Close queue">Close</button>
-      </div>
-    </header>
-    <div class="cc-music-queue-body" id="cc-music-queue-body"></div>
-  </aside>
 </section>
+
+<aside class="cc-music-queue" id="cc-music-queue" aria-label="Music queue" hidden>
+  <header class="cc-music-queue-head">
+    <div>
+      <strong>Music Queue</strong>
+      <span id="cc-music-queue-summary">0 tracks</span>
+    </div>
+    <div class="cc-music-queue-head-actions">
+      <button type="button" id="cc-music-queue-clear" aria-label="Clear queue" title="Clear queue">Clear</button>
+      <button type="button" id="cc-music-queue-close" aria-label="Close queue" title="Close queue">Close</button>
+    </div>
+  </header>
+  <div class="cc-music-queue-body" id="cc-music-queue-body"></div>
+</aside>
 
 <button type="button" class="cc-music-player-show" id="cc-music-player-show" aria-label="Show music player"
         aria-controls="cc-music-player" data-spatial-key="music-player-show" hidden>
@@ -125,8 +129,23 @@
         <span id="cc-music-now-playing-meta">Choose a track, album, or artist.</span>
       </div>
 
-      <canvas class="cc-music-now-playing-visualizer" id="cc-music-now-playing-visualizer"
-              width="560" height="96" aria-hidden="true"></canvas>
+      <div class="cc-music-now-playing-visualizer-stage">
+        <canvas class="cc-music-now-playing-visualizer" id="cc-music-now-playing-visualizer"
+                width="560" height="96" role="button" tabindex="0"
+                aria-label="Visualizer: Bars. Activate to switch"
+                data-spatial-key="music-visualizer-mode"></canvas>
+        <div class="cc-music-now-playing-scene-control" aria-label="Full-screen visualizer controls">
+          <label class="sr-only" for="cc-music-now-playing-scene">Visualizer scene</label>
+          <select id="cc-music-now-playing-scene" aria-label="Visualizer scene"
+                  data-spatial-key="music-visualizer-scene">
+            <option value="auto">Random</option>
+          </select>
+          <span id="cc-music-now-playing-scene-name" aria-live="polite">Cosmic Bloom</span>
+          <button type="button" id="cc-music-now-playing-glow" title="Show center glow"
+                  aria-label="Show center glow" aria-pressed="false"
+                  data-spatial-key="music-visualizer-glow">Glow</button>
+        </div>
+      </div>
 
       <div class="cc-music-now-playing-timeline">
         <input id="cc-music-now-playing-progress" type="range" min="0" max="1000" value="0" aria-label="Track position">
@@ -147,8 +166,6 @@
         <div class="cc-music-now-playing-secondary">
           <button type="button" id="cc-music-now-playing-fullscreen" aria-label="Full-screen visualizer"
                   title="Full-screen visualizer" aria-pressed="false">Visualizer</button>
-          <button type="button" id="cc-music-now-playing-details-toggle" aria-label="Track details"
-                  title="Track details" aria-expanded="false" aria-controls="cc-music-now-playing-details">Details</button>
           <label class="cc-music-now-playing-volume" for="cc-music-now-playing-volume">
             <span class="sr-only">Volume</span>
             <input id="cc-music-now-playing-volume" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volume">
@@ -156,17 +173,6 @@
         </div>
       </div>
 
-      <div class="cc-music-now-playing-details" id="cc-music-now-playing-details" hidden>
-        <dl>
-          <div><dt>Artist</dt><dd id="cc-music-now-playing-detail-artist">Unknown artist</dd></div>
-          <div><dt>Year</dt><dd id="cc-music-now-playing-detail-year">Unknown</dd></div>
-          <div><dt>Audio</dt><dd id="cc-music-now-playing-detail-audio">Unknown</dd></div>
-        </dl>
-        <div class="cc-music-now-playing-mode-actions" aria-label="Playback mode">
-          <button type="button" id="cc-music-now-playing-shuffle" aria-label="Shuffle" aria-pressed="false">Shuffle</button>
-          <button type="button" id="cc-music-now-playing-repeat" aria-label="Repeat off" aria-pressed="false">Repeat</button>
-        </div>
-      </div>
     </div>
 
     <div class="cc-music-now-playing-story" id="cc-music-now-playing-story"

@@ -34,7 +34,13 @@ test("persistent player is a sibling outside the hidden Music panel", () => {
     "cc-music-player-hide", "cc-music-player-show",
   ]) assert.match(panel, new RegExp(`id="${id}"`));
   assert.match(panel, /id="cc-music-player-hide"[^>]*aria-label="Hide music player"[^>]*aria-controls="cc-music-player"/);
-  assert.match(panel, /<\/section>\s*<button type="button" class="cc-music-player-show" id="cc-music-player-show"[^>]*aria-label="Show music player"[^>]*hidden>/);
+  assert.match(
+    panel,
+    /<\/section>\s*<aside class="cc-music-queue" id="cc-music-queue"[\s\S]*?<\/aside>\s*<button type="button" class="cc-music-player-show" id="cc-music-player-show"[^>]*aria-label="Show music player"[^>]*hidden>/,
+    "the fixed queue must be a viewport-level sibling, not a child of the filtered mini player",
+  );
+  const playerMarkup = panel.slice(panel.indexOf('<section class="cc-music-player"'), panel.indexOf('<aside class="cc-music-queue"'));
+  assert.doesNotMatch(playerMarkup, /id="cc-music-queue"/);
 });
 
 test("music delegates contextual controller actions without taking panel bumpers", () => {

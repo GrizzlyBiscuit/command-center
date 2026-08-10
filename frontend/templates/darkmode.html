@@ -23,7 +23,7 @@
           <h2>Interface palette</h2>
           <p>All palettes keep the same layout and contrast-led hierarchy.</p>
         </div>
-        <span class="dm-current" id="appearance-current" aria-live="polite">Graphite selected</span>
+        <span class="dm-current" id="appearance-current" aria-live="polite">Synthwave selected</span>
       </div>
 
       <div class="dm-cards">
@@ -100,7 +100,7 @@
   function sync() {
     var cur = null;
     try { cur = localStorage.getItem('cc_theme'); } catch (e) {}
-    if (!labels[cur]) cur = 'outrun';
+    if (!labels[cur]) cur = 'synthwave';
     cards.forEach(function (card) {
       var on = card.dataset.theme === cur;
       card.classList.toggle('active', on);

@@ -30,6 +30,10 @@
     folder: [["path", { d: "M3 7h7l2 3h9v9H3zM3 7v12" }]],
     fullscreen: [["path", { d: "M8 3H3v5M16 3h5v5M21 16v5h-5M8 21H3v-5" }]],
     fullscreenExit: [["path", { d: "M3 8h5V3M21 8h-5V3M16 21v-5h5M8 21v-5H3" }]],
+    glow: [
+      ["circle", { cx: "12", cy: "12", r: "4" }],
+      ["path", { d: "M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1" }],
+    ],
     music: [
       ["path", { d: "M9 18V5l10-2v13" }],
       ["circle", { cx: "6", cy: "18", r: "3" }],

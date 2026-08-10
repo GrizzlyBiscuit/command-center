@@ -54,14 +54,14 @@
 .cc-music :is(button, input, select),
 .cc-music-player :is(button, input),
 .cc-music-queue button,
-.cc-music-now-playing :is(button, input) {
+.cc-music-now-playing :is(button, input, select) {
   font: inherit;
 }
 
 .cc-music :is(button, input, select):focus-visible,
 .cc-music-player :is(button, input, [role="button"]):focus-visible,
 .cc-music-queue button:focus-visible,
-.cc-music-now-playing :is(button, input):focus-visible,
+.cc-music-now-playing :is(button, input, select):focus-visible,
 .cc-music-player-show:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--cc-local-music-accent-strong) 72%, transparent);
   outline-offset: 2px;
@@ -70,7 +70,7 @@
 body[data-input-mode="gamepad"] .cc-music :is(button, input, select):focus,
 body[data-input-mode="gamepad"] .cc-music-player :is(button, input, [role="button"]):focus,
 body[data-input-mode="gamepad"] .cc-music-queue button:focus,
-body[data-input-mode="gamepad"] .cc-music-now-playing :is(button, input):focus,
+body[data-input-mode="gamepad"] .cc-music-now-playing :is(button, input, select):focus,
 body[data-input-mode="gamepad"] .cc-music-player-show:focus {
   outline: 2px solid var(--cc-local-music-accent-strong);
   outline-offset: 2px;
@@ -104,14 +104,20 @@ body[data-input-mode="gamepad"] .cc-music-player-show:focus {
   box-shadow: none;
 }
 
-/* The optional shell theme may recolor accents, but this player deliberately
-   keeps the reference app's black media surfaces. */
+/* Let the shell's Synthwave sun/grid carry through the library. The focused
+   player remains black below for Local Media Player fidelity. */
 html[data-theme="synthwave"] #tab-music,
-html[data-theme="synthwave"] .cc-music,
+html[data-theme="synthwave"] .cc-music {
+  border-color: var(--cc-local-music-line-soft);
+  background: transparent;
+  box-shadow: none;
+}
+
 html[data-theme="synthwave"] .cc-music-content {
   border-color: var(--cc-local-music-line-soft);
-  background: #000;
+  background: rgba(2, 3, 14, 0.08);
   box-shadow: none;
+  backdrop-filter: blur(2px);
 }
 
 html[data-theme="synthwave"] #cc-music-player {
@@ -1380,7 +1386,7 @@ body.cc-music-now-playing-open #cc-music-player {
   pointer-events: none;
 }
 
-body.cc-music-now-playing-open #cc-music-player #cc-music-queue:not([hidden]) {
+body.cc-music-now-playing-open #cc-music-queue:not([hidden]) {
   pointer-events: auto;
 }
 
@@ -1500,6 +1506,12 @@ body.cc-music-now-playing-open #cc-music-player #cc-music-queue:not([hidden]) {
   white-space: nowrap;
 }
 
+.cc-music-now-playing-visualizer-stage {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
 .cc-music-now-playing-visualizer {
   display: block;
   width: 100%;
@@ -1508,6 +1520,16 @@ body.cc-music-now-playing-open #cc-music-player #cc-music-queue:not([hidden]) {
   border: 0;
   border-radius: 0;
   background: transparent;
+  cursor: pointer;
+}
+
+.cc-music-now-playing-visualizer:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--cc-local-music-accent-strong) 72%, transparent);
+  outline-offset: 2px;
+}
+
+.cc-music-now-playing-scene-control {
+  display: none;
 }
 
 .cc-music-now-playing-timeline {
@@ -1628,40 +1650,6 @@ body.cc-music-now-playing-open #cc-music-player #cc-music-queue:not([hidden]) {
 
 .cc-music-now-playing-volume input {
   width: 100%;
-}
-
-.cc-music-now-playing-details {
-  display: grid;
-  gap: 8px;
-  margin-top: -4px;
-  padding: 10px 2px 0;
-  border-top: 1px solid var(--cc-local-music-line-soft);
-}
-
-.cc-music-now-playing-details[hidden] {
-  display: none;
-}
-
-.cc-music-now-playing-details dl {
-  display: grid;
-  gap: 5px;
-  margin: 0;
-}
-
-.cc-music-now-playing-details dl > div {
-  display: grid;
-  grid-template-columns: 74px minmax(0, 1fr);
-  gap: 12px;
-  color: var(--cc-local-music-muted);
-  font-size: 12px;
-}
-
-.cc-music-now-playing-details :is(dt, dd) {
-  margin: 0;
-}
-
-.cc-music-now-playing-details dd {
-  color: var(--cc-local-music-text);
 }
 
 .cc-music-now-playing-mode-actions {
@@ -1808,15 +1796,90 @@ body.cc-music-now-playing-open #cc-music-player #cc-music-queue:not([hidden]) {
   .cc-music-now-playing-artwork,
   .cc-music-now-playing-copy,
   .cc-music-now-playing-timeline,
-  .cc-music-now-playing-details,
   .cc-music-now-playing-story
 ) {
   display: none;
 }
 
+.cc-music-now-playing.is-visualizer-focus .cc-music-now-playing-visualizer-stage {
+  min-height: calc(100dvh - 168px);
+  overflow: hidden;
+  background: #000;
+}
+
 .cc-music-now-playing.is-visualizer-focus .cc-music-now-playing-visualizer {
   width: 100%;
-  height: calc(100dvh - 168px);
+  height: 100%;
+  min-height: calc(100dvh - 168px);
+  cursor: default;
+}
+
+.cc-music-now-playing.is-visualizer-focus .cc-music-now-playing-scene-control {
+  position: absolute;
+  z-index: 2;
+  top: max(0px, env(safe-area-inset-top));
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(460px, calc(100% - 112px));
+  min-height: 44px;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  background: rgba(2, 6, 18, 0.36);
+  color: #f8fafc;
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+  transform: translateX(-50%);
+}
+
+.cc-music-now-playing-scene-control select {
+  width: auto;
+  min-width: 138px;
+  height: 34px;
+  padding: 4px 28px 4px 10px;
+  border: 0;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  box-shadow: none;
+  color-scheme: dark;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.cc-music-now-playing-scene-control select option {
+  background: #0b1020;
+  color: #f8fafc;
+}
+
+.cc-music-now-playing-scene-control > span {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(226, 232, 240, 0.72);
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cc-music-now-playing-scene-control button {
+  flex: 0 0 34px;
+  width: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgba(226, 232, 240, 0.64);
+}
+
+.cc-music-now-playing-scene-control button[aria-pressed="true"] {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
 }
 
 .cc-music-now-playing.is-visualizer-focus .cc-music-now-playing-controls {

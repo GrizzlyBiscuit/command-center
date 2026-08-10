@@ -25,6 +25,14 @@ test("the local-player stylesheet is the final visual layer", () => {
   const lyricsIndex = base.indexOf("filename='music/music-lyrics.js'");
   const appIndex = base.indexOf("filename='music/music-app.js'");
   assert.ok(lyricsIndex >= 0 && lyricsIndex < appIndex, "lyrics helpers should load before the music app");
+
+  const ambientScenesIndex = panel.indexOf("filename='music/music-orbit-bloom-ambient-scenes.js'");
+  const orbitBloomIndex = panel.indexOf("filename='music/music-orbit-bloom.js'");
+  const classicModesIndex = panel.indexOf("filename='music/music-now-playing-visualizer.js'");
+  assert.ok(
+    ambientScenesIndex >= 0 && ambientScenesIndex < orbitBloomIndex && orbitBloomIndex < classicModesIndex,
+    "visualizer helpers should load in dependency order before the deferred music app",
+  );
 });
 
 test("the Music panel keeps its persistent player and exposes an album-first toolbar", () => {
@@ -51,6 +59,7 @@ test("the Music panel keeps its persistent player and exposes an album-first too
   assert.match(panel, /<option value="oldest">Oldest<\/option>/);
   assert.match(panel, /<option value="title">Title<\/option>/);
   assert.match(panel, /<div[^>]*class="cc-music-queue-body"[^>]*id="cc-music-queue-body"/);
+  assert.match(panel, /<\/section>\s*<aside[^>]*id="cc-music-queue"/);
 });
 
 test("the mini player opens an accessible full-screen Now Playing dialog", () => {
@@ -74,10 +83,14 @@ test("the mini player opens an accessible full-screen Now Playing dialog", () =>
     "cc-music-now-playing-volume",
     "cc-music-now-playing-story",
     "cc-music-now-playing-fullscreen",
-    "cc-music-now-playing-details-toggle",
+    "cc-music-now-playing-scene",
+    "cc-music-now-playing-scene-name",
+    "cc-music-now-playing-glow",
   ]) {
     assert.match(panel, new RegExp(`id="${id}"`), `${id} should stay wired`);
   }
+  assert.doesNotMatch(panel, /id="cc-music-now-playing-details-toggle"/);
+  assert.doesNotMatch(panel, /id="cc-music-now-playing-details"/);
 });
 
 test("music defaults to sorted albums and synchronizes every playback surface", () => {
@@ -111,8 +124,8 @@ test("music defaults to sorted albums and synchronizes every playback surface", 
   assert.doesNotMatch(`${panel}\n${app}`, /\b(video|interviews?|offline downloads?)\b/i);
 });
 
-test("shared media icons cover all Music library views", () => {
-  for (const name of ["albums", "artists", "details", "folder", "settings", "stats"]) {
+test("shared media icons cover Music views and full-screen visualizer chrome", () => {
+  for (const name of ["albums", "artists", "details", "folder", "glow", "settings", "stats"]) {
     assert.ok(mediaUI.icons.includes(name), `missing ${name} icon`);
     assert.ok(mediaUI.createIcon(name, { document: null }) === null);
   }
@@ -137,6 +150,15 @@ test("the late CSS owns the black artwork-first library and focused album view",
     /\.cc-music-album\.is-expanded\s*\{(?=[^}]*grid-column:\s*1\s*\/\s*-1;)(?=[^}]*grid-template-columns:\s*minmax\(260px,\s*360px\)\s*minmax\(520px,\s*760px\);)[^}]*\}/,
   );
   assert.match(css, /\.cc-music-album-grid:has\(> \.cc-music-album\.is-expanded\)[^{]*\{\s*display:\s*none;/);
+});
+
+test("Synthwave leaves Music library surfaces translucent while Now Playing stays black", () => {
+  assert.match(
+    css,
+    /html\[data-theme="synthwave"\] #tab-music,\s*html\[data-theme="synthwave"\] \.cc-music\s*\{[^}]*background:\s*transparent;/,
+  );
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-content\s*\{[^}]*background:\s*rgba\(2, 3, 14, 0\.08\);/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing\s*\{[^}]*background:\s*#000;/);
 });
 
 test("desktop and mobile mini-player sizing remain deliberate", () => {

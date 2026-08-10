@@ -1,6 +1,7 @@
 // Appearance picker - swaps a complete accent/surface palette on <html>.
 // Legacy storage keys remain valid so existing installations migrate cleanly.
 (function () {
+  var DEFAULT_THEME = 'synthwave';
   var THEMES = {
     outrun: { label: 'Graphite', vars: {} },
     vaporwave: {
@@ -69,18 +70,19 @@
 
   function apply(name) {
     var root = document.documentElement;
+    var selected = THEMES[name] ? name : DEFAULT_THEME;
     // clear old theme vars
     Object.keys(THEMES).forEach(function (k) {
       var v = THEMES[k].vars;
       if (v) Object.keys(v).forEach(function (p) { root.style.removeProperty(p); });
     });
-    var t = THEMES[name] || THEMES.outrun;
+    var t = THEMES[selected];
     if (t.vars) Object.keys(t.vars).forEach(function (p) { root.style.setProperty(p, t.vars[p]); });
-    root.setAttribute('data-theme', name);
-    try { localStorage.setItem('cc_theme', name); } catch (e) {}
+    root.setAttribute('data-theme', selected);
+    try { localStorage.setItem('cc_theme', selected); } catch (e) {}
     // refresh active state in the picker if present
     document.querySelectorAll('.theme-swatch').forEach(function (s) {
-      var active = s.dataset.theme === name;
+      var active = s.dataset.theme === selected;
       s.classList.toggle('active', active);
       s.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
@@ -91,7 +93,7 @@
   function init() {
     var saved = null;
     try { saved = localStorage.getItem('cc_theme'); } catch (e) {}
-    if (THEMES[saved]) apply(saved);
+    var selected = THEMES[saved] ? saved : DEFAULT_THEME;
     // build swatches if the picker exists
     var wrap = document.getElementById('theme-swatches');
     if (wrap && !wrap.dataset.built) {
@@ -110,8 +112,8 @@
         b.onclick = function () { apply(k); };
         wrap.appendChild(b);
       });
-      apply(THEMES[saved] ? saved : 'outrun');
     }
+    apply(selected);
   }
 
   window.CCTheme = { apply: apply, list: function () { return Object.keys(THEMES); } };

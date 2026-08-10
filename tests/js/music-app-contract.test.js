@@ -180,8 +180,12 @@ test("Now Playing owns at most one scheduled visualizer frame", () => {
   assert.match(appSource, /nowPlayingFrame = root\.requestAnimationFrame\(\(\) => \{\n\s*nowPlayingFrame = 0;/);
   assert.match(appSource, /function openNowPlaying\(\)[\s\S]*?requestNowPlayingVisualizerFrame\(\);/);
   const toggle = appSource.match(/nodes\.nowPlayingFullscreen\?\.addEventListener\("click", \(\) => \{([\s\S]*?)\n\s*\}\);/)?.[1] || "";
-  assert.match(toggle, /requestNowPlayingVisualizerFrame\(\)/);
+  assert.match(toggle, /setVisualizerFocus\(!visualizerFocusActive\(\)\)/);
   assert.doesNotMatch(toggle, /drawNowPlayingVisualizer\(\)/);
+  assert.match(
+    appSource,
+    /function setVisualizerFocus\(focused,[\s\S]*?requestNowPlayingVisualizerFrame\(\);[\s\S]*?return active;/,
+  );
 });
 
 test("synchronized lyric cues become native spatial buttons without manual key emulation", () => {

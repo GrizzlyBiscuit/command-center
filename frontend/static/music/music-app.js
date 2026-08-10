@@ -28,6 +28,8 @@
   const Lyrics = root.CCMusicLyrics;
   const Remote = root.CCMusicRemote;
   const MediaUI = root.CCMediaUI;
+  const NowPlayingVisualizer = root.CCMusicNowPlayingVisualizer;
+  const OrbitBloom = root.MediaPlayerOrbitBloom;
   const API = Object.freeze({
     settings: "/api/music/settings",
     library: "/api/music/library",
@@ -42,6 +44,8 @@
   const STATS_FLUSH_SECONDS = 30;
   const EXPANDED_GROUP_CONTROL = '.cc-music-group-reveal[aria-expanded="true"]';
   const PLAYER_HIDDEN_STORAGE_KEY = "cc.music.player.hidden.v1";
+  const FULLSCREEN_VISUALIZER_SCENE_KEY = "fullscreenVisualizerScene";
+  const FULLSCREEN_VISUALIZER_GLOW_KEY = "fullscreenVisualizerCenterGlowEnabled";
 
   let app = null;
 
@@ -71,6 +75,16 @@
 
   function writePlayerHiddenPreference(host, hidden) {
     try { host?.localStorage?.setItem(PLAYER_HIDDEN_STORAGE_KEY, hidden ? "1" : "0"); }
+    catch {}
+  }
+
+  function readLocalPreference(host, key, fallback = "") {
+    try { return host?.localStorage?.getItem(key) ?? fallback; }
+    catch { return fallback; }
+  }
+
+  function writeLocalPreference(host, key, value) {
+    try { host?.localStorage?.setItem(key, String(value)); }
     catch {}
   }
 
@@ -278,6 +292,9 @@
       nowPlayingTitle: byId("cc-music-now-playing-title"),
       nowPlayingMeta: byId("cc-music-now-playing-meta"),
       nowPlayingVisualizer: byId("cc-music-now-playing-visualizer"),
+      nowPlayingScene: byId("cc-music-now-playing-scene"),
+      nowPlayingSceneName: byId("cc-music-now-playing-scene-name"),
+      nowPlayingGlow: byId("cc-music-now-playing-glow"),
       nowPlayingProgress: byId("cc-music-now-playing-progress"),
       nowPlayingElapsed: byId("cc-music-now-playing-elapsed"),
       nowPlayingDuration: byId("cc-music-now-playing-duration"),
@@ -286,14 +303,7 @@
       nowPlayingPrevious: byId("cc-music-now-playing-previous"),
       nowPlayingPlay: byId("cc-music-now-playing-play"),
       nowPlayingNext: byId("cc-music-now-playing-next"),
-      nowPlayingShuffle: byId("cc-music-now-playing-shuffle"),
-      nowPlayingRepeat: byId("cc-music-now-playing-repeat"),
       nowPlayingFullscreen: byId("cc-music-now-playing-fullscreen"),
-      nowPlayingDetailsToggle: byId("cc-music-now-playing-details-toggle"),
-      nowPlayingDetails: byId("cc-music-now-playing-details"),
-      nowPlayingDetailArtist: byId("cc-music-now-playing-detail-artist"),
-      nowPlayingDetailYear: byId("cc-music-now-playing-detail-year"),
-      nowPlayingDetailAudio: byId("cc-music-now-playing-detail-audio"),
       nowPlayingVolume: byId("cc-music-now-playing-volume"),
       nowPlayingStory: byId("cc-music-now-playing-story"),
       nowPlayingLineBefore: byId("cc-music-now-playing-line-before"),
@@ -360,6 +370,15 @@
     let nowPlayingReturnFocus = null;
     let queueReturnFocus = null;
     let modalInertState = null;
+    let nowPlayingFrequencyData = null;
+    let nowPlayingWaveformData = null;
+    const classicVisualizer = NowPlayingVisualizer?.create?.({
+      canvas: nodes.nowPlayingVisualizer,
+      host: root,
+      storage: root.localStorage,
+      styleSource: nodes.root,
+    }) || null;
+    let fullscreenVisualizer = null;
 
     function currentTrack() {
       return state.queueIndex >= 0 ? state.trackById.get(state.queue[state.queueIndex]) || null : null;
@@ -1367,6 +1386,179 @@
       }
     }
 
+    function visualizerFocusActive() {
+      return Boolean(nodes.nowPlaying?.classList.contains("is-visualizer-focus"));
+    }
+
+    function fullscreenVisualizerScenes() {
+      return Array.isArray(OrbitBloom?.SCENE_OPTIONS) ? OrbitBloom.SCENE_OPTIONS : [];
+    }
+
+    function syncFullscreenVisualizerScene(sceneValue = "", selectionValue = "") {
+      const label = typeof sceneValue === "string"
+        ? sceneValue
+        : String(sceneValue?.label || sceneValue?.name || "");
+      const selection = String(
+        selectionValue
+        || fullscreenVisualizer?.sceneSelection?.()
+        || OrbitBloom?.AUTO_SCENE
+        || "auto",
+      );
+      if (nodes.nowPlayingScene) {
+        nodes.nowPlayingScene.value = selection;
+        nodes.nowPlayingScene.title = selection === "auto"
+          ? `Random - ${label || "visualizer"}`
+          : label || "Visualizer";
+      }
+      if (nodes.nowPlayingSceneName) nodes.nowPlayingSceneName.textContent = label || "Cosmic Bloom";
+    }
+
+    function syncFullscreenVisualizerGlow() {
+      if (!nodes.nowPlayingGlow) return;
+      const enabled = fullscreenVisualizer?.sharedGlowEnabled?.() === true;
+      const label = enabled ? "Hide center glow" : "Show center glow";
+      nodes.nowPlayingGlow.setAttribute("aria-pressed", String(enabled));
+      setControlIcon(nodes.nowPlayingGlow, "glow", label, "Glow");
+    }
+
+    function setupNowPlayingVisualizer() {
+      if (!fullscreenVisualizer && typeof OrbitBloom?.create === "function") {
+        try {
+          fullscreenVisualizer = OrbitBloom.create({
+            canvas: nodes.nowPlayingVisualizer,
+            initialScene: readLocalPreference(root, FULLSCREEN_VISUALIZER_SCENE_KEY, OrbitBloom.AUTO_SCENE || "auto"),
+            initialSharedGlow: readLocalPreference(root, FULLSCREEN_VISUALIZER_GLOW_KEY, "false") === "true",
+            onSceneChange: syncFullscreenVisualizerScene,
+          });
+        } catch (error) {
+          root.console?.warn?.("[music] full-screen visualizer unavailable", error);
+        }
+      }
+      if (nodes.nowPlayingScene) {
+        const existing = new Set(Array.from(nodes.nowPlayingScene.options).map(option => option.value));
+        fullscreenVisualizerScenes().forEach(scene => {
+          if (existing.has(scene.id)) return;
+          const option = root.document.createElement("option");
+          option.value = scene.id;
+          option.textContent = scene.label;
+          nodes.nowPlayingScene.append(option);
+        });
+      }
+      const selection = fullscreenVisualizer?.sceneSelection?.()
+        || OrbitBloom?.AUTO_SCENE
+        || "auto";
+      const current = fullscreenVisualizer?.currentScene?.()
+        || fullscreenVisualizerScenes().find(scene => scene.id === selection)?.label
+        || "Cosmic Bloom";
+      syncFullscreenVisualizerScene(current, selection);
+      syncFullscreenVisualizerGlow();
+      classicVisualizer?.syncCanvasLabel?.();
+    }
+
+    function applyFullscreenVisualizerScene(requested) {
+      if (!fullscreenVisualizer) return "auto";
+      const available = new Set(["auto", ...fullscreenVisualizerScenes().map(scene => scene.id)]);
+      const safeValue = available.has(String(requested || "")) ? String(requested) : "auto";
+      const selection = fullscreenVisualizer.setScene?.(safeValue) || "auto";
+      writeLocalPreference(root, FULLSCREEN_VISUALIZER_SCENE_KEY, selection);
+      syncFullscreenVisualizerScene(fullscreenVisualizer.currentScene?.(), selection);
+      if (!playbackIsPlaying()) fullscreenVisualizer.pause?.();
+      requestNowPlayingVisualizerFrame();
+      return selection;
+    }
+
+    function toggleFullscreenVisualizerGlow() {
+      if (!fullscreenVisualizer) return false;
+      const enabled = fullscreenVisualizer.setSharedGlow?.(
+        fullscreenVisualizer.sharedGlowEnabled?.() !== true,
+      ) === true;
+      writeLocalPreference(root, FULLSCREEN_VISUALIZER_GLOW_KEY, enabled ? "true" : "false");
+      syncFullscreenVisualizerGlow();
+      requestNowPlayingVisualizerFrame();
+      return enabled;
+    }
+
+    function setVisualizerFocus(focused, { update = true } = {}) {
+      const active = Boolean(focused && nodes.nowPlaying);
+      nodes.nowPlaying?.classList.toggle("is-visualizer-focus", active);
+      nodes.nowPlayingFullscreen?.setAttribute("aria-pressed", String(active));
+      if (active) {
+        fullscreenVisualizer?.setArtwork?.(artUrl(currentTrack()));
+        fullscreenVisualizer?.open?.();
+      } else {
+        fullscreenVisualizer?.close?.();
+      }
+      if (update) updateNowPlayingSurface(currentTrack(), playbackIsPlaying());
+      requestNowPlayingVisualizerFrame();
+      return active;
+    }
+
+    function cycleClassicVisualizer() {
+      if (visualizerFocusActive() || !classicVisualizer) return false;
+      const mode = classicVisualizer.cycle();
+      const label = NowPlayingVisualizer?.MODE_LABELS?.[mode] || mode;
+      nodes.nowPlayingVisualizer?.setAttribute("aria-label", `Visualizer: ${label}. Activate to switch`);
+      requestNowPlayingVisualizerFrame();
+      return true;
+    }
+
+    function visualizerSamples(now) {
+      const analyser = state.analyser;
+      if (analyser) {
+        if (!nowPlayingFrequencyData || nowPlayingFrequencyData.length !== analyser.frequencyBinCount) {
+          nowPlayingFrequencyData = new Uint8Array(analyser.frequencyBinCount);
+        }
+        if (!nowPlayingWaveformData || nowPlayingWaveformData.length !== analyser.fftSize) {
+          nowPlayingWaveformData = new Uint8Array(analyser.fftSize);
+        }
+        analyser.getByteFrequencyData(nowPlayingFrequencyData);
+        analyser.getByteTimeDomainData(nowPlayingWaveformData);
+        return { frequencyData: nowPlayingFrequencyData, waveformData: nowPlayingWaveformData };
+      }
+      const frequencyData = NowPlayingVisualizer?.syntheticFrequencyData?.(now, 64)
+        || new Uint8Array(64).fill(48);
+      const waveformData = new Uint8Array(128);
+      for (let index = 0; index < waveformData.length; index += 1) {
+        waveformData[index] = Math.round(128 + Math.sin(index * 0.23 + now / 420) * 18);
+      }
+      return { frequencyData, waveformData };
+    }
+
+    function clearNowPlayingVisualizer() {
+      const canvas = nodes.nowPlayingVisualizer;
+      const context = canvas?.getContext?.("2d");
+      context?.clearRect?.(0, 0, canvas.width || 0, canvas.height || 0);
+    }
+
+    function drawFallbackVisualizer(frequencyData, now) {
+      const canvas = nodes.nowPlayingVisualizer;
+      const context = canvas?.getContext?.("2d");
+      if (!context) return;
+      const pixelRatio = Math.max(1, Math.min(2, Number(root.devicePixelRatio) || 1));
+      const width = Math.max(1, Math.round((canvas.clientWidth || 560) * pixelRatio));
+      const height = Math.max(1, Math.round((canvas.clientHeight || 96) * pixelRatio));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      context.clearRect(0, 0, width, height);
+      const bars = 32;
+      const gap = Math.max(2, Math.round(width / 190));
+      const barWidth = Math.max(2, (width - gap * (bars - 1)) / bars);
+      const accent = root.getComputedStyle?.(nodes.root)?.getPropertyValue("--accent")?.trim() || "#7c3aed";
+      const gradient = context.createLinearGradient(0, 0, width, 0);
+      gradient.addColorStop(0, accent);
+      gradient.addColorStop(1, "#f8fafc");
+      context.fillStyle = gradient;
+      for (let index = 0; index < bars; index += 1) {
+        const sourceIndex = Math.floor(index / bars * frequencyData.length * 0.42);
+        const idle = 0.16 + Math.abs(Math.sin(index * 0.68 + now / 620)) * 0.22;
+        const level = Math.max(0.08, (frequencyData[sourceIndex] || idle * 255) / 255);
+        const barHeight = Math.max(3 * pixelRatio, level * height * 0.88);
+        context.fillRect(index * (barWidth + gap), height - barHeight, barWidth, barHeight);
+      }
+    }
+
     function requestNowPlayingVisualizerFrame() {
       if (nowPlayingFrame || !nowPlayingIsOpen() || !nodes.nowPlayingVisualizer) return;
       if (typeof root.requestAnimationFrame !== "function") {
@@ -1381,36 +1573,21 @@
 
     function drawNowPlayingVisualizer() {
       if (!nowPlayingIsOpen() || !nodes.nowPlayingVisualizer) return;
-      const canvas = nodes.nowPlayingVisualizer;
-      const context = canvas.getContext?.("2d");
-      if (!context) return;
-      const pixelRatio = Math.max(1, Math.min(2, Number(root.devicePixelRatio) || 1));
-      const width = Math.max(1, Math.round((canvas.clientWidth || 560) * pixelRatio));
-      const height = Math.max(1, Math.round((canvas.clientHeight || 96) * pixelRatio));
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
+      const focused = visualizerFocusActive();
+      const playing = playbackIsPlaying();
+      if (!playing) {
+        if (focused && fullscreenVisualizer) fullscreenVisualizer.pause?.();
+        else clearNowPlayingVisualizer();
+        return;
       }
-      context.clearRect(0, 0, width, height);
-      const analyser = state.analyser;
-      const samples = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
-      analyser?.getByteFrequencyData(samples);
-      const bars = 42;
-      const gap = Math.max(2, Math.round(width / 190));
-      const barWidth = Math.max(2, (width - gap * (bars - 1)) / bars);
-      const visualStyles = root.getComputedStyle?.(nodes.root);
-      const accent = visualStyles?.getPropertyValue("--accent").trim() || "#7c3aed";
-      const gradient = context.createLinearGradient(0, 0, width, 0);
-      gradient.addColorStop(0, accent);
-      gradient.addColorStop(1, "#f8fafc");
-      context.fillStyle = gradient;
-      for (let index = 0; index < bars; index += 1) {
-        const sourceIndex = samples ? Math.floor(index / bars * samples.length * 0.42) : 0;
-        const idle = 0.16 + Math.abs(Math.sin(index * 0.68 + Date.now() / 620)) * 0.22;
-        const level = samples ? Math.max(0.08, samples[sourceIndex] / 255) : idle;
-        const barHeight = Math.max(3 * pixelRatio, level * height * 0.88);
-        const x = index * (barWidth + gap);
-        context.fillRect(x, height - barHeight, barWidth, barHeight);
+      const now = root.performance?.now?.() ?? Date.now();
+      const samples = visualizerSamples(now);
+      if (focused && fullscreenVisualizer) {
+        fullscreenVisualizer.render?.({ ...samples, now });
+      } else if (classicVisualizer) {
+        classicVisualizer.render?.({ frequencyData: samples.frequencyData, now });
+      } else {
+        drawFallbackVisualizer(samples.frequencyData, now);
       }
       const reducedMotion = root.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
       if (!reducedMotion && typeof root.requestAnimationFrame === "function") {
@@ -1438,8 +1615,7 @@
       nodes.nowPlaying.setAttribute("aria-hidden", "true");
       nodes.nowPlaying.classList.remove("is-visualizer-focus");
       nodes.nowPlayingFullscreen?.setAttribute("aria-pressed", "false");
-      if (nodes.nowPlayingDetails) nodes.nowPlayingDetails.hidden = true;
-      nodes.nowPlayingDetailsToggle?.setAttribute("aria-expanded", "false");
+      fullscreenVisualizer?.close?.();
       root.document.body?.classList.remove("cc-music-now-playing-open");
       if (nowPlayingFrame) root.cancelAnimationFrame?.(nowPlayingFrame);
       nowPlayingFrame = 0;
@@ -1706,31 +1882,22 @@
       if (nodes.nowPlayingArtFallback) nodes.nowPlayingArtFallback.hidden = Boolean(source);
       if (nodes.nowPlayingTitle) nodes.nowPlayingTitle.textContent = track?.title || "Nothing playing";
       if (nodes.nowPlayingMeta) nodes.nowPlayingMeta.textContent = track?.album || "Choose a track, album, or artist.";
-      if (nodes.nowPlayingDetailArtist) nodes.nowPlayingDetailArtist.textContent = track?.artist || "Unknown artist";
-      if (nodes.nowPlayingDetailYear) nodes.nowPlayingDetailYear.textContent = String(track?.date || track?.year || "Unknown").slice(0, 4);
-      const audioDetails = [String(track?.format || "").toUpperCase(), track?.bitrate_kbps ? `${track.bitrate_kbps} kbps` : ""].filter(Boolean);
-      if (nodes.nowPlayingDetailAudio) nodes.nowPlayingDetailAudio.textContent = audioDetails.join(" · ") || "Unknown";
       renderNowPlayingStory(track);
+      fullscreenVisualizer?.setArtwork?.(source);
 
       setControlIcon(nodes.nowPlayingPrevious, "previous", "Previous track", "Previous");
       setControlIcon(nodes.nowPlayingPlay, playing ? "pause" : "play", playing ? "Pause music" : "Play music", playing ? "Pause" : "Play");
       setControlIcon(nodes.nowPlayingNext, "next", "Next track", "Next");
-      setControlIcon(nodes.nowPlayingShuffle, "shuffle", state.shuffle ? "Turn shuffle off" : "Turn shuffle on", "Shuffle");
-      setControlIcon(nodes.nowPlayingRepeat, "repeat", `Repeat ${state.repeat}`, "Repeat");
       setControlIcon(nodes.nowPlayingQueue, "queue", `Queue, ${state.queue.length} tracks`, "Queue");
-      const visualizerFocused = Boolean(nodes.nowPlaying?.classList.contains("is-visualizer-focus"));
+      const visualizerFocused = visualizerFocusActive();
       setControlIcon(
         nodes.nowPlayingFullscreen,
         visualizerFocused ? "fullscreenExit" : "fullscreen",
         visualizerFocused ? "Return to Now Playing" : "Full-screen visualizer",
         visualizerFocused ? "Return" : "Visualizer",
       );
-      setControlIcon(nodes.nowPlayingDetailsToggle, "details", "Track details", "Details");
       if (nodes.nowPlayingQueueCount) nodes.nowPlayingQueue?.append(nodes.nowPlayingQueueCount);
       nodes.nowPlayingPlay?.setAttribute("aria-pressed", playing ? "true" : "false");
-      nodes.nowPlayingShuffle?.setAttribute("aria-pressed", state.shuffle ? "true" : "false");
-      nodes.nowPlayingRepeat?.setAttribute("aria-pressed", state.repeat === "off" ? "false" : "true");
-      if (nodes.nowPlayingRepeat) nodes.nowPlayingRepeat.dataset.repeat = state.repeat;
       if (nodes.nowPlayingPlay) nodes.nowPlayingPlay.disabled = !track;
       if (nodes.nowPlayingPrevious) nodes.nowPlayingPrevious.disabled = !track;
       if (nodes.nowPlayingNext) nodes.nowPlayingNext.disabled = !track;
@@ -1799,6 +1966,7 @@
       if (nodes.volume && root.document.activeElement !== nodes.volume) nodes.volume.value = String(playbackVolume());
       updateNowPlayingSurface(track, playing);
       updateProgress();
+      if (nowPlayingIsOpen()) requestNowPlayingVisualizerFrame();
     }
 
     function updateProgress() {
@@ -2252,8 +2420,8 @@
       try {
         state.audioContext = state.audioContext || new AudioContext();
         state.analyser = state.audioContext.createAnalyser();
-        state.analyser.fftSize = 2048;
-        state.analyser.smoothingTimeConstant = 0.82;
+        state.analyser.fftSize = 128;
+        state.analyser.smoothingTimeConstant = 0.78;
         state.audioSource = state.audioContext.createMediaElementSource(nodes.audio);
         state.audioSource.connect(state.analyser);
         state.analyser.connect(state.audioContext.destination);
@@ -2541,6 +2709,7 @@
     }, 120);
 
     function bind() {
+      setupNowPlayingVisualizer();
       nodes.root.querySelectorAll("[data-music-view]").forEach(control => {
         control.addEventListener("click", () => setView(control.dataset.musicView));
       });
@@ -2580,21 +2749,20 @@
       nodes.nowPlayingPlay?.addEventListener("click", () => !playbackIsPlaying() ? play().catch(error => setStatus(error.message, "error")) : pause());
       nodes.nowPlayingPrevious?.addEventListener("click", previous);
       nodes.nowPlayingNext?.addEventListener("click", () => next());
-      nodes.nowPlayingShuffle?.addEventListener("click", toggleShuffle);
-      nodes.nowPlayingRepeat?.addEventListener("click", toggleRepeat);
       nodes.nowPlayingQueue?.addEventListener("click", () => setQueueOpen(nodes.queue?.hidden, nodes.nowPlayingQueue));
       nodes.nowPlayingFullscreen?.addEventListener("click", () => {
-        const focused = nodes.nowPlaying?.classList.toggle("is-visualizer-focus");
-        nodes.nowPlayingFullscreen.setAttribute("aria-pressed", focused ? "true" : "false");
-        updateNowPlayingSurface(currentTrack(), playbackIsPlaying());
-        requestNowPlayingVisualizerFrame();
+        setVisualizerFocus(!visualizerFocusActive());
       });
-      nodes.nowPlayingDetailsToggle?.addEventListener("click", () => {
-        const opening = Boolean(nodes.nowPlayingDetails?.hidden);
-        if (nodes.nowPlayingDetails) nodes.nowPlayingDetails.hidden = !opening;
-        nodes.nowPlayingDetailsToggle.setAttribute("aria-expanded", opening ? "true" : "false");
+      nodes.nowPlayingScene?.addEventListener("change", () => {
+        applyFullscreenVisualizerScene(nodes.nowPlayingScene.value);
       });
-
+      nodes.nowPlayingGlow?.addEventListener("click", toggleFullscreenVisualizerGlow);
+      nodes.nowPlayingVisualizer?.addEventListener("click", cycleClassicVisualizer);
+      nodes.nowPlayingVisualizer?.addEventListener("keydown", event => {
+        if (!["Enter", " "].includes(event.key) || visualizerFocusActive()) return;
+        event.preventDefault();
+        cycleClassicVisualizer();
+      });
       const seekFrom = control => {
         if (usingRemoteOutput()) {
           const duration = playbackDuration();
@@ -2630,12 +2798,14 @@
         if ("mediaSession" in root.navigator) root.navigator.mediaSession.playbackState = "playing";
         updateOutputStatus();
         updateDock();
+        requestNowPlayingVisualizerFrame();
       });
       nodes.audio.addEventListener("pause", () => {
         if (usingRemoteOutput()) return;
         collectListeningTime();
         if ("mediaSession" in root.navigator) root.navigator.mediaSession.playbackState = "paused";
         updateDock();
+        requestNowPlayingVisualizerFrame();
       });
       nodes.audio.addEventListener("ended", () => {
         if (usingRemoteOutput()) return;
@@ -2682,6 +2852,10 @@
       });
       root.addEventListener("cc:tabchange", event => {
         if (event.detail?.name === "music") renderContent();
+      });
+      root.addEventListener("resize", () => {
+        if (visualizerFocusActive()) fullscreenVisualizer?.resize?.();
+        requestNowPlayingVisualizerFrame();
       });
       root.addEventListener("cc:ambientaudiochange", syncAmbientControls);
       syncAmbientControls();

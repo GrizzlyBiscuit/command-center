@@ -7,11 +7,13 @@
     <title>{% block title %}Command Center{% endblock %}</title>
     <script>
       (function () {
+        var selectedTheme = 'synthwave';
         try {
           var savedTheme = localStorage.getItem('cc_theme');
           var knownThemes = ['outrun', 'vaporwave', 'cyberpunk', 'bloodmoon', 'ice', 'midnight', 'neon', 'synthwave'];
-          if (knownThemes.indexOf(savedTheme) !== -1) document.documentElement.setAttribute('data-theme', savedTheme);
+          if (knownThemes.indexOf(savedTheme) !== -1) selectedTheme = savedTheme;
         } catch (error) {}
+        document.documentElement.setAttribute('data-theme', selectedTheme);
       })();
     </script>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
