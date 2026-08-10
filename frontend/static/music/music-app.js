@@ -325,8 +325,10 @@
     const nodes = {
       root: byId("cc-music-root"),
       search: byId("cc-music-search"),
+      mobileSearch: byId("cc-music-search-mobile"),
       sort: byId("cc-music-sort"),
       content: byId("cc-music-content"),
+      playbackSettings: byId("cc-music-playback-settings"),
       status: byId("cc-music-status"),
       libraryQueue: byId("cc-music-library-queue"),
       libraryQueueCount: byId("cc-music-library-queue-count"),
@@ -785,6 +787,7 @@
         const searchRegion = nodes.search.closest(".cc-music-search-wrap") || nodes.search;
         searchRegion.hidden = state.view === "stats" || state.view === "settings";
       }
+      if (nodes.playbackSettings) nodes.playbackSettings.hidden = state.view !== "settings";
       if (nodes.sort) {
         nodes.sort.value = state.sort;
         nodes.sort.closest(".cc-music-sort-wrap").hidden = state.view !== "albums";
@@ -1355,6 +1358,7 @@
     function clearSearch() {
       state.query = "";
       if (nodes.search) nodes.search.value = "";
+      if (nodes.mobileSearch) nodes.mobileSearch.value = "";
       renderContent();
     }
 
@@ -1380,7 +1384,7 @@
       if (nodes.playerShow) nodes.playerShow.hidden = queueOpen ? true : visibility.restoreHidden;
     }
 
-    function setPlayerHidden(hidden) {
+    function setPlayerHidden(hidden, { restoreFocus = true } = {}) {
       state.playerHidden = Boolean(hidden);
       if (state.playerHidden && nodes.queue && !nodes.queue.hidden) {
         nodes.queue.hidden = true;
@@ -1391,11 +1395,18 @@
       }
       writePlayerHiddenPreference(root, state.playerHidden);
       updateDock();
-      const focusCandidates = state.playerHidden
-        ? [nodes.playerShow]
-        : [nodes.playerOpen, nodes.play, nodes.previous, nodes.next];
-      const focusTarget = focusCandidates.find(canRestoreFocus);
-      if (focusTarget) focusTarget.focus({ preventScroll: true });
+      if (restoreFocus) {
+        const focusCandidates = state.playerHidden
+          ? [nodes.playerShow]
+          : [nodes.playerOpen, nodes.play, nodes.previous, nodes.next];
+        const focusTarget = focusCandidates.find(canRestoreFocus);
+        if (focusTarget) focusTarget.focus({ preventScroll: true });
+      }
+      if (typeof root.dispatchEvent === "function" && typeof root.CustomEvent === "function") {
+        root.dispatchEvent(new root.CustomEvent("cc:musicplayervisibilitychange", {
+          detail: { visible: !state.playerHidden },
+        }));
+      }
     }
 
     function syncLibraryHighlights(track = currentTrack()) {
@@ -1756,6 +1767,7 @@
       if (typeof root.showTab === "function") root.showTab("music");
       state.query = "";
       if (nodes.search) nodes.search.value = "";
+      if (nodes.mobileSearch) nodes.mobileSearch.value = "";
       setView("albums");
 
       const focusAlbum = () => {
@@ -2871,13 +2883,18 @@
       nodes.root.querySelectorAll("[data-music-view]").forEach(control => {
         control.addEventListener("click", () => setView(control.dataset.musicView));
       });
-      if (nodes.search) {
-        const applySearch = Domain.debounce(() => {
-          state.query = nodes.search.value;
-          renderContent();
-        }, 180);
-        nodes.search.addEventListener("input", applySearch);
-      }
+      const applySearch = Domain.debounce(search => {
+        state.query = search.value;
+        const mobileSearch = nodes.mobileSearch || byId("cc-music-search-mobile");
+        if (nodes.search && nodes.search !== search) nodes.search.value = state.query;
+        if (mobileSearch && mobileSearch !== search) mobileSearch.value = state.query;
+        renderContent();
+      }, 180);
+      nodes.root.addEventListener("input", event => {
+        const search = event.target;
+        if (search?.id !== "cc-music-search" && search?.id !== "cc-music-search-mobile") return;
+        applySearch(search);
+      });
       nodes.sort?.addEventListener("change", () => {
         if (!ALBUM_SORT_MODES.includes(nodes.sort.value)) return;
         state.sort = nodes.sort.value;
@@ -3033,6 +3050,7 @@
       getAnalyser,
       getPlaybackState,
       handleInputAction,
+      isPlayerVisible: () => !state.playerHidden,
       isPlaying: () => !nodes.audio.paused && !nodes.audio.ended,
       next: () => next(),
       onShow: renderContent,
@@ -3040,6 +3058,7 @@
       play,
       previous,
       reload: () => load({ keepView: true }),
+      setPlayerVisible: visible => setPlayerHidden(!Boolean(visible), { restoreFocus: false }),
     });
   }
 
@@ -3047,6 +3066,7 @@
     getAnalyser() { return app?.getAnalyser() || null; },
     getPlaybackState() { return app?.getPlaybackState() || null; },
     handleInputAction(action, detail) { return app?.handleInputAction(action, detail) || false; },
+    isPlayerVisible() { return app ? app.isPlayerVisible() : !readPlayerHiddenPreference(root); },
     isPlaying() { return app?.isPlaying() || false; },
     next() { return app?.next(); },
     onShow() { return app?.onShow(); },
@@ -3054,6 +3074,10 @@
     play() { return app?.play(); },
     previous() { return app?.previous(); },
     reload() { return app?.reload(); },
+    setPlayerVisible(visible) {
+      if (app) return app.setPlayerVisible(visible);
+      writePlayerHiddenPreference(root, !Boolean(visible));
+    },
   };
   root.CCMusic = Object.freeze(publicApi);
   if (typeof module === "object" && module.exports) {

@@ -578,6 +578,10 @@ html[data-theme="tropical"] .cc-music-now-playing-body {
   min-width: 0;
 }
 
+.cc-music-mobile-menu {
+  display: none !important;
+}
+
 .cc-music-views button,
 .cc-music-library-actions button,
 .cc-music-head-tools select {
@@ -614,7 +618,7 @@ html[data-theme="tropical"] .cc-music-now-playing-body {
 
 .cc-music-head-tools {
   display: grid;
-  grid-template-columns: auto minmax(148px, 180px) minmax(220px, 320px);
+  grid-template-columns: auto minmax(220px, 320px);
   justify-content: end;
   align-items: center;
   gap: 10px;
@@ -649,7 +653,7 @@ html[data-theme="tropical"] .cc-music-now-playing-body {
 
 .cc-music-sort-wrap #cc-music-sort,
 .cc-music-output-wrap #cc-music-output,
-.cc-music-search-wrap #cc-music-search {
+.cc-music-search-wrap :is(#cc-music-search, #cc-music-search-mobile) {
   width: 100%;
   min-width: 0;
   min-height: 36px;
@@ -689,6 +693,24 @@ html[data-theme="tropical"] .cc-music-now-playing-body {
 
 .cc-music-output-wrap:is([data-state="offline"], [data-state="blocked"]) small {
   color: var(--danger, #ed6a74);
+}
+
+.cc-music-playback-settings {
+  margin: 0 20px 20px;
+}
+
+.cc-music-playback-settings > .cc-music-output-wrap {
+  max-width: 420px;
+}
+
+.cc-music-settings-search {
+  display: none;
+}
+
+.cc-music-settings-search small {
+  color: var(--cc-local-music-muted);
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .cc-music-status {
@@ -1989,6 +2011,13 @@ body.cc-music-now-playing-open #cc-music-queue:not([hidden]) {
   transform: none;
 }
 
+html[data-theme="synthwave"] .cc-music-now-playing .cc-music-now-playing-album:is(:focus, :focus-visible),
+html[data-theme="synthwave"] body[data-input-mode="keyboard"] .cc-music-now-playing .cc-music-now-playing-album:focus-visible,
+html[data-theme="synthwave"] body[data-input-mode="gamepad"] .cc-music-now-playing .cc-music-now-playing-album:focus {
+  outline: 0;
+  box-shadow: none;
+}
+
 .cc-music-now-playing-album:disabled {
   opacity: 1;
   cursor: default;
@@ -2395,7 +2424,7 @@ body.cc-music-now-playing-open #cc-music-queue:not([hidden]) {
   }
 
   .cc-music-head-tools {
-    grid-template-columns: auto minmax(148px, 180px) minmax(220px, 1fr);
+    grid-template-columns: auto minmax(220px, 1fr);
     justify-content: stretch;
   }
 
@@ -2517,7 +2546,7 @@ body.cc-music-now-playing-open #cc-music-queue:not([hidden]) {
   }
 
   .cc-music-head-tools {
-    grid-template-columns: minmax(0, 1fr) minmax(136px, 0.48fr);
+    grid-template-columns: minmax(0, 1fr);
     gap: 6px;
   }
 
@@ -2539,7 +2568,7 @@ body.cc-music-now-playing-open #cc-music-queue:not([hidden]) {
     font-size: 12px;
   }
 
-  .cc-music-search-wrap #cc-music-search {
+  .cc-music-search-wrap :is(#cc-music-search, #cc-music-search-mobile) {
     min-height: 40px;
     height: 40px;
     padding-inline: 12px;
@@ -2710,6 +2739,14 @@ body.cc-music-now-playing-open #cc-music-queue:not([hidden]) {
 }
 
 @media (max-width: 680px) {
+  .app-shell[data-current-view="music"] .workspace-topbar {
+    display: none;
+  }
+
+  .app-shell[data-current-view="music"] #tab-music {
+    min-height: 100dvh;
+  }
+
   .cc-music,
   .cc-music-player,
   .cc-music-player-show,
@@ -2719,16 +2756,43 @@ body.cc-music-now-playing-open #cc-music-queue:not([hidden]) {
   }
 
   .cc-music-head-tools {
-    grid-template-columns: minmax(118px, 0.78fr) minmax(0, 1.22fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .cc-music-head {
-    top: 72px;
+    top: 0;
+  }
+
+  .cc-music .cc-music-mobile-menu {
+    display: inline-grid !important;
+  }
+
+  .cc-music-views [data-music-view="stats"] {
+    display: none;
+  }
+
+  .cc-music .cc-music-mobile-menu[aria-expanded="true"] {
+    border-color: color-mix(in srgb, var(--cc-local-music-accent) 42%, transparent);
+    background: var(--cc-local-music-accent-soft);
+    color: var(--cc-local-music-accent-strong);
   }
 
   .cc-music-output-wrap,
   .cc-music-search-wrap {
     width: 100%;
+  }
+
+  .cc-music-head-tools > .cc-music-search-wrap {
+    display: none !important;
+  }
+
+  .cc-music-settings-search {
+    display: grid;
+    gap: 6px;
+  }
+
+  .cc-music-playback-settings {
+    margin: 0 10px 16px;
   }
 
   #cc-music-player,
@@ -2832,7 +2896,7 @@ body.cc-music-now-playing-open #cc-music-queue:not([hidden]) {
   }
 
   .cc-music-head-tools {
-    grid-template-columns: minmax(112px, 0.72fr) minmax(0, 1.28fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .cc-music-library-actions {

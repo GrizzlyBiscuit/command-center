@@ -139,6 +139,9 @@
   var sideToggle = document.getElementById("cc-side-toggle");
   var sideReopen = document.getElementById("cc-side-reopen");
   var mobileMenu = document.getElementById("cc-mobile-menu");
+  var musicMobileMenu = document.getElementById("cc-music-mobile-menu");
+  var mobileMenuTriggers = [mobileMenu, musicMobileMenu].filter(Boolean);
+  var activeMobileMenu = mobileMenu || musicMobileMenu;
   var navSearch = document.getElementById("cc-nav-search");
   var navEmpty = document.getElementById("cc-nav-empty");
   var drawerBackgrounds = [
@@ -352,12 +355,15 @@
   }
 
   function setMobileDrawer(open, returnFocus) {
-    if (!shell || !sidebar || !mobileMenu) return;
+    if (!shell || !sidebar || !mobileMenuTriggers.length) return;
     mobileDrawerOpen = Boolean(open && isMobile());
     shell.classList.toggle("mobile-nav-open", mobileDrawerOpen);
     document.body.classList.toggle("cc-mobile-nav-open", mobileDrawerOpen);
-    mobileMenu.setAttribute("aria-expanded", mobileDrawerOpen ? "true" : "false");
-    mobileMenu.setAttribute("aria-label", mobileDrawerOpen ? "Close navigation" : "Open navigation");
+    mobileMenuTriggers.forEach(function (trigger) {
+      trigger.setAttribute("aria-expanded", mobileDrawerOpen ? "true" : "false");
+      trigger.setAttribute("aria-label", mobileDrawerOpen ? "Close navigation" : "Open navigation");
+      trigger.setAttribute("title", mobileDrawerOpen ? "Close navigation" : "Open navigation");
+    });
     drawerBackgrounds.forEach(function (element) {
       element.inert = mobileDrawerOpen;
     });
@@ -372,7 +378,7 @@
       });
     } else if (returnFocus) {
       window.requestAnimationFrame(function () {
-        try { mobileMenu.focus(); } catch (error) {}
+        try { activeMobileMenu && activeMobileMenu.focus(); } catch (error) {}
       });
     }
   }
@@ -386,18 +392,20 @@
     mobileDrawerOpen = false;
     if (shell) shell.classList.remove("mobile-nav-open");
     document.body.classList.remove("cc-mobile-nav-open");
-    if (mobileMenu) {
-      mobileMenu.setAttribute("aria-expanded", "false");
-      mobileMenu.setAttribute("aria-label", "Open navigation");
-    }
+    mobileMenuTriggers.forEach(function (trigger) {
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.setAttribute("aria-label", "Open navigation");
+      trigger.setAttribute("title", "Open navigation");
+    });
     setSidebarCollapsed(savedDesktopCollapsed());
   }
 
-  if (mobileMenu) {
-    mobileMenu.addEventListener("click", function () {
+  mobileMenuTriggers.forEach(function (trigger) {
+    trigger.addEventListener("click", function () {
+      activeMobileMenu = trigger;
       setMobileDrawer(!mobileDrawerOpen, false);
     });
-  }
+  });
 
   if (shell) {
     shell.addEventListener("click", function (event) {

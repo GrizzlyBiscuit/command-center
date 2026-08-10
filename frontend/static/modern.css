@@ -2348,6 +2348,81 @@ ul.agent-list li,
   box-shadow: none;
 }
 
+.appearance-preferences {
+  max-width: 720px;
+  margin-top: 20px;
+}
+
+.appearance-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 18px;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--panel) 86%, transparent);
+  cursor: pointer;
+}
+
+.appearance-toggle-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.appearance-toggle-copy strong {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.appearance-toggle-copy small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.appearance-toggle-row input[role="switch"] {
+  position: relative;
+  width: 44px;
+  min-width: 44px;
+  height: 24px;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  appearance: none;
+  background: var(--surface-raised);
+  cursor: pointer;
+  transition: border-color 140ms ease, background 140ms ease;
+}
+
+.appearance-toggle-row input[role="switch"]::after {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--muted-strong);
+  content: "";
+  transition: transform 140ms ease, background 140ms ease;
+}
+
+.appearance-toggle-row input[role="switch"]:checked {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.appearance-toggle-row input[role="switch"]:checked::after {
+  background: var(--accent);
+  transform: translateX(20px);
+}
+
+.appearance-toggle-row input[role="switch"]:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 3px;
+}
+
 /* Media surfaces are kept structurally intact and brought into this system. */
 .cc-music,
 .cc-video {
@@ -3957,8 +4032,29 @@ html[data-theme="tropical"] .tab-panel:not([hidden]) {
     border-radius: 16px;
   }
 
-  .workspace-topbar {
-    padding: 11px 14px;
+  .workspace-topbar,
+  .app-shell.sidebar-collapsed .workspace-topbar {
+    min-height: 58px;
+    justify-content: flex-start;
+    padding: 10px 14px;
+    border-bottom: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none;
+    pointer-events: none;
+  }
+
+  .workspace-heading-copy,
+  .workspace-topbar-side {
+    display: none;
+  }
+
+  .workspace-heading {
+    width: auto;
+  }
+
+  #cc-mobile-menu {
+    pointer-events: auto;
   }
 
   #view-description,

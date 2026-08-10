@@ -226,3 +226,12 @@ test("debounce only invokes the final call", () => {
   [...callbacks.values()][0]();
   assert.deepEqual(calls, ["last"]);
 });
+
+test("debounce uses browser-safe timer wrappers by default", async () => {
+  const calls = [];
+  const debounced = Music.debounce(value => calls.push(value), 1);
+  debounced("first");
+  debounced("last");
+  await new Promise(resolve => setTimeout(resolve, 10));
+  assert.deepEqual(calls, ["last"]);
+});

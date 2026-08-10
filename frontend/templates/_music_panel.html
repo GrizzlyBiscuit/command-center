@@ -7,6 +7,10 @@
     <header class="cc-music-head">
       <div class="cc-music-head-primary">
         <nav class="cc-music-views" aria-label="Music views">
+          <button class="cc-music-mobile-menu" id="cc-music-mobile-menu" type="button"
+                  aria-label="Open navigation" aria-controls="cc-sidebar" aria-expanded="false" title="Open navigation">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </button>
           <button type="button" data-music-view="tracks" aria-label="Tracks" title="Tracks">Tracks</button>
           <button type="button" class="is-active active" data-music-view="albums" aria-label="Albums" title="Albums">Albums</button>
           <button type="button" data-music-view="artists" aria-label="Artists" title="Artists">Artists</button>
@@ -40,15 +44,6 @@
           <button type="button" id="cc-music-shuffle-shown" aria-label="Shuffle shown music" title="Shuffle shown music">Shuffle</button>
         </div>
 
-        <label class="cc-music-output-wrap" for="cc-music-output">
-          <span class="sr-only">Play on</span>
-          <select id="cc-music-output" aria-label="Play on">
-            <option value="device">This device</option>
-            <option value="computer">Command Center PC</option>
-          </select>
-          <small id="cc-music-output-status" role="status" aria-live="polite">Checking PC player...</small>
-        </label>
-
         <label class="cc-music-search-wrap" for="cc-music-search">
           <span class="sr-only">Search music</span>
           <input id="cc-music-search" type="search" placeholder="Search songs, releases, or artists" autocomplete="off">
@@ -58,6 +53,25 @@
 
     <div class="cc-music-status" id="cc-music-status" role="status" aria-live="polite"></div>
     <div class="cc-music-content" id="cc-music-content"></div>
+    <section class="cc-music-settings cc-music-playback-settings" id="cc-music-playback-settings" hidden>
+      <div class="cc-music-settings-head">
+        <h4>Playback</h4>
+        <p class="cc-music-muted">Choose where music plays. Phone controls can send playback to the Command Center PC.</p>
+      </div>
+      <label class="cc-music-output-wrap" for="cc-music-output">
+        <span>Play on</span>
+        <select id="cc-music-output" aria-label="Play on">
+          <option value="device">This device</option>
+          <option value="computer">Command Center PC</option>
+        </select>
+        <small id="cc-music-output-status" role="status" aria-live="polite">Checking PC player...</small>
+      </label>
+      <label class="cc-music-search-wrap cc-music-settings-search" for="cc-music-search-mobile">
+        <span>Search library</span>
+        <input id="cc-music-search-mobile" type="search" aria-label="Search library" placeholder="Search songs, releases, or artists" autocomplete="off">
+        <small>On phones, enter a search here and return to Tracks, Albums, or Artists to see the results.</small>
+      </label>
+    </section>
   </div>
 </div>
 

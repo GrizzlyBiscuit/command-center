@@ -64,6 +64,26 @@ test("the Music panel keeps its persistent player and exposes an album-first too
   assert.match(panel, /<\/section>\s*<aside[^>]*id="cc-music-queue"/);
 });
 
+test("playback output lives in Settings and phone search leaves the library header", () => {
+  const header = panel.slice(panel.indexOf('<header class="cc-music-head">'), panel.indexOf("</header>"));
+  const settingsStart = panel.indexOf('id="cc-music-playback-settings"');
+  assert.ok(settingsStart > panel.indexOf('id="cc-music-content"'), "playback settings should follow the rendered settings content");
+  assert.doesNotMatch(header, /id="cc-music-output"/);
+  assert.match(panel.slice(settingsStart), /id="cc-music-output"[^>]*aria-label="Play on"/);
+  assert.match(panel.slice(settingsStart), /id="cc-music-search-mobile"[^>]*type="search"[^>]*aria-label="Search library"/);
+  assert.match(base, /filename='music\/music-app\.js'\) }}\?v=\d{8}-\d+/);
+  assert.match(app, /nodes\.root\.addEventListener\("input", event => \{/);
+  assert.match(app, /search\?\.id !== "cc-music-search" && search\?\.id !== "cc-music-search-mobile"/);
+  assert.match(app, /if \(nodes\.playbackSettings\) nodes\.playbackSettings\.hidden = state\.view !== "settings"/);
+  assert.match(base, /filename='music\/music-domain\.js'\) }}\?v=\d{8}-\d+/);
+
+  const mobileStart = css.indexOf("@media (max-width: 680px)");
+  const mobileEnd = css.indexOf("@media (max-width: 440px)", mobileStart);
+  const mobile = css.slice(mobileStart, mobileEnd);
+  assert.match(mobile, /\.cc-music-head-tools > \.cc-music-search-wrap\s*\{[^}]*display:\s*none !important;/);
+  assert.match(mobile, /\.cc-music-settings-search\s*\{(?=[^}]*display:\s*grid;)[^}]*\}/);
+});
+
 test("the mini player opens an accessible full-screen Now Playing dialog", () => {
   assert.match(
     panel,
@@ -203,6 +223,7 @@ test("Synthwave carries its wallpaper through darkened album and Now Playing sur
   assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing-body\s*\{(?=[^}]*position:\s*relative;)(?=[^}]*z-index:\s*2;)[^}]*\}/);
   assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-album\.is-expanded\s*\{(?=[^}]*background:\s*linear-gradient)(?=[^}]*backdrop-filter:\s*blur\(4px\) saturate\(92%\);)[^}]*\}/);
   assert.match(css, /html\[data-theme="synthwave"\] #cc-music-player\s*\{(?=[^}]*background:\s*rgba\(8, 2, 22, 0\.58\);)(?=[^}]*border-color:\s*rgba\(103, 232, 255, 0\.25\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing \.cc-music-now-playing-album:is\(:focus, :focus-visible\)[\s\S]*?outline:\s*0;[\s\S]*?box-shadow:\s*none;/);
 });
 
 test("immersive themes tint the glass player and carry into Music surfaces", () => {

@@ -59,6 +59,13 @@ test("video screen and icon transport are controller friendly", () => {
   assert.match(app, /\["Enter", " "\]\.includes\(event\.key\)/);
   assert.match(app, /setControlIcon\(nodes\.play, playing \? "pause" : "play"/);
   assert.match(app, /fullscreen \? "fullscreenExit" : "fullscreen"/);
+  assert.match(app, /webkitEnterFullscreen/);
+  assert.match(app, /nodes\.player\?\.requestFullscreen/);
+  assert.match(app, /setFallbackFullscreen\(true\)/);
+  assert.match(app, /if \(!fullscreenActive\(\)\) setFallbackFullscreen\(true\)/);
+  assert.match(app, /fullscreenerror/);
+  assert.match(css, /\.cc-video-player\.is-fallback-fullscreen,[\s\S]*?\.cc-video-player:fullscreen,[\s\S]*?position:\s*fixed !important;[\s\S]*?height:\s*100dvh;/);
+  assert.match(css, /\.cc-video-screen:fullscreen[\s\S]*?height:\s*100dvh[\s\S]*?object-fit:\s*contain/);
   assert.match(app, /` · \$\{state\.queueIndex \+ 1\} of \$\{state\.queue\.length\}`/);
 });
 
@@ -66,6 +73,10 @@ test("video library stays visual and compact on phones", () => {
   const phone = css.slice(css.indexOf("@media (max-width: 540px)"), css.indexOf("@media (max-width: 340px)"));
   assert.match(phone, /grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
   assert.match(phone, /\.cc-video-card-actions button\s*\{[\s\S]*?min-width:\s*44px;[\s\S]*?min-height:\s*44px;/);
+  assert.match(phone, /\.cc-video-controls button\s*\{[\s\S]*?min-height:\s*44px;/);
+  assert.match(phone, /#cc-video-fullscreen\s*\{(?=[^}]*width:\s*44px;)(?=[^}]*height:\s*44px;)[^}]*\}/);
+  assert.match(phone, /\.cc-video-controls label\[for="cc-video-volume"\],[\s\S]*?#cc-video-volume\s*\{\s*display:\s*none;/);
+  assert.match(app, /nodes\.volume\?\.addEventListener\("change", handleVolumeInput\)/);
   assert.match(css, /@media \(max-width: 340px\)[\s\S]*?grid-template-columns:\s*1fr/);
 });
 

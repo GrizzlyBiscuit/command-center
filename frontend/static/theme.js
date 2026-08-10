@@ -2,6 +2,7 @@
 // Legacy storage keys remain valid so existing installations migrate cleanly.
 (function () {
   var DEFAULT_THEME = 'synthwave';
+  var MUSIC_PLAYER_HIDDEN_KEY = 'cc.music.player.hidden.v1';
   var THEMES = {
     outrun: { label: 'Graphite', vars: {} },
     ice: {
@@ -193,6 +194,27 @@
     if (out) out.textContent = t.label;
   }
 
+  function storedMusicPlayerVisible() {
+    try { return localStorage.getItem(MUSIC_PLAYER_HIDDEN_KEY) !== '1'; }
+    catch (e) { return true; }
+  }
+
+  function syncMusicPlayerToggles(visible) {
+    var show = typeof visible === 'boolean' ? visible : storedMusicPlayerVisible();
+    document.querySelectorAll('[data-music-player-toggle]').forEach(function (toggle) {
+      toggle.checked = show;
+    });
+  }
+
+  function setMusicPlayerVisible(visible) {
+    if (window.CCMusic && typeof window.CCMusic.setPlayerVisible === 'function') {
+      window.CCMusic.setPlayerVisible(visible);
+    } else {
+      try { localStorage.setItem(MUSIC_PLAYER_HIDDEN_KEY, visible ? '0' : '1'); } catch (e) {}
+    }
+    syncMusicPlayerToggles(Boolean(visible));
+  }
+
   function init() {
     var saved = null;
     try { saved = localStorage.getItem('cc_theme'); } catch (e) {}
@@ -214,6 +236,23 @@
         b.innerHTML = '<span class="theme-dot"></span><span class="theme-name">' + t.label + '</span>';
         b.onclick = function () { apply(k); };
         wrap.appendChild(b);
+      });
+    }
+    document.querySelectorAll('[data-music-player-toggle]').forEach(function (toggle) {
+      toggle.addEventListener('change', function () {
+        setMusicPlayerVisible(toggle.checked);
+      });
+    });
+    syncMusicPlayerToggles(
+      window.CCMusic && typeof window.CCMusic.isPlayerVisible === 'function'
+        ? window.CCMusic.isPlayerVisible()
+        : storedMusicPlayerVisible()
+    );
+    if (typeof window.addEventListener === 'function') {
+      window.addEventListener('cc:musicplayervisibilitychange', function (event) {
+        syncMusicPlayerToggles(event.detail && typeof event.detail.visible === 'boolean'
+          ? event.detail.visible
+          : storedMusicPlayerVisible());
       });
     }
     apply(selected);

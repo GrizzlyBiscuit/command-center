@@ -906,7 +906,7 @@
       }
       if (nodes.fullscreen) {
         nodes.fullscreen.disabled = !localSource;
-        const fullscreen = Boolean(root.document.fullscreenElement);
+        const fullscreen = fullscreenActive();
         setControlIcon(
           nodes.fullscreen,
           fullscreen ? "fullscreenExit" : "fullscreen",
@@ -1116,8 +1116,34 @@
       if (usingRemoteOutput() && reportRemote) {
         sendRemote("volume", { volume: bounded }).catch(() => {});
       } else {
-        nodes.media.volume = bounded;
+        try {
+          nodes.media.volume = bounded;
+          if (Math.abs(Number(nodes.media.volume) - bounded) > 0.01) {
+            setStatus("This phone uses its hardware buttons for volume.", "info");
+          }
+        } catch {
+          setStatus("This phone uses its hardware buttons for volume.", "info");
+        }
       }
+      updatePlayer();
+    }
+
+    function fallbackFullscreenActive() {
+      return Boolean(nodes.player?.classList.contains("is-fallback-fullscreen"));
+    }
+
+    function fullscreenActive() {
+      return Boolean(
+        root.document.fullscreenElement
+        || root.document.webkitFullscreenElement
+        || nodes.media?.webkitDisplayingFullscreen
+        || fallbackFullscreenActive()
+      );
+    }
+
+    function setFallbackFullscreen(active) {
+      nodes.player?.classList.toggle("is-fallback-fullscreen", Boolean(active));
+      root.document.body?.classList.toggle("cc-video-fallback-fullscreen", Boolean(active));
       updatePlayer();
     }
 
@@ -1125,6 +1151,7 @@
       const video = currentVideo();
       if (usingRemoteOutput() && reportRemote) sendRemote("stop").catch(() => {});
       else if (video) persistProgress(video, { force: true });
+      setFallbackFullscreen(false);
       removeLocalSource();
       state.queue = [];
       state.queueIndex = -1;
@@ -1134,12 +1161,45 @@
 
     async function toggleFullscreen() {
       if (usingRemoteOutput() || !currentVideo()) return;
-      try {
-        if (root.document.fullscreenElement) await root.document.exitFullscreen();
-        else await (nodes.screen.requestFullscreen?.() || nodes.media.requestFullscreen?.());
-      } catch (error) {
-        setStatus(error.message || "Fullscreen is unavailable.", "error");
+      if (fallbackFullscreenActive()) {
+        setFallbackFullscreen(false);
+        return;
       }
+      if (root.document.fullscreenElement || root.document.webkitFullscreenElement) {
+        const exit = root.document.exitFullscreen || root.document.webkitExitFullscreen;
+        if (typeof exit === "function") {
+          try { await exit.call(root.document); } catch {}
+        }
+        updatePlayer();
+        return;
+      }
+      if (nodes.media?.webkitDisplayingFullscreen && typeof nodes.media.webkitExitFullscreen === "function") {
+        nodes.media.webkitExitFullscreen();
+        updatePlayer();
+        return;
+      }
+
+      const playerRequest = nodes.player?.requestFullscreen || nodes.player?.webkitRequestFullscreen;
+      const mediaRequest = nodes.media?.requestFullscreen;
+      if (typeof playerRequest === "function" || typeof mediaRequest === "function") {
+        const target = typeof playerRequest === "function" ? nodes.player : nodes.media;
+        const request = typeof playerRequest === "function" ? playerRequest : mediaRequest;
+        try {
+          await request.call(target);
+          await new Promise(resolve => root.setTimeout(resolve, 100));
+          if (!fullscreenActive()) setFallbackFullscreen(true);
+          else updatePlayer();
+          return;
+        } catch {}
+      }
+      if (typeof nodes.media?.webkitEnterFullscreen === "function") {
+        try {
+          nodes.media.webkitEnterFullscreen();
+          updatePlayer();
+          return;
+        } catch {}
+      }
+      setFallbackFullscreen(true);
     }
 
     function setupSharedMediaSession() {
@@ -1181,13 +1241,22 @@
         return true;
       }
       if (action !== "back") return false;
-      const fullscreen = root.document.fullscreenElement;
+      const fullscreen = root.document.fullscreenElement || root.document.webkitFullscreenElement;
       const ownsFullscreen = Boolean(
         fullscreen
         && (fullscreen === nodes.screen || fullscreen === nodes.media || nodes.screen?.contains(fullscreen)),
       );
       if (ownsFullscreen) {
-        root.document.exitFullscreen?.();
+        const exit = root.document.exitFullscreen || root.document.webkitExitFullscreen;
+        exit?.call(root.document);
+        return true;
+      }
+      if (nodes.media?.webkitDisplayingFullscreen && typeof nodes.media.webkitExitFullscreen === "function") {
+        nodes.media.webkitExitFullscreen();
+        return true;
+      }
+      if (fallbackFullscreenActive()) {
+        setFallbackFullscreen(false);
         return true;
       }
       return false;
@@ -1469,11 +1538,13 @@
         if (usingRemoteOutput()) sendRemoteSeek(position);
         else seekTo(position, { reportRemote: false });
       });
-      nodes.volume?.addEventListener("input", () => {
+      const handleVolumeInput = () => {
         const volume = Math.max(0, Math.min(1, Number(nodes.volume.value)));
         if (usingRemoteOutput()) sendRemoteVolume(volume);
         else setVolume(volume, { reportRemote: false });
-      });
+      };
+      nodes.volume?.addEventListener("input", handleVolumeInput);
+      nodes.volume?.addEventListener("change", handleVolumeInput);
 
       nodes.media.addEventListener("play", () => {
         state.rendererError = "";
@@ -1506,6 +1577,11 @@
         updatePlayer();
       });
       root.document.addEventListener("fullscreenchange", updatePlayer);
+      root.document.addEventListener("webkitfullscreenchange", updatePlayer);
+      root.document.addEventListener("fullscreenerror", () => setFallbackFullscreen(true));
+      root.document.addEventListener("webkitfullscreenerror", () => setFallbackFullscreen(true));
+      nodes.media.addEventListener("webkitbeginfullscreen", updatePlayer);
+      nodes.media.addEventListener("webkitendfullscreen", updatePlayer);
       root.document.addEventListener("visibilitychange", () => {
         if (root.document.hidden && localSourceReady()) {
           persistProgress(localSourceVideo(), { force: true, keepalive: true });

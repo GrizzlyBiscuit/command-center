@@ -334,11 +334,15 @@
       : `${minutes}:${String(remainder).padStart(2, "0")}`;
   }
 
-  function debounce(fn, wait = 180, clock = { setTimeout, clearTimeout }) {
+  function debounce(fn, wait = 180, clock = null) {
+    const timerApi = clock || {
+      setTimeout(callback, delay) { return setTimeout(callback, delay); },
+      clearTimeout(id) { clearTimeout(id); },
+    };
     let timer = null;
     return function debounced(...args) {
-      if (timer !== null) clock.clearTimeout(timer);
-      timer = clock.setTimeout(() => {
+      if (timer !== null) timerApi.clearTimeout(timer);
+      timer = timerApi.setTimeout(() => {
         timer = null;
         fn.apply(this, args);
       }, wait);

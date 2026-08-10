@@ -46,12 +46,13 @@ test("player visibility preference is local, guarded, and presentation-only", ()
   assert.equal(readPlayerHiddenPreference(host), false);
   assert.equal(readPlayerHiddenPreference({ get localStorage() { throw new Error("denied"); } }), false);
 
-  const handler = appSource.match(/function setPlayerHidden\(hidden\) \{([\s\S]*?)\n    \}/)?.[1] || "";
+  const handler = appSource.match(/function setPlayerHidden\(hidden, \{ restoreFocus = true \} = \{\}\) \{([\s\S]*?)\n    \}/)?.[1] || "";
   assert.match(handler, /writePlayerHiddenPreference/);
   assert.match(handler, /aria-expanded", "false"/);
   assert.match(handler, /focusCandidates\.find\(canRestoreFocus\)/);
   assert.match(handler, /focusTarget\.focus\(\{ preventScroll: true \}\)/);
   assert.match(handler, /nodes\.playerOpen/);
+  assert.match(handler, /if \(restoreFocus\)/);
   assert.doesNotMatch(handler, /nodes\.playerHide/);
   assert.doesNotMatch(handler, /pause\(|\.pause\(|stop|clearQueue|sendRemote/);
   assert.match(appSource, /nodes\.player\?\.addEventListener\("contextmenu", event => \{\s*event\.preventDefault\(\);\s*setPlayerHidden\(true\);\s*\}\);/);
