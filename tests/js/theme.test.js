@@ -255,8 +255,8 @@ test("Starlight, Matrix, Verse, and Aurora register complete persistent aestheti
 });
 
 test("immersive themes have distinct animated scenes and readable glass surfaces", () => {
-  assert.match(modernSource, /html\[data-theme="starlight"\] body::before \{(?=[^}]*radial-gradient\(circle)(?=[^}]*background-size: 113px 127px, 181px 163px, 239px 211px, 307px 281px;)(?=[^}]*animation: cc-starlight-drift 28s ease-in-out infinite alternate;)[^}]*\}/);
-  assert.match(modernSource, /html\[data-theme="starlight"\] body::after \{(?=[^}]*linear-gradient\(90deg, transparent)(?=[^}]*animation: cc-starlight-meteor 10s cubic-bezier)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="starlight"\] body::before \{(?=[^}]*radial-gradient\(circle)(?=[^}]*background-size: 113px 127px, 181px 163px, 239px 211px, 307px 281px;)(?=[^}]*cc-starlight-drift 16s linear infinite alternate)(?=[^}]*cc-starlight-twinkle 3\.6s ease-in-out infinite)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="starlight"\] body::after \{(?=[^}]*linear-gradient\(90deg, transparent)(?=[^}]*animation: cc-starlight-meteor 6\.8s cubic-bezier)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="starlight"\] \.cc-hero::after \{(?=[^}]*radial-gradient\(circle at 9% 68%)(?=[^}]*radial-gradient\(circle at 91% 48%)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="matrix"\] body::before \{(?=[^}]*repeating-linear-gradient)(?=[^}]*background-size: 92px 100%, 137px 100%, 173px 100%;)(?=[^}]*animation: cc-matrix-rain 14s linear infinite;)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="matrix"\] body::after \{(?=[^}]*repeating-linear-gradient\(0deg)(?=[^}]*radial-gradient\(ellipse at center)[^}]*\}/);

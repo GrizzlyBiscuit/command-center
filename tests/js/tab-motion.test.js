@@ -45,8 +45,9 @@ test("immersive palettes have distinct reduced-motion-safe tab entrances", () =>
   assert.match(modern, /body::after \{\s*animation:\s*cc-synth-sun-breathe 6s ease-in-out infinite;/);
   assert.match(modern, /@keyframes\s+cc-synth-sun-breathe[\s\S]*?scale\(0\.97\)[\s\S]*?scale\(1\.035\)/);
   assert.match(modern, /@keyframes\s+cc-synth-grid-drift[\s\S]*?center 54px;/);
-  assert.match(modern, /@keyframes\s+cc-starlight-drift[\s\S]*?29px 3px, 61px 49px, 68px 27px, 139px 57px;/);
-  assert.match(modern, /@keyframes\s+cc-starlight-meteor[\s\S]*?translate3d\(62vw, 34vh, 0\)/);
+  assert.match(modern, /@keyframes\s+cc-starlight-drift[\s\S]*?73px -21px, 104px 78px, 28px 54px, 182px 29px;/);
+  assert.match(modern, /@keyframes\s+cc-starlight-twinkle[\s\S]*?brightness\(1\.42\)/);
+  assert.match(modern, /@keyframes\s+cc-starlight-meteor[\s\S]*?translate3d\(68vw, 38vh, 0\)/);
   assert.match(modern, /@keyframes\s+cc-matrix-rain[\s\S]*?18px 175px, 62px 195px, 101px 186px;/);
   assert.match(modern, /html\[data-theme="matrix"\] body::before \{[^}]*animation:\s*cc-matrix-rain 14s linear infinite;/);
   assert.match(modern, /@media \(prefers-reduced-motion: reduce\)[\s\S]*?html\[data-theme="matrix"\] body::before,[\s\S]*?html\[data-theme="matrix"\] \.cc-music-now-playing::before,[\s\S]*?animation:\s*none !important;/);

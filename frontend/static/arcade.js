@@ -1,8 +1,30 @@
-// Arcade — Synthwave Snake + 2048. Arrow keys or WASD. Self-contained.
+// Arcade - theme-aware Snake + 2048. Arrow keys or WASD. Self-contained.
 (function () {
   var stage, scoreEl, raf = null, game = 'snake', snake = null, board = null;
   var score = 0;
   var inputCaptured = false;
+
+  function themeColor(styles, name, fallback) {
+    try {
+      var value = styles.getPropertyValue(name).trim();
+      return value || fallback;
+    } catch (error) {
+      return fallback;
+    }
+  }
+
+  function arcadePalette() {
+    var styles = window.getComputedStyle(document.documentElement);
+    return {
+      background: themeColor(styles, '--bg', '#080315'),
+      grid: themeColor(styles, '--border-soft', 'rgba(193,119,255,0.18)'),
+      food: themeColor(styles, '--warning', '#ffd166'),
+      secondary: themeColor(styles, '--accent-2', '#43e7ff'),
+      tertiary: themeColor(styles, '--accent-3', '#a56dff'),
+      primary: themeColor(styles, '--accent', '#ff4fb7'),
+      danger: themeColor(styles, '--danger', '#ff6685')
+    };
+  }
 
   function captureInput() {
     if (game === 'chess' || !stage) return false;
@@ -63,26 +85,29 @@
   }
   function drawSnake() {
     var ctx = snake.ctx, n = snake.n, c = snake.cell;
+    var palette = arcadePalette();
     ctx.clearRect(0, 0, n * c, n * c);
-    ctx.fillStyle = 'rgba(20,4,40,0.6)'; ctx.fillRect(0, 0, n * c, n * c);
+    ctx.fillStyle = palette.background; ctx.fillRect(0, 0, n * c, n * c);
     // grid
-    ctx.strokeStyle = 'rgba(185,87,255,0.12)';
+    ctx.strokeStyle = palette.grid;
     for (var i = 0; i <= n; i++) { ctx.beginPath(); ctx.moveTo(i * c, 0); ctx.lineTo(i * c, n * c); ctx.stroke(); ctx.beginPath(); ctx.moveTo(0, i * c); ctx.lineTo(n * c, i * c); ctx.stroke(); }
     if (snake.food) {
-      ctx.fillStyle = '#ffd24a'; ctx.shadowColor = '#ff8a3c'; ctx.shadowBlur = 12;
+      ctx.fillStyle = palette.food;
+      ctx.shadowColor = palette.tertiary; ctx.shadowBlur = 12;
       ctx.fillRect(snake.food.x * c + 3, snake.food.y * c + 3, c - 6, c - 6);
       ctx.shadowBlur = 0;
     }
     for (var k = 0; k < snake.body.length; k++) {
       var b = snake.body[k];
       var grad = ctx.createLinearGradient(b.x * c, b.y * c, b.x * c + c, b.y * c + c);
-      grad.addColorStop(0, '#ff2d95'); grad.addColorStop(1, '#35c4ff');
-      ctx.fillStyle = grad; ctx.shadowColor = '#ff2d95'; ctx.shadowBlur = 8;
+      grad.addColorStop(0, palette.primary);
+      grad.addColorStop(1, palette.secondary);
+      ctx.fillStyle = grad; ctx.shadowColor = palette.primary; ctx.shadowBlur = 8;
       ctx.fillRect(b.x * c + 1, b.y * c + 1, c - 2, c - 2);
     }
     ctx.shadowBlur = 0;
     if (snake.dead) {
-      ctx.fillStyle = 'rgba(255,45,85,0.85)'; ctx.font = 'bold 28px Orbitron, monospace';
+      ctx.fillStyle = palette.danger; ctx.font = 'bold 28px Orbitron, monospace';
       ctx.textAlign = 'center'; ctx.fillText('GAME OVER', n * c / 2, n * c / 2);
     }
   }
