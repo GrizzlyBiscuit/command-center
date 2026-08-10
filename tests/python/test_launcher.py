@@ -286,6 +286,17 @@ class LauncherStartupTests(unittest.TestCase):
 
 
 class LauncherPathTests(unittest.TestCase):
+    def test_vbs_uses_the_neighbor_checkout_environment_or_shows_an_error(self) -> None:
+        launcher = Path(__file__).resolve().parents[2] / "launcher" / "launch_cc.vbs"
+        source = launcher.read_text(encoding="utf-8")
+
+        self.assertIn('SiblingRepoRoot = Fso.BuildPath(Fso.GetParentFolderName(RepoRoot), "command-center")', source)
+        self.assertIn('SiblingPython = Fso.BuildPath(SiblingRepoRoot, ".venv\\Scripts\\pythonw.exe")', source)
+        self.assertIn('ElseIf Fso.FileExists(SiblingPython) Then', source)
+        self.assertIn('MsgBox "Command Center could not find its Python environment."', source)
+        self.assertNotIn('PythonExe = "pythonw.exe"', source)
+        self.assertNotIn("C:\\Users\\mattz", source)
+
     def test_hub_script_prefers_override_then_checkout_then_legacy(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
