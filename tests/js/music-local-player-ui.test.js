@@ -144,7 +144,11 @@ test("the late CSS owns the black artwork-first library and focused album view",
   );
   assert.match(
     css,
-    /\.cc-music-album-artwork\s*\{(?=[^}]*aspect-ratio:\s*1\s*\/\s*1;)(?=[^}]*overflow:\s*hidden;)[^}]*\}/,
+    /\.cc-music-album-artwork\s*\{(?=[^}]*width:\s*100%;)(?=[^}]*height:\s*auto;)(?=[^}]*aspect-ratio:\s*1\s*\/\s*1;)(?=[^}]*overflow:\s*hidden;)[^}]*\}/,
+  );
+  assert.match(
+    css,
+    /\.cc-music button\.cc-music-album-cover\s*\{(?=[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\);)(?=[^}]*height:\s*auto;)(?=[^}]*aspect-ratio:\s*auto;)(?=[^}]*align-items:\s*stretch;)(?=[^}]*justify-content:\s*stretch;)[^}]*\}/,
   );
   assert.match(css, /\.cc-music\s*\{(?=[^}]*width:\s*100%;)(?=[^}]*max-width:\s*none;)[^}]*\}/);
   assert.match(css, /\.cc-music-album-art\s*\{[^}]*object-fit:\s*cover;/);
