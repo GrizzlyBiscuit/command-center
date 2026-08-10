@@ -229,8 +229,9 @@ test("Synthwave is registered and apply updates palette state", () => {
   }
 });
 
-test("Matrix, Verse, and Aurora register complete persistent aesthetic palettes", () => {
+test("Starlight, Matrix, Verse, and Aurora register complete persistent aesthetic palettes", () => {
   const expected = {
+    starlight: { label: "Starlight", accent: "#8dbbff", accent2: "#edf5ff", bg: "#030712" },
     matrix: { label: "Matrix", accent: "#39ff78", accent2: "#b4ffca", bg: "#020704" },
     verse: { label: "Verse", accent: "#ff365f", accent2: "#3fe7ff", bg: "#060713" },
     aurora: { label: "Aurora", accent: "#65f5bf", accent2: "#8eb8ff", bg: "#041014" },
@@ -250,10 +251,13 @@ test("Matrix, Verse, and Aurora register complete persistent aesthetic palettes"
     assert.equal(swatchFor(harness, id).classList.contains("active"), true);
   }
 
-  assert.match(baseSource, /'synthwave', 'matrix', 'verse', 'aurora'/);
+  assert.match(baseSource, /'synthwave', 'starlight', 'matrix', 'verse', 'aurora'/);
 });
 
 test("immersive themes have distinct animated scenes and readable glass surfaces", () => {
+  assert.match(modernSource, /html\[data-theme="starlight"\] body::before \{(?=[^}]*radial-gradient\(circle)(?=[^}]*background-size: 113px 127px, 181px 163px, 239px 211px, 307px 281px;)(?=[^}]*animation: cc-starlight-drift 28s ease-in-out infinite alternate;)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="starlight"\] body::after \{(?=[^}]*linear-gradient\(90deg, transparent)(?=[^}]*animation: cc-starlight-meteor 10s cubic-bezier)[^}]*\}/);
+  assert.match(modernSource, /html\[data-theme="starlight"\] \.cc-hero::after \{(?=[^}]*radial-gradient\(circle at 9% 68%)(?=[^}]*radial-gradient\(circle at 91% 48%)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="matrix"\] body::before \{(?=[^}]*repeating-linear-gradient)(?=[^}]*background-size: 92px 100%, 137px 100%, 173px 100%;)(?=[^}]*animation: cc-matrix-rain 14s linear infinite;)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="matrix"\] body::after \{(?=[^}]*repeating-linear-gradient\(0deg)(?=[^}]*radial-gradient\(ellipse at center)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="matrix"\] :is\(\.workspace-heading h1, \.panel-h, \.appearance-header h1, \.cc-hero h1, \.cc-nav-label\) \{(?=[^}]*Cascadia Mono)(?=[^}]*letter-spacing: 0\.055em;)[^}]*\}/);
@@ -263,7 +267,7 @@ test("immersive themes have distinct animated scenes and readable glass surfaces
   assert.match(modernSource, /html\[data-theme="verse"\] body::after \{(?=[^}]*linear-gradient\(116deg)(?=[^}]*transform: rotate\(-2deg\);)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="aurora"\] body::before \{(?=[^}]*conic-gradient)(?=[^}]*filter: blur\(58px\);)[^}]*\}/);
   assert.match(modernSource, /html\[data-theme="aurora"\] body::after \{(?=[^}]*radial-gradient\(circle at 18% 24%)(?=[^}]*opacity: 0\.28;)[^}]*\}/);
-  assert.match(modernSource, /html:is\(\[data-theme="matrix"\], \[data-theme="verse"\], \[data-theme="aurora"\]\) :is\([\s\S]*?\.app-titlebar,[\s\S]*?background: var\(--theme-shell\);/);
+  assert.match(modernSource, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="verse"\], \[data-theme="aurora"\]\) :is\([\s\S]*?\.app-titlebar,[\s\S]*?background: var\(--theme-shell\);/);
 });
 
 test("a saved Synthwave preference is restored while building picker controls", () => {

@@ -221,7 +221,7 @@ Shared task board for you and the agent.
 Interface palette and aesthetic switcher.
 
 - Pick a theme.
-- Includes an optional Synthwave treatment without changing the modern layout.
+- Includes immersive Synthwave, Starlight, Matrix, Verse, and Aurora treatments without changing the modern layout.
 - Persists across restarts.
 
 ### Changelog
