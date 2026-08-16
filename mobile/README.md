@@ -13,12 +13,12 @@ Goal: a native-feeling Android app that connects to your local Command Center hu
 2. Open this folder as a Gradle project
 3. If prompted, let it install SDK 35 / build-tools
 4. Create `local.properties` with your SDK path:
-   `sdk.dir=~/AppData/Local/Android/Sdk`
+   sdk.dir=~/AppData/Local/Android/Sdk
 5. Run on device/emulator via Android Studio
 
 ## How it connects
 - Tailscale hostname first: `http://commandcenter.local:5050`
-- Then direct IP: `http://[REDACTED_LAN_IP]:5050`
+- Then direct IP: `http://<this-pc-lan-ip>:5050`
 - Cleartext allowed for local domains via `network_security_config.xml`
 - External links always open in the real browser
 - In Music, **Play on > This device** plays through the phone. **Command Center PC** controls the audio element in the running desktop launcher window.
