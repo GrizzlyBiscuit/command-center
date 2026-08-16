@@ -1,0 +1,43 @@
+<section class="cc-now-playing" id="cc-now-playing-card" aria-labelledby="cc-now-playing-heading" data-state="empty">
+  <header class="cc-now-playing-head">
+    <div>
+      <div class="cc-now-playing-eyebrow">NOW PLAYING</div>
+      <h2 id="cc-now-playing-heading" class="cc-now-playing-heading">Media</h2>
+    </div>
+    <div class="cc-now-playing-badges">
+      <span class="cc-now-playing-kind" id="cc-now-playing-kind">Media</span>
+      <span class="cc-now-playing-target" id="cc-now-playing-target">Ready</span>
+      <button type="button" class="cc-now-playing-open" id="cc-now-playing-open" disabled>Open player</button>
+    </div>
+  </header>
+
+  <div class="cc-now-playing-body">
+    <div class="cc-now-playing-art" aria-hidden="true">
+      <img id="cc-now-playing-artwork" alt="" hidden>
+      <span id="cc-now-playing-glyph">&#9835;</span>
+    </div>
+
+    <div class="cc-now-playing-copy" aria-live="polite" aria-atomic="true">
+      <strong id="cc-now-playing-title">Nothing playing</strong>
+      <span id="cc-now-playing-subtitle">Start music or a video to control it here.</span>
+    </div>
+
+    <div class="cc-now-playing-transport" aria-label="Media playback controls">
+      <button type="button" id="cc-now-playing-previous" aria-label="Previous" disabled>&#9198;</button>
+      <button type="button" id="cc-now-playing-play" aria-label="Play" aria-pressed="false" disabled>&#9654;</button>
+      <button type="button" id="cc-now-playing-next" aria-label="Next" disabled>&#9197;</button>
+    </div>
+  </div>
+
+  <div class="cc-now-playing-timeline">
+    <span id="cc-now-playing-elapsed">0:00</span>
+    <input id="cc-now-playing-progress" type="range" min="0" max="1000" value="0"
+           aria-label="Media position" aria-valuetext="0:00 of 0:00" disabled>
+    <span id="cc-now-playing-duration">0:00</span>
+  </div>
+
+  <label class="cc-now-playing-volume" for="cc-now-playing-volume">
+    <span>Volume</span>
+    <input id="cc-now-playing-volume" type="range" min="0" max="1" step="0.01" value="0.8" disabled>
+  </label>
+</section>

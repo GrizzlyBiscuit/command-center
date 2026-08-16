@@ -1,0 +1,50 @@
+name: Command Center checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install Python dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Run Python tests
+        run: python -m unittest discover -s tests/python -p "test_*.py" -v
+      - name: Parse Python modules
+        run: python -m compileall -q backend launcher
+      - name: Run browser module tests
+        run: node --test tests/js/*.test.js
+      - name: Parse browser modules
+        run: >-
+          node --check frontend/static/arcade.js &&
+          node --check frontend/static/chess.js &&
+          node --check frontend/static/chat.js &&
+          node --check frontend/static/fx.js &&
+          node --check frontend/static/kanban.js &&
+          node --check frontend/static/visualizer.js &&
+          node --check frontend/static/media/media-session.js &&
+          node --check frontend/static/media/now-playing.js &&
+          node --check frontend/static/music/music-domain.js &&
+          node --check frontend/static/music/music-remote.js &&
+          node --check frontend/static/music/music-app.js &&
+          node --check frontend/static/video/video-domain.js &&
+          node --check frontend/static/video/video-remote.js &&
+          node --check frontend/static/video/video-app.js &&
+          node --check frontend/static/input/controller-navigation.js &&
+          node --check frontend/static/input/gamepad-controller.js &&
+          node --check frontend/static/input/keyboard-controls.js &&
+          node --check frontend/static/input/spatial-navigation.js

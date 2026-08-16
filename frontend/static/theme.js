@@ -1,94 +1,224 @@
-// Theme Switcher — swaps the synthwave palette by setting data-theme on <html>.
-// Each theme overrides the :root CSS variables. Preference saved to localStorage.
+// Appearance picker - swaps a complete accent/surface palette on <html>.
+// Legacy storage keys remain valid so existing installations migrate cleanly.
 (function () {
+  var DEFAULT_THEME = 'synthwave';
+  var MUSIC_PLAYER_HIDDEN_KEY = 'cc.music.player.hidden.v1';
   var THEMES = {
-    outrun:    { label: 'Outrun',     vars: {} }, // default, uses :root
-    vaporwave: {
-      label: 'Vaporwave',
-      vars: {
-        '--accent': '#ff71ce', '--accent-2': '#b967ff', '--accent-3': '#01cdfe',
-        '--sun-1': '#fff200', '--sun-2': '#ff9ff3', '--sun-3': '#ff2d95',
-        '--muted': '#c8b6ff', '--border': 'rgba(255,113,206,0.5)',
-        '--shadow': '0 25px 80px rgba(185,103,255,0.5)'
-      }
-    },
-    cyberpunk: {
-      label: 'Cyberpunk',
-      vars: {
-        '--accent': '#39ff14', '--accent-2': '#ffb000', '--accent-3': '#00e5ff',
-        '--sun-1': '#e8ff00', '--sun-2': '#ffb000', '--sun-3': '#ff3c00',
-        '--muted': '#a8ffcf', '--border': 'rgba(57,255,20,0.45)',
-        '--shadow': '0 25px 80px rgba(0,180,90,0.45)'
-      }
-    },
-    bloodmoon: {
-      label: 'Blood Moon',
-      vars: {
-        '--accent': '#ff2d55', '--accent-2': '#ff6b3d', '--accent-3': '#ffd24a',
-        '--sun-1': '#ffd24a', '--sun-2': '#ff6b3d', '--sun-3': '#b3001b',
-        '--muted': '#ffb3a7', '--border': 'rgba(255,45,85,0.5)',
-        '--shadow': '0 25px 80px rgba(150,0,30,0.6)'
-      }
-    },
+    outrun: { label: 'Graphite', vars: {} },
     ice: {
-      label: 'Ice',
+      label: 'Glacier',
       vars: {
-        '--accent': '#35c4ff', '--accent-2': '#5d7bff', '--accent-3': '#b6f0ff',
-        '--sun-1': '#eaffff', '--sun-2': '#7fd8ff', '--sun-3': '#2a7bff',
-        '--muted': '#b6e6ff', '--border': 'rgba(53,196,255,0.5)',
-        '--shadow': '0 25px 80px rgba(40,120,200,0.5)'
+        '--accent': '#559bd6', '--accent-2': '#7eb7e6', '--accent-3': '#559bd6',
+        '--accent-soft': 'rgba(85,155,214,0.13)'
       }
     },
-    // --- Dark Mode page presets: two synthwave looks, not a light/dark invert ---
     midnight: {
-      label: 'Midnight',
+      label: 'Ink',
       vars: {
-        '--bg': '#05010f',
-        '--panel': 'rgba(12, 4, 30, 0.82)',
-        '--panel-soft': 'rgba(18, 7, 42, 0.92)',
-        '--accent': '#ff2d95', '--accent-2': '#7b3fff', '--accent-3': '#2bd4ff',
-        '--sun-1': '#ffd24a', '--sun-2': '#ff6b9d', '--sun-3': '#7a1bff',
-        '--text': '#e9d8ff', '--muted': '#9a7fd6', '--border': 'rgba(123,63,255,0.32)',
-        '--shadow': '0 18px 60px rgba(40,0,90,0.5)'
+        '--bg': '#070a0f', '--bg-elevated': '#0c1118', '--panel': '#10161f',
+        '--panel-soft': '#151d28', '--surface-hover': '#192331',
+        '--accent': '#7483df', '--accent-2': '#9da8f2', '--accent-3': '#7483df',
+        '--accent-soft': 'rgba(116,131,223,0.13)', '--border': '#222d3b'
       }
     },
-    neon: {
-      label: 'Neon',
+    synthwave: {
+      label: 'Synthwave',
       vars: {
-        '--bg': '#0c0220',
-        '--panel': 'rgba(28, 8, 56, 0.8)',
-        '--panel-soft': 'rgba(40, 12, 72, 0.9)',
-        '--accent': '#ff2d95', '--accent-2': '#b957ff', '--accent-3': '#35f0ff',
-        '--sun-1': '#fff200', '--sun-2': '#ff8a3c', '--sun-3': '#ff2d00',
-        '--text': '#fff0ff', '--muted': '#ffb3f0', '--border': 'rgba(255,45,149,0.6)',
-        '--shadow': '0 25px 90px rgba(255,45,149,0.55)'
+        '--bg': '#080315', '--bg-elevated': '#100722', '--panel': '#170b30',
+        '--panel-soft': '#21103d', '--surface-hover': '#2b174b', '--surface-active': '#38205f',
+        '--accent': '#ff4fb7', '--accent-2': '#43e7ff', '--accent-3': '#a56dff',
+        '--accent-soft': 'rgba(255,79,183,0.14)', '--text': '#fff7ff',
+        '--text-soft': '#eadff3', '--muted': '#aa9cbd', '--muted-strong': '#c8b9d7',
+        '--border': 'rgba(67,231,255,0.28)', '--border-soft': 'rgba(193,119,255,0.18)',
+        '--success': '#58efaa', '--success-soft': 'rgba(88,239,170,0.13)',
+        '--warning': '#ffd166', '--warning-soft': 'rgba(255,209,102,0.14)',
+        '--danger': '#ff6685', '--danger-soft': 'rgba(255,102,133,0.13)',
+        '--info': '#43e7ff', '--shadow': '0 22px 58px rgba(20,2,48,0.42)',
+        '--shadow-soft': '0 10px 28px rgba(20,2,48,0.32)'
+      }
+    },
+    starlight: {
+      label: 'Starlight',
+      vars: {
+        '--bg': '#030712', '--bg-elevated': '#07101f', '--panel': '#0a1528',
+        '--panel-soft': '#101d33', '--surface-hover': '#162743', '--surface-active': '#203657',
+        '--accent': '#8dbbff', '--accent-2': '#edf5ff', '--accent-3': '#b39cff',
+        '--accent-soft': 'rgba(141,187,255,0.14)', '--text': '#f7faff',
+        '--text-soft': '#dce7f7', '--muted': '#8fa2bd', '--muted-strong': '#b8c9df',
+        '--border': 'rgba(141,187,255,0.26)', '--border-soft': 'rgba(184,211,255,0.15)',
+        '--success': '#72e5bd', '--success-soft': 'rgba(114,229,189,0.13)',
+        '--warning': '#f4d98a', '--warning-soft': 'rgba(244,217,138,0.13)',
+        '--danger': '#ff829c', '--danger-soft': 'rgba(255,130,156,0.13)',
+        '--info': '#8dbbff', '--shadow': '0 22px 58px rgba(0,7,24,0.54)',
+        '--shadow-soft': '0 10px 28px rgba(0,7,24,0.38)',
+        '--theme-shell': 'rgba(4,10,23,0.86)', '--theme-panel-glass': 'rgba(8,18,37,0.76)',
+        '--theme-card-glass': 'rgba(12,25,47,0.72)', '--theme-player': 'rgba(4,11,25,0.58)',
+        '--theme-player-edge': 'rgba(141,187,255,0.3)', '--theme-glow': 'rgba(141,187,255,0.18)'
+      }
+    },
+    matrix: {
+      label: 'Matrix',
+      vars: {
+        '--bg': '#020704', '--bg-elevated': '#061009', '--panel': '#08140c',
+        '--panel-soft': '#0c1d12', '--surface-hover': '#11291a', '--surface-active': '#173923',
+        '--accent': '#39ff78', '--accent-2': '#b4ffca', '--accent-3': '#13c95a',
+        '--accent-soft': 'rgba(57,255,120,0.13)', '--text': '#eaffef',
+        '--text-soft': '#c7e9d0', '--muted': '#76a884', '--muted-strong': '#9ccdaa',
+        '--border': 'rgba(57,255,120,0.28)', '--border-soft': 'rgba(117,222,147,0.16)',
+        '--success': '#39ff78', '--success-soft': 'rgba(57,255,120,0.13)',
+        '--warning': '#d6ff65', '--warning-soft': 'rgba(214,255,101,0.13)',
+        '--danger': '#ff6278', '--danger-soft': 'rgba(255,98,120,0.13)',
+        '--info': '#73ff9c', '--shadow': '0 22px 58px rgba(0,18,6,0.5)',
+        '--shadow-soft': '0 10px 28px rgba(0,18,6,0.36)',
+        '--theme-shell': 'rgba(2,10,5,0.9)', '--theme-panel-glass': 'rgba(5,18,10,0.82)',
+        '--theme-card-glass': 'rgba(8,24,14,0.78)', '--theme-player': 'rgba(2,12,6,0.64)',
+        '--theme-player-edge': 'rgba(57,255,120,0.32)', '--theme-glow': 'rgba(57,255,120,0.18)'
+      }
+    },
+    iceage: {
+      label: 'Ice Age',
+      vars: {
+        '--bg': '#020a12', '--bg-elevated': '#061520', '--panel': '#0a1c29',
+        '--panel-soft': '#102938', '--surface-hover': '#173849', '--surface-active': '#205066',
+        '--accent': '#72e6ff', '--accent-2': '#e9fcff', '--accent-3': '#8baeff',
+        '--accent-soft': 'rgba(114,230,255,0.14)', '--text': '#f5fdff',
+        '--text-soft': '#d9f2f7', '--muted': '#83a8b4', '--muted-strong': '#b2d4dc',
+        '--border': 'rgba(134,230,255,0.3)', '--border-soft': 'rgba(188,240,255,0.17)',
+        '--success': '#79f0d0', '--success-soft': 'rgba(121,240,208,0.13)',
+        '--warning': '#e9f7ad', '--warning-soft': 'rgba(233,247,173,0.13)',
+        '--danger': '#ff829d', '--danger-soft': 'rgba(255,130,157,0.13)',
+        '--info': '#9adfff', '--shadow': '0 22px 58px rgba(0,12,24,0.54)',
+        '--shadow-soft': '0 10px 28px rgba(0,12,24,0.38)',
+        '--theme-shell': 'rgba(3,15,24,0.88)', '--theme-panel-glass': 'rgba(7,27,40,0.72)',
+        '--theme-card-glass': 'rgba(11,36,50,0.7)', '--theme-player': 'rgba(3,20,30,0.58)',
+        '--theme-player-edge': 'rgba(134,230,255,0.36)', '--theme-glow': 'rgba(114,230,255,0.22)'
+      }
+    },
+    aurora: {
+      label: 'Aurora',
+      vars: {
+        '--bg': '#041014', '--bg-elevated': '#08191e', '--panel': '#0d2026',
+        '--panel-soft': '#132b32', '--surface-hover': '#193740', '--surface-active': '#214650',
+        '--accent': '#65f5bf', '--accent-2': '#8eb8ff', '--accent-3': '#c493ff',
+        '--accent-soft': 'rgba(101,245,191,0.13)', '--text': '#f3fffc',
+        '--text-soft': '#d7ece9', '--muted': '#89aaa9', '--muted-strong': '#afd0cd',
+        '--border': 'rgba(101,245,191,0.25)', '--border-soft': 'rgba(142,184,255,0.16)',
+        '--success': '#65f5bf', '--success-soft': 'rgba(101,245,191,0.13)',
+        '--warning': '#ffe07c', '--warning-soft': 'rgba(255,224,124,0.13)',
+        '--danger': '#ff7e9d', '--danger-soft': 'rgba(255,126,157,0.13)',
+        '--info': '#8eb8ff', '--shadow': '0 22px 58px rgba(1,18,24,0.5)',
+        '--shadow-soft': '0 10px 28px rgba(1,18,24,0.34)',
+        '--theme-shell': 'rgba(4,17,22,0.88)', '--theme-panel-glass': 'rgba(8,27,33,0.8)',
+        '--theme-card-glass': 'rgba(12,35,42,0.76)', '--theme-player': 'rgba(4,18,23,0.62)',
+        '--theme-player-edge': 'rgba(101,245,191,0.3)', '--theme-glow': 'rgba(142,184,255,0.2)'
+      }
+    },
+    forest: {
+      label: 'Forest',
+      vars: {
+        '--bg': '#030b08', '--bg-elevated': '#07150f', '--panel': '#0b1d15',
+        '--panel-soft': '#112a1e', '--surface-hover': '#183927', '--surface-active': '#215036',
+        '--accent': '#78e89f', '--accent-2': '#e4ff9a', '--accent-3': '#55c9a5',
+        '--accent-soft': 'rgba(120,232,159,0.14)', '--text': '#f5fff7',
+        '--text-soft': '#d7eddd', '--muted': '#82a58d', '--muted-strong': '#accbb4',
+        '--border': 'rgba(120,232,159,0.27)', '--border-soft': 'rgba(188,238,159,0.15)',
+        '--success': '#78e89f', '--success-soft': 'rgba(120,232,159,0.13)',
+        '--warning': '#e4ff9a', '--warning-soft': 'rgba(228,255,154,0.13)',
+        '--danger': '#ff7f82', '--danger-soft': 'rgba(255,127,130,0.13)',
+        '--info': '#72d7c1', '--shadow': '0 22px 58px rgba(0,18,9,0.52)',
+        '--shadow-soft': '0 10px 28px rgba(0,18,9,0.36)',
+        '--theme-shell': 'rgba(3,15,10,0.88)', '--theme-panel-glass': 'rgba(8,29,19,0.76)',
+        '--theme-card-glass': 'rgba(12,38,25,0.72)', '--theme-player': 'rgba(4,22,14,0.6)',
+        '--theme-player-edge': 'rgba(120,232,159,0.32)', '--theme-glow': 'rgba(228,255,154,0.18)'
+      }
+    },
+    ember: {
+      label: 'Ember',
+      vars: {
+        '--bg': '#100402', '--bg-elevated': '#1b0804', '--panel': '#271008',
+        '--panel-soft': '#35160c', '--surface-hover': '#472013', '--surface-active': '#5e2a17',
+        '--accent': '#ff7b32', '--accent-2': '#ffd36a', '--accent-3': '#ff3d2e',
+        '--accent-soft': 'rgba(255,123,50,0.15)', '--text': '#fff8f2',
+        '--text-soft': '#f2ddd0', '--muted': '#b18f7e', '--muted-strong': '#d3b09d',
+        '--border': 'rgba(255,123,50,0.3)', '--border-soft': 'rgba(255,193,103,0.17)',
+        '--success': '#8de19e', '--success-soft': 'rgba(141,225,158,0.13)',
+        '--warning': '#ffd36a', '--warning-soft': 'rgba(255,211,106,0.14)',
+        '--danger': '#ff5546', '--danger-soft': 'rgba(255,85,70,0.14)',
+        '--info': '#ff9d5c', '--shadow': '0 22px 58px rgba(32,5,0,0.56)',
+        '--shadow-soft': '0 10px 28px rgba(32,5,0,0.4)',
+        '--theme-shell': 'rgba(20,6,3,0.89)', '--theme-panel-glass': 'rgba(38,12,6,0.77)',
+        '--theme-card-glass': 'rgba(49,17,8,0.73)', '--theme-player': 'rgba(27,8,3,0.62)',
+        '--theme-player-edge': 'rgba(255,123,50,0.36)', '--theme-glow': 'rgba(255,92,38,0.22)'
+      }
+    },
+    tropical: {
+      label: 'Tropical Island',
+      vars: {
+        '--bg': '#03121a', '--bg-elevated': '#08232c', '--panel': '#0b3038',
+        '--panel-soft': '#10404a', '--surface-hover': '#17515b', '--surface-active': '#1d6670',
+        '--accent': '#4ce2cf', '--accent-2': '#ffe59a', '--accent-3': '#ff8f70',
+        '--accent-soft': 'rgba(76,226,207,0.15)', '--text': '#f8ffff',
+        '--text-soft': '#d8efec', '--muted': '#8eb4b2', '--muted-strong': '#b5d5d1',
+        '--border': 'rgba(76,226,207,0.3)', '--border-soft': 'rgba(255,229,154,0.16)',
+        '--success': '#62e8ac', '--success-soft': 'rgba(98,232,172,0.13)',
+        '--warning': '#ffe59a', '--warning-soft': 'rgba(255,229,154,0.14)',
+        '--danger': '#ff7d7d', '--danger-soft': 'rgba(255,125,125,0.14)',
+        '--info': '#69d9ec', '--shadow': '0 22px 58px rgba(0,22,31,0.5)',
+        '--shadow-soft': '0 10px 28px rgba(0,22,31,0.34)',
+        '--theme-shell': 'rgba(3,24,31,0.86)', '--theme-panel-glass': 'rgba(7,44,51,0.72)',
+        '--theme-card-glass': 'rgba(10,55,62,0.7)', '--theme-player': 'rgba(3,31,38,0.58)',
+        '--theme-player-edge': 'rgba(76,226,207,0.34)', '--theme-glow': 'rgba(255,186,112,0.2)'
       }
     }
   };
 
   function apply(name) {
     var root = document.documentElement;
+    var selected = THEMES[name] ? name : DEFAULT_THEME;
     // clear old theme vars
     Object.keys(THEMES).forEach(function (k) {
       var v = THEMES[k].vars;
       if (v) Object.keys(v).forEach(function (p) { root.style.removeProperty(p); });
     });
-    var t = THEMES[name] || THEMES.outrun;
+    var t = THEMES[selected];
     if (t.vars) Object.keys(t.vars).forEach(function (p) { root.style.setProperty(p, t.vars[p]); });
-    root.setAttribute('data-theme', name);
-    try { localStorage.setItem('cc_theme', name); } catch (e) {}
+    root.setAttribute('data-theme', selected);
+    try { localStorage.setItem('cc_theme', selected); } catch (e) {}
     // refresh active state in the picker if present
     document.querySelectorAll('.theme-swatch').forEach(function (s) {
-      s.classList.toggle('active', s.dataset.theme === name);
+      var active = s.dataset.theme === selected;
+      s.classList.toggle('active', active);
+      s.setAttribute('aria-pressed', active ? 'true' : 'false');
     });
     var out = document.getElementById('theme-current');
     if (out) out.textContent = t.label;
   }
 
+  function storedMusicPlayerVisible() {
+    try { return localStorage.getItem(MUSIC_PLAYER_HIDDEN_KEY) !== '1'; }
+    catch (e) { return true; }
+  }
+
+  function syncMusicPlayerToggles(visible) {
+    var show = typeof visible === 'boolean' ? visible : storedMusicPlayerVisible();
+    document.querySelectorAll('[data-music-player-toggle]').forEach(function (toggle) {
+      toggle.checked = show;
+    });
+  }
+
+  function setMusicPlayerVisible(visible) {
+    if (window.CCMusic && typeof window.CCMusic.setPlayerVisible === 'function') {
+      window.CCMusic.setPlayerVisible(visible);
+    } else {
+      try { localStorage.setItem(MUSIC_PLAYER_HIDDEN_KEY, visible ? '0' : '1'); } catch (e) {}
+    }
+    syncMusicPlayerToggles(Boolean(visible));
+  }
+
   function init() {
     var saved = null;
     try { saved = localStorage.getItem('cc_theme'); } catch (e) {}
-    if (THEMES[saved]) apply(saved);
+    var selected = THEMES[saved] ? saved : DEFAULT_THEME;
     // build swatches if the picker exists
     var wrap = document.getElementById('theme-swatches');
     if (wrap && !wrap.dataset.built) {
@@ -96,17 +226,36 @@
       Object.keys(THEMES).forEach(function (k) {
         var t = THEMES[k];
         var b = document.createElement('button');
+        b.type = 'button';
         b.className = 'theme-swatch';
         b.dataset.theme = k;
+        b.setAttribute('aria-pressed', 'false');
         b.setAttribute('data-tip', t.label + ' palette');
-        b.style.setProperty('--sw1', (t.vars && t.vars['--accent']) || '#ff2d95');
-        b.style.setProperty('--sw2', (t.vars && t.vars['--accent-3']) || '#35c4ff');
+        b.style.setProperty('--sw1', (t.vars && t.vars['--accent']) || '#7c8cff');
+        b.style.setProperty('--sw2', (t.vars && t.vars['--accent-2']) || '#98a5ff');
         b.innerHTML = '<span class="theme-dot"></span><span class="theme-name">' + t.label + '</span>';
         b.onclick = function () { apply(k); };
         wrap.appendChild(b);
       });
-      apply(THEMES[saved] ? saved : 'outrun');
     }
+    document.querySelectorAll('[data-music-player-toggle]').forEach(function (toggle) {
+      toggle.addEventListener('change', function () {
+        setMusicPlayerVisible(toggle.checked);
+      });
+    });
+    syncMusicPlayerToggles(
+      window.CCMusic && typeof window.CCMusic.isPlayerVisible === 'function'
+        ? window.CCMusic.isPlayerVisible()
+        : storedMusicPlayerVisible()
+    );
+    if (typeof window.addEventListener === 'function') {
+      window.addEventListener('cc:musicplayervisibilitychange', function (event) {
+        syncMusicPlayerToggles(event.detail && typeof event.detail.visible === 'boolean'
+          ? event.detail.visible
+          : storedMusicPlayerVisible());
+      });
+    }
+    apply(selected);
   }
 
   window.CCTheme = { apply: apply, list: function () { return Object.keys(THEMES); } };

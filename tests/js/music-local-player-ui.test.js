@@ -1,0 +1,306 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const test = require("node:test");
+
+const root = path.resolve(__dirname, "../..");
+const read = relativePath => fs
+  .readFileSync(path.join(root, relativePath), "utf8")
+  .replace(/\r\n?/g, "\n");
+
+const base = read("frontend/templates/base.html");
+const panel = read("frontend/templates/_music_panel.html");
+const app = read("frontend/static/music/music-app.js");
+const css = read("frontend/static/music/local-player-ui.css");
+const mediaUI = require(path.join(root, "frontend/static/media/media-ui.js"));
+
+test("the local-player stylesheet is the final visual layer", () => {
+  const modernIndex = base.indexOf("filename='modern.css'");
+  const localPlayerIndex = base.indexOf("filename='music/local-player-ui.css'");
+
+  assert.ok(modernIndex >= 0, "base should load modern.css");
+  assert.ok(localPlayerIndex > modernIndex, "local-player-ui.css should load after modern.css");
+  assert.equal(base.indexOf("filename='music/local-player-ui.css'", localPlayerIndex + 1), -1);
+
+  const lyricsIndex = base.indexOf("filename='music/music-lyrics.js'");
+  const appIndex = base.indexOf("filename='music/music-app.js'");
+  assert.ok(lyricsIndex >= 0 && lyricsIndex < appIndex, "lyrics helpers should load before the music app");
+
+  const ambientScenesIndex = panel.indexOf("filename='music/music-orbit-bloom-ambient-scenes.js'");
+  const orbitBloomIndex = panel.indexOf("filename='music/music-orbit-bloom.js'");
+  const classicModesIndex = panel.indexOf("filename='music/music-now-playing-visualizer.js'");
+  assert.ok(
+    ambientScenesIndex >= 0 && ambientScenesIndex < orbitBloomIndex && orbitBloomIndex < classicModesIndex,
+    "visualizer helpers should load in dependency order before the deferred music app",
+  );
+});
+
+test("the Music panel keeps its persistent player and exposes an album-first toolbar", () => {
+  assert.match(
+    panel,
+    /<div[^>]*id="tab-music"[\s\S]*?<\/div>\s*<\/div>\s*<section[^>]*id="cc-music-player"/,
+    "the player must remain a sibling outside the hidden Music tab",
+  );
+  assert.match(panel, /<button[^>]*class="[^"]*\bactive\b[^"]*"[^>]*data-music-view="albums"/);
+
+  for (const id of [
+    "cc-music-library-queue",
+    "cc-music-library-queue-count",
+    "cc-music-sort",
+    "cc-music-play-shown",
+    "cc-music-shuffle-shown",
+    "cc-music-queue-body",
+  ]) {
+    assert.match(panel, new RegExp(`id="${id}"`), `${id} should stay wired`);
+  }
+
+  assert.match(panel, /<select[^>]*id="cc-music-sort"[^>]*aria-label="Album order or organization"/);
+  assert.match(panel, /<option value="newest">Newest<\/option>/);
+  assert.match(panel, /<option value="oldest">Oldest<\/option>/);
+  assert.match(panel, /<option value="title">Title<\/option>/);
+  assert.match(panel, /<option value="folder">Folder<\/option>/);
+  assert.match(panel, /<option value="year">Year<\/option>/);
+  assert.match(panel, /<div[^>]*class="cc-music-queue-body"[^>]*id="cc-music-queue-body"/);
+  assert.match(panel, /<\/section>\s*<aside[^>]*id="cc-music-queue"/);
+});
+
+test("playback output lives in Settings and phone search leaves the library header", () => {
+  const header = panel.slice(panel.indexOf('<header class="cc-music-head">'), panel.indexOf("</header>"));
+  const settingsStart = panel.indexOf('id="cc-music-playback-settings"');
+  assert.ok(settingsStart > panel.indexOf('id="cc-music-content"'), "playback settings should follow the rendered settings content");
+  assert.doesNotMatch(header, /id="cc-music-output"/);
+  assert.match(panel.slice(settingsStart), /id="cc-music-output"[^>]*aria-label="Play on"/);
+  assert.match(panel.slice(settingsStart), /id="cc-music-search-mobile"[^>]*type="search"[^>]*aria-label="Search library"/);
+  assert.match(base, /filename='music\/music-app\.js'\) }}\?v=\d{8}-\d+/);
+  assert.match(app, /nodes\.root\.addEventListener\("input", event => \{/);
+  assert.match(app, /search\?\.id !== "cc-music-search" && search\?\.id !== "cc-music-search-mobile"/);
+  assert.match(app, /if \(nodes\.playbackSettings\) nodes\.playbackSettings\.hidden = state\.view !== "settings"/);
+  assert.match(base, /filename='music\/music-domain\.js'\) }}\?v=\d{8}-\d+/);
+
+  const mobileStart = css.indexOf("@media (max-width: 680px)");
+  const mobileEnd = css.indexOf("@media (max-width: 440px)", mobileStart);
+  const mobile = css.slice(mobileStart, mobileEnd);
+  assert.match(mobile, /\.cc-music-head-tools > \.cc-music-search-wrap\s*\{[^}]*display:\s*none !important;/);
+  assert.match(mobile, /\.cc-music-settings-search\s*\{(?=[^}]*display:\s*grid;)[^}]*\}/);
+});
+
+test("the mini player opens an accessible full-screen Now Playing dialog", () => {
+  assert.match(
+    panel,
+    /<div[^>]*id="cc-music-player-open"[^>]*role="button"[^>]*tabindex="0"[^>]*aria-label="Open Now Playing"[^>]*aria-controls="cc-music-now-playing"/,
+  );
+  assert.match(
+    panel,
+    /<section[^>]*id="cc-music-now-playing"[^>]*role="dialog"[^>]*aria-modal="true"[^>]*aria-hidden="true"[^>]*hidden>/,
+  );
+  assert.match(
+    panel,
+    /<button[^>]*id="cc-music-now-playing-close"[^>]*aria-label="Collapse Now Playing"/,
+  );
+  assert.match(
+    panel,
+    /<button[^>]*class="cc-music-now-playing-album"[^>]*id="cc-music-now-playing-meta"[^>]*data-spatial-key="music-now-playing-album"[^>]*disabled>/,
+  );
+  for (const id of [
+    "cc-music-now-playing-art",
+    "cc-music-now-playing-title",
+    "cc-music-now-playing-progress",
+    "cc-music-now-playing-play",
+    "cc-music-now-playing-volume",
+    "cc-music-now-playing-story",
+    "cc-music-now-playing-fullscreen",
+    "cc-music-now-playing-scene",
+    "cc-music-now-playing-scene-name",
+    "cc-music-now-playing-glow",
+  ]) {
+    assert.match(panel, new RegExp(`id="${id}"`), `${id} should stay wired`);
+  }
+  assert.doesNotMatch(panel, /id="cc-music-now-playing-details-toggle"/);
+  assert.doesNotMatch(panel, /id="cc-music-now-playing-details"/);
+  assert.match(css, /\.cc-music-now-playing-close\s*\{(?=[^}]*position:\s*fixed;)(?=[^}]*z-index:\s*4;)[^}]*\}/);
+});
+
+test("the mini player advertises and wires non-destructive right-click hiding", () => {
+  assert.match(panel, /id="cc-music-player-hide"[^>]*title="Hide music player \(or right-click the player\)"/);
+  assert.match(base, /<dt>Hide music mini player<\/dt><dd>Right-click the mini player<\/dd>/);
+  assert.match(app, /nodes\.player\?\.addEventListener\("contextmenu", event => \{\s*event\.preventDefault\(\);\s*setPlayerHidden\(true\);\s*\}\);/);
+  assert.match(app, /nodes\.playerShow\?\.addEventListener\("click", \(\) => setPlayerHidden\(false\)\)/);
+});
+
+test("music defaults to sorted albums and synchronizes every playback surface", () => {
+  assert.match(app, /view:\s*"albums"/);
+  assert.match(app, /sort:\s*"newest"/);
+  assert.match(app, /function sortAlbumGroups\(groups\)/);
+  assert.match(app, /nodes\.sort\?\.addEventListener\("change"/);
+  assert.match(app, /ALBUM_SORT_MODES\.includes\(nodes\.sort\.value\)/);
+  assert.match(app, /function shownPlaybackTracks\(\)[\s\S]*?state\.view !== "albums"[\s\S]*?albumGroupsInDisplayOrder\(tracks\)\.flatMap/);
+  assert.match(app, /function playShownMusic\([\s\S]*?const tracks = shownPlaybackTracks\(\);[\s\S]*?state\.shuffle = false;[\s\S]*?playTrack\(tracks\[0\]\.id, tracks\)/);
+  assert.match(panel, /id="cc-music-play-shown"[^>]*aria-label="Play all shown music"[^>]*>Play all<\/button>/);
+
+  assert.match(app, /function openNowPlaying\(\)/);
+  assert.match(app, /function closeNowPlaying\(\{ restoreFocus = true \} = \{\}\)/);
+  assert.match(app, /nodes\.playerOpen\?\.addEventListener\("click", openNowPlaying\)/);
+  assert.match(app, /nodes\.nowPlayingClose\?\.addEventListener\("click", \(\) => closeNowPlaying\(\)\)/);
+  assert.match(app, /nodes\.nowPlayingMeta\?\.addEventListener\("click", openCurrentAlbum\)/);
+  assert.match(app, /function openCurrentAlbum\(\)[\s\S]*?closeNowPlaying\(\{ restoreFocus: false \}\)[\s\S]*?root\.showTab\("music"\)[\s\S]*?setView\("albums"\)/);
+  assert.match(app, /querySelectorAll\("\.cc-music-track\[data-track-id\]"\)[\s\S]*?album\.click\(\)[\s\S]*?album\.focus/);
+  assert.match(app, /root\.document\.addEventListener\("keydown", handleModalKeydown\)/);
+  assert.match(app, /if \(queueIsOpen\(\)\) setQueueOpen\(false\)/);
+  assert.match(app, /function applyModalInert\(\)/);
+
+  assert.match(app, /function updateNowPlayingSurface\(track, playing\)/);
+  assert.match(app, /updateNowPlayingSurface\(track, playing\)/);
+  assert.match(app, /nodes\.nowPlayingProgress\.value = progressValue/);
+  assert.match(app, /nodes\.nowPlayingVolume\.value = String\(playbackVolume\(\)\)/);
+  assert.match(app, /function queueControls\(\)/);
+  assert.match(app, /const queueHost = nodes\.queueBody \|\| nodes\.queue/);
+  assert.match(app, /const Lyrics = root\.CCMusicLyrics/);
+  assert.match(app, /function ensureNowPlayingLyrics\(track\)/);
+  assert.match(app, /Lyrics\.activeLrcIndex\(state\.lyrics\.cues, playbackPosition\(\)\)/);
+  assert.match(app, /function playShuffledTracks\(tracks\)/);
+  assert.match(app, /cc-music-album-details-toggle/);
+  assert.match(app, /cc-music-album-queue-button/);
+
+  assert.doesNotMatch(`${panel}\n${app}`, /\b(video|interviews?|offline downloads?)\b/i);
+});
+
+test("shared media icons cover Music views and full-screen visualizer chrome", () => {
+  for (const name of ["albums", "artists", "details", "folder", "glow", "settings", "stats"]) {
+    assert.ok(mediaUI.icons.includes(name), `missing ${name} icon`);
+    assert.ok(mediaUI.createIcon(name, { document: null }) === null);
+  }
+});
+
+test("the late CSS owns the black artwork-first library and focused album view", () => {
+  assert.match(
+    css,
+    /\/\* Full-screen Now Playing[\s\S]*?\.cc-music-now-playing\s*\{(?=[^}]*position:\s*fixed;)(?=[^}]*inset:\s*0;)(?=[^}]*background:\s*#000;)[^}]*\}/,
+  );
+  assert.match(
+    css,
+    /\.cc-music-album-grid\s*\{(?=[^}]*display:\s*grid;)(?=[^}]*grid-template-columns:\s*repeat\(auto-fill,\s*minmax\(min\(165px,\s*100%\),\s*1fr\)\);)[^}]*\}/,
+  );
+  assert.match(
+    css,
+    /\.cc-music-album-artwork\s*\{(?=[^}]*width:\s*100%;)(?=[^}]*height:\s*auto;)(?=[^}]*aspect-ratio:\s*1\s*\/\s*1;)(?=[^}]*overflow:\s*hidden;)[^}]*\}/,
+  );
+  assert.match(
+    css,
+    /\.cc-music button\.cc-music-album-cover\s*\{(?=[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\);)(?=[^}]*height:\s*auto;)(?=[^}]*aspect-ratio:\s*auto;)(?=[^}]*align-items:\s*stretch;)(?=[^}]*justify-content:\s*stretch;)[^}]*\}/,
+  );
+  assert.match(css, /\.cc-music\s*\{(?=[^}]*width:\s*100%;)(?=[^}]*max-width:\s*none;)[^}]*\}/);
+  assert.match(css, /\.cc-music-album-art\s*\{[^}]*object-fit:\s*cover;/);
+  assert.match(
+    css,
+    /\.cc-music-album\.is-expanded\s*\{(?=[^}]*grid-column:\s*1\s*\/\s*-1;)(?=[^}]*grid-template-columns:\s*minmax\(260px,\s*360px\)\s*minmax\(520px,\s*760px\);)[^}]*\}/,
+  );
+  assert.match(
+    css,
+    /\.cc-music-album\.is-expanded \.cc-music-album-cover \.cc-music-album-artwork\s*\{(?=[^}]*grid-column:\s*1;)(?=[^}]*grid-row:\s*1;)[^}]*\}/,
+  );
+  assert.match(
+    css,
+    /\.cc-music-album\.is-expanded \.cc-music-album-cover \.cc-music-group-copy\s*\{(?=[^}]*grid-column:\s*1;)(?=[^}]*grid-row:\s*2;)[^}]*\}/,
+  );
+  assert.match(css, /\.cc-music-album-grid:has\(> \.cc-music-album\.is-expanded\)[^{]*\{\s*display:\s*none;/);
+
+  const narrowStart = css.indexOf("@media (max-width: 860px)");
+  const phoneStart = css.indexOf("@media (max-width: 440px)", narrowStart);
+  assert.ok(narrowStart >= 0 && phoneStart > narrowStart);
+  assert.doesNotMatch(css.slice(narrowStart, phoneStart), /\.cc-music-album-grid\s*\{[^}]*grid-template-columns:/);
+  assert.match(css.slice(phoneStart), /\.cc-music-album-grid\s*\{[^}]*grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\);/);
+});
+
+test("Synthwave carries its wallpaper through darkened album and Now Playing surfaces", () => {
+  assert.match(
+    css,
+    /html\[data-theme="synthwave"\] #tab-music,\s*html\[data-theme="synthwave"\] \.cc-music\s*\{[^}]*background:\s*transparent;/,
+  );
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-content\s*\{[^}]*background:\s*rgba\(2, 3, 14, 0\.08\);/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing\s*\{(?=[^}]*isolation:\s*isolate;)(?=[^}]*linear-gradient\(rgba\(3, 0, 13, 0\.78\), rgba\(3, 0, 13, 0\.82\)\))(?=[^}]*backdrop-filter:\s*blur\(5px\) saturate\(88%\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing::before\s*\{(?=[^}]*repeating-linear-gradient)(?=[^}]*opacity:\s*0\.24;)(?=[^}]*transform:\s*perspective\(38rem\) rotateX\(62deg\) scale\(1\.16\);)(?=[^}]*animation:\s*cc-synth-grid-drift 10s linear infinite;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing::after\s*\{(?=[^}]*width:\s*clamp\(340px, 40vw, 640px\);)(?=[^}]*repeating-linear-gradient\(to bottom)(?=[^}]*opacity:\s*0\.3;)(?=[^}]*animation:\s*cc-synth-sun-breathe 6s ease-in-out infinite;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing-body\s*\{(?=[^}]*position:\s*relative;)(?=[^}]*z-index:\s*2;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-album\.is-expanded\s*\{(?=[^}]*background:\s*linear-gradient)(?=[^}]*backdrop-filter:\s*blur\(4px\) saturate\(92%\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] #cc-music-player\s*\{(?=[^}]*background:\s*rgba\(8, 2, 22, 0\.58\);)(?=[^}]*border-color:\s*rgba\(103, 232, 255, 0\.25\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="synthwave"\] \.cc-music-now-playing \.cc-music-now-playing-album:is\(:focus, :focus-visible\)[\s\S]*?outline:\s*0;[\s\S]*?box-shadow:\s*none;/);
+});
+
+test("immersive themes tint the glass player and carry into Music surfaces", () => {
+  assert.match(
+    css,
+    /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\], \[data-theme="forest"\], \[data-theme="ember"\], \[data-theme="tropical"\]\) #cc-music-player\s*\{(?=[^}]*border-color:\s*var\(--theme-player-edge\);)(?=[^}]*background:\s*var\(--theme-player\);)(?=[^}]*var\(--theme-glow\))[^}]*\}/,
+  );
+  assert.match(css, /html:is\(\[data-theme="starlight"\], \[data-theme="matrix"\], \[data-theme="iceage"\], \[data-theme="aurora"\], \[data-theme="forest"\], \[data-theme="ember"\], \[data-theme="tropical"\]\) \.cc-music-content\s*\{(?=[^}]*background:\s*color-mix)(?=[^}]*backdrop-filter:\s*blur\(3px\) saturate\(108%\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing\s*\{(?=[^}]*isolation:\s*isolate;)(?=[^}]*radial-gradient\(circle at 84% 13%)(?=[^}]*backdrop-filter:\s*blur\(4px\) saturate\(92%\);)[^}]*\}/);
+  assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing\s*\{[^}]*linear-gradient\(#020610, #030814\);/);
+  assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing::before\s*\{(?=[^}]*background-size:\s*113px 127px, 181px 163px, 239px 211px;)(?=[^}]*cc-starlight-drift 16s linear infinite alternate)(?=[^}]*cc-starlight-twinkle 3\.6s ease-in-out infinite)[^}]*\}/);
+  assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing::after\s*\{(?=[^}]*linear-gradient\(90deg, transparent)(?=[^}]*animation:\s*cc-starlight-meteor 6\.8s cubic-bezier)[^}]*\}/);
+  assert.match(css, /html\[data-theme="starlight"\] \.cc-music-now-playing-body\s*\{(?=[^}]*position:\s*relative;)(?=[^}]*z-index:\s*2;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing\s*\{(?=[^}]*isolation:\s*isolate;)(?=[^}]*repeating-linear-gradient)(?=[^}]*rgba\(57, 255, 120, 0\.1\))[^}]*\}/);
+  assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing\s*\{[^}]*linear-gradient\(#010703, #010703\);/);
+  assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing::before\s*\{(?=[^}]*position:\s*fixed;)(?=[^}]*z-index:\s*1;)(?=[^}]*opacity:\s*0\.14;)(?=[^}]*animation:\s*cc-matrix-rain 14s linear infinite;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="matrix"\] \.cc-music-now-playing-body\s*\{(?=[^}]*position:\s*relative;)(?=[^}]*z-index:\s*2;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="iceage"\] \.cc-music-now-playing\s*\{(?=[^}]*isolation:\s*isolate;)(?=[^}]*linear-gradient\(#020b13, #031521\))[^}]*\}/);
+  assert.match(css, /html\[data-theme="iceage"\] \.cc-music-now-playing::before\s*\{(?=[^}]*radial-gradient\(circle)(?=[^}]*animation:\s*cc-iceage-snow 13s linear infinite;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="iceage"\] \.cc-music-now-playing::after\s*\{(?=[^}]*clip-path:\s*polygon)(?=[^}]*animation:\s*cc-iceage-glint 7s ease-in-out infinite alternate;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="iceage"\] \.cc-music-now-playing-body\s*\{(?=[^}]*position:\s*relative;)(?=[^}]*z-index:\s*2;)[^}]*\}/);
+  assert.match(css, /html\[data-theme="aurora"\] \.cc-music-now-playing\s*\{(?=[^}]*rgba\(101, 245, 191, 0\.1\))(?=[^}]*rgba\(196, 147, 255, 0\.09\))[^}]*\}/);
+  assert.match(css, /html\[data-theme="aurora"\] \.cc-music-now-playing\s*\{[^}]*linear-gradient\(#030e12, #030e12\);/);
+  assert.match(css, /html\[data-theme="forest"\] \.cc-music-now-playing::before\s*\{(?=[^}]*cc-forest-fireflies 11s)(?=[^}]*cc-forest-flicker 3\.8s)[^}]*\}/);
+  assert.match(css, /html\[data-theme="forest"\] \.cc-music-now-playing::after\s*\{(?=[^}]*radial-gradient\(ellipse at 59% 51%)(?=[^}]*clip-path:\s*polygon)(?=[^}]*cc-forest-sway 9s)[^}]*\}/);
+  assert.match(css, /html\[data-theme="ember"\] \.cc-music-now-playing::before\s*\{(?=[^}]*radial-gradient\(circle)(?=[^}]*cc-ember-rise 9s linear infinite)[^}]*\}/);
+  assert.match(css, /html\[data-theme="ember"\] \.cc-music-now-playing::after\s*\{(?=[^}]*conic-gradient)(?=[^}]*cc-ember-breathe 4\.6s)[^}]*\}/);
+  assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing\s*\{(?=[^}]*--cc-local-music-text:\s*#fbffff;)(?=[^}]*--cc-local-music-muted:\s*#c7dfdc;)(?=[^}]*radial-gradient\(circle at 72% 24%)(?=[^}]*linear-gradient\(to bottom)(?=[^}]*#bba66f 66%)[^}]*\}/);
+  assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing :is\([\s\S]*?\.cc-music-now-playing-story,[\s\S]*?text-shadow:\s*0 2px 12px rgba\(0, 20, 24, 0\.88\);/);
+  assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing::before\s*\{(?=[^}]*repeating-linear-gradient)(?=[^}]*cc-tropical-surf 7s)[^}]*\}/);
+  assert.match(css, /html\[data-theme="tropical"\] \.cc-music-now-playing::after\s*\{(?=[^}]*inset:\s*-2%;)(?=[^}]*tropical-palms\.svg)(?=[^}]*transform:\s*none;)(?=[^}]*filter:\s*none;)(?=[^}]*animation:\s*none;)[^}]*\}/);
+  assert.match(css, /\.cc-music-now-playing-album\s*\{(?=[^}]*background:\s*transparent;)(?=[^}]*cursor:\s*pointer;)(?=[^}]*text-align:\s*left;)[^}]*\}/);
+});
+
+test("desktop and mobile mini-player sizing remain deliberate", () => {
+  assert.match(
+    css,
+    /#cc-music-player\s*\{(?=[^}]*position:\s*fixed;)(?=[^}]*grid-template-columns:\s*minmax\(240px,\s*420px\)\s*auto\s*minmax\(220px,\s*1fr\)\s*auto;)(?=[^}]*min-height:\s*80px;)[^}]*\}/,
+  );
+  assert.match(css, /\.cc-music-now img\s*\{(?=[^}]*width:\s*56px;)(?=[^}]*height:\s*56px;)[^}]*\}/);
+  assert.match(
+    css,
+    /#cc-music-player\s*\{(?=[^}]*background:\s*rgba\(3, 6, 11, 0\.7\);)(?=[^}]*backdrop-filter:\s*blur\(24px\) saturate\(140%\);)(?=[^}]*-webkit-backdrop-filter:\s*blur\(24px\) saturate\(140%\);)[^}]*\}/,
+  );
+
+  const mobileStart = css.indexOf("@media (max-width: 680px)");
+  const mobileEnd = css.indexOf("@media (max-width: 440px)", mobileStart);
+  assert.ok(mobileStart >= 0 && mobileEnd > mobileStart, "mobile player rules should be bounded");
+  const mobile = css.slice(mobileStart, mobileEnd);
+  assert.match(
+    mobile,
+    /#cc-music-player,[\s\S]*?\{(?=[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s*auto;)(?=[^}]*min-height:\s*66px;)[^}]*\}/,
+  );
+  assert.match(mobile, /\.cc-music-now img\s*\{(?=[^}]*width:\s*38px;)(?=[^}]*height:\s*38px;)[^}]*\}/);
+  assert.match(mobile, /padding-bottom:\s*calc\(80px \+ env\(safe-area-inset-bottom\)\);/);
+  assert.match(mobile, /\.cc-music-queue\s*\{(?=[^}]*top:\s*0;)[^}]*\}/);
+  assert.match(mobile, /\.cc-music-queue-head\s*\{[^}]*padding-top:\s*calc\(14px \+ env\(safe-area-inset-top\)\);/);
+});
+
+test("Now Playing adapts from two columns to narrow screens", () => {
+  assert.match(
+    css,
+    /\.cc-music-now-playing-body\s*\{[^}]*grid-template-columns:\s*minmax\(420px,\s*560px\)\s*minmax\(480px,\s*1fr\);/,
+  );
+  const tabletStart = css.indexOf("@media (max-width: 1099px)");
+  const tabletEnd = css.indexOf("@media (max-width: 1120px)", tabletStart);
+  assert.ok(tabletStart >= 0 && tabletEnd > tabletStart, "tablet Now Playing rules should be bounded");
+  assert.match(
+    css.slice(tabletStart, tabletEnd),
+    /\.cc-music-now-playing-body\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*560px\);/,
+  );
+
+  const narrowStart = css.indexOf("@media (max-width: 860px)");
+  const narrowEnd = css.indexOf("@media (max-width: 680px)", narrowStart);
+  assert.ok(narrowStart >= 0 && narrowEnd > narrowStart, "narrow Now Playing rules should be bounded");
+  const narrow = css.slice(narrowStart, narrowEnd);
+  assert.match(narrow, /\.cc-music-now-playing-artwork\s*\{[^}]*width:\s*94vw;/);
+  assert.match(narrow, /\.cc-music-now-playing-controls\s*\{[^}]*grid-template-columns:\s*minmax\(44px,\s*1fr\)\s*auto\s*minmax\(44px,\s*1fr\);/);
+  assert.match(narrow, /\.cc-music-now-playing-volume\s*\{\s*display:\s*none;/);
+});

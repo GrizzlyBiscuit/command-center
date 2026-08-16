@@ -1,0 +1,66 @@
+<!-- Local video library. Playback remains available while another tab is open. -->
+<div class="tab-panel" id="tab-video" style="display:none">
+  <div class="cc-video" id="cc-video-root">
+    <header class="cc-video-head">
+      <div>
+        <h3 class="panel-h">Video Library</h3>
+        <p class="panel-sub">Watch videos stored on this computer. Nothing is uploaded.</p>
+      </div>
+      <div class="cc-video-head-tools">
+        <label class="cc-video-output-wrap" for="cc-video-output">
+          <span>Play on</span>
+          <select id="cc-video-output">
+            <option value="device">This device</option>
+            <option value="computer">Command Center PC</option>
+          </select>
+          <small id="cc-video-output-status" role="status" aria-live="polite">Checking PC player...</small>
+        </label>
+        <label class="cc-video-search-wrap" for="cc-video-search">
+          <span>Search</span>
+          <input id="cc-video-search" type="search" placeholder="Video titles..." autocomplete="off">
+        </label>
+      </div>
+    </header>
+
+    <nav class="cc-video-views" aria-label="Video views">
+      <button type="button" class="btn-ghost active" data-video-view="library">Library</button>
+      <button type="button" class="btn-ghost" data-video-view="recent">Recent</button>
+      <button type="button" class="btn-ghost" data-video-view="settings">Settings</button>
+    </nav>
+
+    <div class="cc-video-status" id="cc-video-status" role="status" aria-live="polite"></div>
+
+    <section class="cc-video-player" id="cc-video-player" aria-label="Video player" hidden>
+      <div class="cc-video-screen" id="cc-video-screen" role="button" tabindex="0" data-spatial-key="video-screen" aria-label="Video screen" aria-pressed="false">
+        <video id="cc-video-media" preload="metadata" playsinline></video>
+        <div class="cc-video-screen-placeholder" id="cc-video-placeholder" aria-hidden="true">
+          <span>Preview unavailable</span>
+          <strong id="cc-video-placeholder-title">Choose a video</strong>
+          <small id="cc-video-placeholder-note">Playback will appear here</small>
+        </div>
+      </div>
+      <div class="cc-video-now">
+        <div class="cc-video-now-copy">
+          <strong id="cc-video-now-title">Nothing playing</strong>
+          <span id="cc-video-now-meta">Choose a video from the library</span>
+        </div>
+        <button type="button" id="cc-video-fullscreen">Fullscreen</button>
+      </div>
+      <div class="cc-video-timeline">
+        <span id="cc-video-elapsed">0:00</span>
+        <input id="cc-video-progress" type="range" min="0" max="1000" value="0" aria-label="Video position">
+        <span id="cc-video-duration">0:00</span>
+      </div>
+      <div class="cc-video-controls" aria-label="Playback controls">
+        <button type="button" id="cc-video-previous" aria-label="Previous video">Previous</button>
+        <button type="button" id="cc-video-play" aria-label="Play video">Play</button>
+        <button type="button" id="cc-video-next" aria-label="Next video">Next</button>
+        <label for="cc-video-volume">Volume</label>
+        <input id="cc-video-volume" type="range" min="0" max="1" step="0.01" value="0.8">
+        <button type="button" id="cc-video-stop">Close</button>
+      </div>
+    </section>
+
+    <div class="cc-video-content" id="cc-video-content"></div>
+  </div>
+</div>

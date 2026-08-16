@@ -5,136 +5,130 @@
 {% block content %}
 <section class="panel home-panel">
 
-  <!-- HERO — only visible on the Home tab (lives inside #tab-home) -->
-  <div class="tab-panel" id="tab-home">
+  <div class="tab-panel dashboard-view" id="tab-home">
     <header class="cc-hero" id="cc-hero">
-      <h1 class="home-hero-title">COMMAND CENTER</h1>
-      <p class="home-hero-sub">Pick a panel to begin</p>
-      <nav class="cc-hero-nav" aria-label="Primary">
-        <a href="{{ url_for('index') }}">Home</a>
-        <a href="{{ url_for('darkmode') }}">Dark Mode</a>
-        <a href="{{ url_for('instructions') }}">Setup</a>
-        {% if session.admin %}
-          <a href="{{ url_for('admin_settings') }}">Admin</a>
-          <a href="{{ url_for('admin_log') }}">Logs</a>
-          <a href="{{ url_for('admin_logout') }}">Logout</a>
-        {% else %}
-          <a href="{{ url_for('admin_login') }}">Admin Login</a>
-        {% endif %}
-      </nav>
-    </header>
-
-    <div class="home-hero">
-      <div class="fire-widget" id="fire-widget">
-        <div class="fire-flame-wrap">
-          <svg id="fire-flame" class="fire-flame" viewBox="0 0 100 120" aria-label="Fire danger level">
-            <defs>
-              <radialGradient id="flameGrad" cx="50%" cy="70%" r="60%">
-                <stop offset="0%" stop-color="#fff6d5"/>
-                <stop offset="35%" stop-color="#ffd23f"/>
-                <stop offset="70%" stop-color="#ff7b00"/>
-                <stop offset="100%" stop-color="#c1121f"/>
-              </radialGradient>
-            </defs>
-            <path id="flame-path" d="M50 110 C20 90 18 55 38 38 C44 32 40 22 50 8 C62 24 60 34 64 40 C82 54 82 90 50 110 Z"
-                  fill="url(#flameGrad)"/>
-          </svg>
-          <div class="fire-stage-label" id="fire-stage-label">Low</div>
-        </div>
-        <div class="fire-meta">
-          <div class="fire-region" id="fire-region">—</div>
-          <div class="fire-sources" id="fire-sources"></div>
-        </div>
-        <div class="fire-evac">
-          <div class="fire-evac-title">EVAC STATUS</div>
-          <div class="evac-lights" id="evac-lights">
-            <span class="evac-light" data-stage="0"><i></i>None</span>
-            <span class="evac-light" data-stage="1"><i></i>Advisory</span>
-            <span class="evac-light" data-stage="2"><i></i>Get Ready</span>
-            <span class="evac-light" data-stage="3"><i></i>Evacuate</span>
-            <span class="evac-light" data-stage="4"><i></i>Mandatory</span>
-          </div>
-          <div class="fire-evac-name" id="fire-evac-name">None</div>
+      <div class="cc-hero-copy">
+        <span class="cc-eyebrow">Local operations</span>
+        <h1 class="home-hero-title">Everything running,<br>right where you left it.</h1>
+        <p class="home-hero-sub">Monitor models, media, automations, and workspace tools from one calm view.</p>
+        <div class="home-hero-actions" aria-label="Quick actions">
+          <button class="hero-chip btn-primary" type="button" data-goto="chat">Open AI chat</button>
+          <button class="hero-chip btn-ghost" type="button" data-goto="sys">View system health</button>
+          <button class="hero-chip btn-ghost" type="button" data-goto="switches">Manage services</button>
         </div>
       </div>
-      <p class="home-hero-sub home-hero-welcome">Choose a panel from the sidebar to get started.</p>
+      <div class="home-time-card" aria-label="Current local time">
+        <span class="home-time-label">Local time</span>
+        <span class="home-clock-time" id="clock-main">--:--:--</span>
+        <span class="home-clock-date" id="clock-date"></span>
+        <span class="home-version" id="home-version">V2.34.14</span>
+      </div>
+    </header>
 
-      <!-- Hub dashboard -->
-      <div class="hub-dash" id="hub-dash">
+    <div class="overview-grid">
+      <section class="hub-dash dashboard-card overview-services" id="hub-dash" aria-labelledby="services-title">
         <div class="hub-head">
           <div>
-            <div class="hub-title">HUB STATUS</div>
-            <div class="hub-meta" id="hub-meta">PID {{ hub.pid if hub else '—' }} · {{ 'UP' if (hub and (hub.relay or hub.ollama)) else 'IDLE' }}</div>
+            <span class="section-kicker">Runtime</span>
+            <h2 class="hub-title" id="services-title">Service health</h2>
+            <div class="hub-meta" id="hub-meta">PID {{ hub.pid if hub else '—' }} · {{ 'Running' if (hub and (hub.relay or hub.ollama)) else 'Idle' }}</div>
           </div>
           <div class="hub-head-actions">
             <button id="hub-refresh" class="btn-ghost" data-tip="Refresh hub state now">Refresh</button>
-            <button id="hub-kill" class="btn-danger" data-tip="Stop the hub process">Kill hub</button>
+            <button id="hub-kill" class="btn-danger btn-danger-quiet" data-tip="Stop the hub process">Stop hub</button>
           </div>
         </div>
         <div class="hub-grid">
-          <div class="hub-card">
-            <div class="hub-card-title">Hub process</div>
-            <div class="hub-indicator-row">
-              <span class="status-dot" id="dot-hub"></span>
-              <strong id="state-hub">running</strong>
-            </div>
-            <div class="hub-sub" id="hub-python">{{ hub.python if hub else '' }}</div>
-            <div class="hub-sub" id="hub-uptime">uptime: checking…</div>
-          </div>
-          <div class="hub-card">
-            <div class="hub-card-title">Relay</div>
-            <div class="hub-indicator-row">
-              <span class="status-dot" id="dot-relay-home"></span>
-              <strong id="state-relay-home">{{ 'running' if (hub and hub.relay) else 'stopped' }}</strong>
-            </div>
-            <div class="hub-sub">Discord bot/model pair</div>
-          </div>
-          <div class="hub-card">
-            <div class="hub-card-title">Ollama</div>
-            <div class="hub-indicator-row">
-              <span class="status-dot" id="dot-ollama-home"></span>
-              <strong id="state-ollama-home">{{ 'up' if (hub and hub.ollama) else 'down' }}</strong>
-            </div>
-            <div class="hub-sub">Local model server</div>
-          </div>
-          <div class="hub-card">
-            <div class="hub-card-title">Cron</div>
-            <div class="hub-sub" id="hub-cron">{{ (hub.cron|length) if hub and hub.cron else 0 }} active</div>
-            <div class="hub-sub" id="hub-cron-list">{% if hub and hub.cron %}{% for c in hub.cron %}<div>{{ c }}</div>{% endfor %}{% endif %}</div>
-          </div>
+          <article class="hub-card">
+            <div class="hub-card-topline"><span class="hub-card-title">Command Center</span><span class="status-dot" id="dot-hub"></span></div>
+            <strong class="hub-card-state" id="state-hub">Running</strong>
+            <div class="hub-sub" id="hub-uptime">Checking uptime…</div>
+            <div class="hub-sub hub-path" id="hub-python">{{ hub.python if hub else '' }}</div>
+          </article>
+          <article class="hub-card">
+            <div class="hub-card-topline"><span class="hub-card-title">Ollama</span><span class="status-dot" id="dot-ollama-home"></span></div>
+            <strong class="hub-card-state" id="state-ollama-home">{{ 'Available' if (hub and hub.ollama) else 'Offline' }}</strong>
+            <div class="hub-sub">Local model runtime</div>
+          </article>
+          <article class="hub-card">
+            <div class="hub-card-topline"><span class="hub-card-title">Relay</span><span class="status-dot" id="dot-relay-home"></span></div>
+            <strong class="hub-card-state" id="state-relay-home">{{ 'Connected' if (hub and hub.relay) else 'Stopped' }}</strong>
+            <div class="hub-sub">Discord and model bridge</div>
+          </article>
+          <article class="hub-card">
+            <div class="hub-card-topline"><span class="hub-card-title">Schedules</span><span class="hub-mini-icon" aria-hidden="true">↗</span></div>
+            <strong class="hub-card-state" id="hub-cron">{{ (hub.cron|length) if hub and hub.cron else 0 }} active</strong>
+            <div class="hub-sub" id="hub-cron-list">{% if hub and hub.cron %}{% for c in hub.cron %}<div>{{ c }}</div>{% endfor %}{% else %}No active schedules{% endif %}</div>
+          </article>
         </div>
         <details class="hub-details">
-          <summary>Script viewer — active endpoints</summary>
+          <summary>Runtime details and active endpoints</summary>
           <pre class="hub-script" id="hub-routes">{% if hub and hub.routes %}{% for r in hub.routes %}{{ r }}
 {% endfor %}{% endif %}</pre>
         </details>
-      </div>
+      </section>
 
-      <!-- Stale runner watcher -->
-      <div class="stale-watcher" id="stale-watcher">
-        <div class="stale-head">
+      <section class="fire-widget dashboard-card overview-fire" id="fire-widget" aria-labelledby="fire-card-title">
+        <div class="fire-card-head">
           <div>
-            <div class="stale-title">STALE RUNNERS</div>
-            <div class="stale-sub">Detects duplicate hubs and orphaned terminal wrappers</div>
+            <span class="section-kicker">Area conditions</span>
+            <h2 id="fire-card-title">Fire readiness</h2>
           </div>
-          <div class="stale-badge" id="stale-badge">0</div>
+          <span class="live-pill"><i></i>Live</span>
         </div>
-        <div class="stale-feed" id="stale-feed">Scanning…</div>
+        <div class="fire-card-body">
+          <div class="fire-flame-wrap">
+            <svg id="fire-flame" class="fire-flame" viewBox="0 0 100 120" aria-label="Fire danger level">
+              <path id="flame-path" d="M50 110 C20 90 18 55 38 38 C44 32 40 22 50 8 C62 24 60 34 64 40 C82 54 82 90 50 110 Z" fill="currentColor"/>
+            </svg>
+            <div><span class="fire-level-caption">Danger level</span><strong class="fire-stage-label" id="fire-stage-label">Low</strong></div>
+          </div>
+          <div class="fire-meta">
+            <div class="fire-meta-label">Region</div>
+            <div class="fire-region" id="fire-region">—</div>
+            <div class="fire-sources" id="fire-sources"></div>
+          </div>
+        </div>
+        <div class="fire-evac">
+          <div class="fire-evac-summary"><span>Evacuation status</span><strong class="fire-evac-name" id="fire-evac-name">None</strong></div>
+          <div class="evac-lights" id="evac-lights" aria-label="Evacuation stages">
+            <span class="evac-light" data-stage="0"><i></i>None</span>
+            <span class="evac-light" data-stage="1"><i></i>Advisory</span>
+            <span class="evac-light" data-stage="2"><i></i>Ready</span>
+            <span class="evac-light" data-stage="3"><i></i>Evacuate</span>
+            <span class="evac-light" data-stage="4"><i></i>Mandatory</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="overview-main-column">
+        {% include "_now_playing_card.html" %}
+
+        <section class="stale-watcher dashboard-card" id="stale-watcher" aria-labelledby="stale-title">
+          <div class="stale-head">
+            <div>
+              <span class="section-kicker">Process monitor</span>
+              <h2 class="stale-title" id="stale-title">Background runners</h2>
+              <div class="stale-sub">Duplicate hubs and orphaned terminal wrappers appear here.</div>
+            </div>
+            <div class="stale-badge" id="stale-badge" aria-label="Stale runner count">0</div>
+          </div>
+          <div class="stale-feed" id="stale-feed">Scanning…</div>
+        </section>
       </div>
 
-      <!-- Fire Watch -->
-      <div class="fire-watch-widget" id="fire-watch-widget">
-        <div class="fire-watch-head">
-          <span class="fire-watch-title">FIRE WATCH</span>
-          <span class="fire-watch-badge" id="fire-watch-badge">LIVE</span>
-        </div>
-        <div class="fire-watch-body" id="fire-watch-body">Checking…</div>
-      </div>
-    </div>
-    <div class="home-version" id="home-version">V2.34.14</div>
-    <div class="home-clock">
-      <span class="home-clock-time" id="clock-main">--:--:--</span>
-      <span class="home-clock-date" id="clock-date"></span>
+      <aside class="overview-side-column">
+        <section class="fire-watch-widget dashboard-card" id="fire-watch-widget" aria-labelledby="fire-watch-title">
+          <div class="fire-watch-head">
+            <div>
+              <span class="section-kicker">Live detail</span>
+              <h2 class="fire-watch-title" id="fire-watch-title">Fire watch</h2>
+            </div>
+            <span class="fire-watch-badge" id="fire-watch-badge">Live</span>
+          </div>
+          <div class="fire-watch-body" id="fire-watch-body">Checking…</div>
+        </section>
+      </aside>
     </div>
   </div>
 
@@ -287,13 +281,13 @@
   <!-- TAB 6: Model Arena (pit two local Ollama models) -->
     <div class="tab-panel" id="tab-arena" style="display:none">
       <div class="arena">
-        <h3 class="panel-h">&#9876; Model Arena</h3>
+        <h3 class="panel-h">Model Arena</h3>
       <p class="panel-sub">Same prompt to two local models. Pick a winner. See who actually earns its VRAM.</p>
 
       <!-- FUSION FORGE — at the top of the pairing space -->
       <div class="forge-top">
         <div class="forge-top-left">
-          <div class="forge-top-h">&#9883; Forge a Fusion Pair</div>
+          <div class="forge-top-h">Forge a Fusion Pair</div>
           <p class="forge-top-sub">Pair two LOCAL models (A drafts &rarr; B finishes). Saved pairs appear in every model dropdown &mdash; Arena debates, Maze, Chat.</p>
           <div class="forge-row">
             <input id="forge-name" class="fusion-input" placeholder="Pair name (e.g. MindSmith)" maxlength="40">
@@ -307,7 +301,7 @@
             </label>
           </div>
           <div class="forge-row">
-            <button id="forge-btn" class="btn-primary">&#9883; Forge Pair</button>
+            <button id="forge-btn" class="btn-primary">Forge Pair</button>
             <span id="forge-status" class="arena-status"></span>
           </div>
           <div id="forge-confirm" class="forge-confirm" style="display:none"></div>
@@ -318,8 +312,8 @@
       </div>
 
       <div class="arena-mode">
-        <button class="arena-mode-btn active" data-mode="fight">&#9876; Fight (A vs B)</button>
-        <button class="arena-mode-btn" data-mode="pair">&#128293; Pair (fuse A&#8594;B)</button>
+        <button class="arena-mode-btn active" data-mode="fight">Fight (A vs B)</button>
+        <button class="arena-mode-btn" data-mode="pair">Pair (fuse A to B)</button>
       </div>
       <p class="arena-mode-note" id="arena-mode-note">Each model answers the prompt; you judge the winner.</p>
 
@@ -330,15 +324,15 @@
         <label>Model B
           <select id="arena-b" class="arena-sel"></select>
         </label>
-        <button id="arena-swap" class="btn-ghost" data-tip="Swap A and B">&#8644; Swap</button>
+        <button id="arena-swap" class="btn-ghost" data-tip="Swap A and B">Swap</button>
       </div>
 
       <textarea id="arena-prompt" class="arena-prompt" rows="3"
         placeholder="Enter a challenge for both models…">Explain what a GPU VRAM fragment is, in one short paragraph.</textarea>
 
       <div class="arena-actions">
-        <button id="arena-fight" class="btn-primary">&#9876; Fight!</button>
-        <button id="arena-pair" class="btn-primary" style="display:none">&#128293; Fuse Pair</button>
+        <button id="arena-fight" class="btn-primary">Fight</button>
+        <button id="arena-pair" class="btn-primary" style="display:none">Fuse Pair</button>
         <span id="arena-status" class="arena-status"></span>
       </div>
 
@@ -371,7 +365,7 @@
         <button id="arena-clear" class="btn-ghost">Clear scores</button>
       </div>
       <div id="arena-pair-out" class="arena-pair-out" style="display:none">
-        <div class="arena-pair-head">&#128293; Fused Pair Output <span id="arena-pair-name"></span></div>
+        <div class="arena-pair-head">Fused Pair Output <span id="arena-pair-name"></span></div>
         <div class="arena-pair-sub" id="arena-pair-draft-wrap">DRAFT (A): <pre id="arena-pair-draft" class="arena-out"></pre></div>
         <div class="arena-pair-sub">FINAL (B): <pre id="arena-pair-final" class="arena-out"></pre></div>
         <div class="arena-meta" id="arena-pair-meta"></div>
@@ -382,7 +376,7 @@
   <!-- TAB 7b: Maze (watch local models solve a maze, live) -->
   <div class="tab-panel" id="tab-maze" style="display:none">
     <div class="maze-wrap">
-      <h3 class="panel-h">&#128373; Maze Run</h3>
+      <h3 class="panel-h">Maze Run</h3>
       <p class="panel-sub">Local models navigate a maze turn-by-turn — you watch them move. Same maze for both = a fair race.</p>
 
       <div class="maze-controls">
@@ -400,8 +394,8 @@
             <option value="21">21×21</option>
           </select>
         </label>
-        <button id="maze-run" class="btn-primary">&#9654; Run (live)</button>
-        <button id="maze-replay" class="btn-ghost" data-tip="Re-solve fast and animate the replay">&#8635; Replay</button>
+        <button id="maze-run" class="btn-primary">Run live</button>
+        <button id="maze-replay" class="btn-ghost" data-tip="Re-solve fast and animate the replay">Replay</button>
         <span id="maze-status" class="arena-status"></span>
       </div>
 
@@ -418,7 +412,7 @@
   <!-- TAB 7c: Fusion Core (forge named model pairs) -->
   <div class="tab-panel" id="tab-fusion" style="display:none">
     <div class="fusion">
-      <h3 class="panel-h">&#9883; Fusion Core</h3>
+      <h3 class="panel-h">Fusion Core</h3>
       <p class="panel-sub">Forge a named pair of two local models. They fuse &mdash; A drafts, B finishes &mdash; exactly like the Discord model pair. Saved pairs appear in EVERY model dropdown (Arena, Maze, Chat) so you can run them through the gauntlet.</p>
 
       <div class="fusion-create">
@@ -429,7 +423,7 @@
         <label>Model B (finish)
           <select id="fusion-b" class="arena-sel"></select>
         </label>
-        <button id="fusion-forge" class="btn-primary">&#9883; Forge Pair</button>
+        <button id="fusion-forge" class="btn-primary">Forge Pair</button>
       </div>
 
       <div class="fusion-evolve" id="fusion-evolve" style="display:none">
@@ -444,17 +438,30 @@
   <!-- TAB 8: Visualizer (audio-reactive neon) -->
   <div class="tab-panel" id="tab-visualizer" style="display:none">
     <div class="viz-wrap">
-      <h3 class="panel-h">&#127911; Audio Visualizer</h3>
-      <p class="panel-sub">Neon bars + scope driven by whatever's playing. Hit play on the audio menu (top-right) to feed it.</p>
-      <canvas id="viz-canvas" class="viz-canvas"></canvas>
-      <div class="viz-foot" id="viz-foot">Idle — start the hum or lo-fi to see it move.</div>
+      <h3 class="panel-h">Audio Visualizer</h3>
+      <p class="panel-sub">Choose a style, then play music or use the titlebar audio menu to make it react.</p>
+      <div class="viz-toolbar">
+        <span class="viz-toolbar-label" id="viz-mode-label">Style</span>
+        <div class="viz-modes" role="group" aria-labelledby="viz-mode-label">
+          <button type="button" class="viz-mode active" data-viz-mode="bars" data-spatial-key="visualizer-mode-bars" aria-pressed="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9m5 10V5m6 14V8m5 11V3"/></svg>
+            <span>Bars + scope</span>
+          </button>
+          <button type="button" class="viz-mode" data-viz-mode="particle-accelerator" data-spatial-key="visualizer-mode-particle-accelerator" aria-pressed="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M4.9 7.5c3.9-4.4 11.1-4.4 14.6.1 3 3.9.5 8.8-4.5 9.1-4 .2-7.6-2.4-8.5-6.1-.7-2.9 1.4-5.6 4.2-6.1M19.1 16.5c-3.9 4.4-11.1 4.4-14.6-.1-3-3.9-.5-8.8 4.5-9.1 4-.2 7.6 2.4 8.5 6.1.7 2.9-1.4 5.6-4.2 6.1"/></svg>
+            <span>Particle accelerator</span>
+          </button>
+        </div>
+      </div>
+      <canvas id="viz-canvas" class="viz-canvas" role="img" aria-label="Audio visualizer: Bars + scope"></canvas>
+      <div class="viz-foot" id="viz-foot" aria-live="polite">Bars + scope — start music or titlebar audio to make it react.</div>
     </div>
   </div>
 
   <!-- TAB 9: Pomodoro / Focus Timer -->
   <div class="tab-panel" id="tab-pomodoro" style="display:none">
     <div class="pomo-wrap">
-      <h3 class="panel-h">&#9202; Focus Timer</h3>
+      <h3 class="panel-h">Focus Timer</h3>
       <p class="panel-sub">The sun charges as the session burns down. When it hits zero, it explodes.</p>
       <div class="pomo-sun" id="pomo-sun"><div class="pomo-core"></div></div>
       <div class="pomo-time" id="pomo-time">25:00</div>
@@ -475,7 +482,7 @@
   <!-- TAB 10: Launchpad -->
   <div class="tab-panel" id="tab-launchpad" style="display:none">
     <div class="lp-wrap">
-      <h3 class="panel-h">&#128640; Launchpad</h3>
+      <h3 class="panel-h">Launchpad</h3>
       <p class="panel-sub">Pin apps and open them with one click. Stored locally.</p>
       <form id="lp-add" class="lp-add">
         <input id="lp-name" placeholder="Label (e.g. Discord)" required>
@@ -489,20 +496,20 @@
   <!-- TAB 11: Arcade (Snake + 2048 + Chess) -->
   <div class="tab-panel" id="tab-arcade" style="display:none">
     <div class="arc-wrap">
-      <h3 class="panel-h">&#127918; Arcade</h3>
-      <p class="panel-sub">Synthwave Snake, 2048 &amp; Chess. Arrow keys (or WASD) to play.</p>
+      <h3 class="panel-h">Arcade</h3>
+      <p class="panel-sub">Snake, 2048, and Chess in one place. Focus the game area and press Enter or controller A to play; Escape or B releases the controls.</p>
       <div class="arc-tabs">
-        <button class="arc-tab active" data-game="snake">&#128013; Snake</button>
-        <button class="arc-tab" data-game="2048">&#128292; 2048</button>
-        <button class="arc-tab" data-game="chess">&#9822; Chess</button>
+        <button class="arc-tab active" data-game="snake">Snake</button>
+        <button class="arc-tab" data-game="2048">2048</button>
+        <button class="arc-tab" data-game="chess">Chess</button>
       </div>
-      <div class="arc-stage" id="arc-stage"></div>
+      <div class="arc-stage" id="arc-stage" tabindex="0" role="application" aria-label="Arcade game area. Press Enter or controller A to play."></div>
       <div class="arc-score" id="arc-score">Score: 0</div>
 
       <!-- Chess lives inside Arcade too -->
       <div class="cc-chess-wrap" id="arc-chess" style="display:none">
         <div class="cc-chess-side">
-          <h3>Synthwave Chess</h3>
+          <h3>Chess</h3>
           <div class="cc-status" id="cc-status">White to move</div>
           <div class="cc-controls">
             <button class="btn-primary" id="cc-new" data-tip="Start a fresh game">New Game</button>
@@ -521,7 +528,7 @@
             <p class="cc-hint">You play <strong>White</strong>. Off = built-in engine (fast, level 1–10). On = your local Ollama model picks moves (validated; falls back to the engine if it stalls).</p>
           </div>
         </div>
-        <div class="cc-board" id="cc-board" aria-label="Chess board"></div>
+        <div class="cc-board" id="cc-board" role="grid" aria-label="Chess board"></div>
       </div>
     </div>
   </div>
@@ -529,7 +536,7 @@
   <!-- TAB 12: Local AI Chat -->
   <div class="tab-panel" id="tab-chat" style="display:none">
     <div class="chat-wrap">
-      <h3 class="panel-h">&#128172; Local AI Chat</h3>
+      <h3 class="panel-h">Local AI Chat</h3>
       <p class="panel-sub">Talks to your local model over the offline webhook. Nothing leaves the machine.</p>
       <div class="chat-model-row">
         <span class="chat-model-label">Model</span>
@@ -549,7 +556,7 @@
   <!-- TAB 13: Notes / Scratchpad -->
   <div class="tab-panel" id="tab-notes" style="display:none">
     <div class="notes-wrap">
-      <h3 class="panel-h">&#128221; Notes</h3>
+      <h3 class="panel-h">Notes</h3>
       <p class="panel-sub">Local markdown scratchpad. Auto-saved.</p>
       <textarea id="notes-area" class="notes-area" placeholder="# Notes&#10;&#10;Type here…"></textarea>
       <div class="notes-preview" id="notes-preview"></div>
@@ -559,7 +566,7 @@
   <!-- TAB 14: Discord Console -->
   <div class="tab-panel" id="tab-discord" style="display:none">
     <div class="dc-wrap">
-      <h3 class="panel-h">&#128483; Discord Console</h3>
+      <h3 class="panel-h">Discord Console</h3>
       <p class="panel-sub">Bot + gateway status, and a way to fire a message to a channel.</p>
       <div class="dc-status" id="dc-status">checking…</div>
       <form id="dc-send" class="dc-send">
@@ -574,7 +581,7 @@
   <!-- TAB 17: Webhook Catcher -->
   <div class="tab-panel" id="tab-webhooks" style="display:none">
     <div class="wh-wrap">
-      <h3 class="panel-h">&#128225; Webhook Catcher</h3>
+      <h3 class="panel-h">Webhook Catcher</h3>
       <p class="panel-sub">Receives <strong>local</strong> POSTs to <code>http://127.0.0.1:5050/api/incoming?source=NAME</code>. Point n8n / your relay / any local tool here. Nothing leaves the box.</p>
       <div class="wh-bar">
         <button class="btn-primary" id="wh-clear" data-tip="Clear the live view">Clear</button>
@@ -585,10 +592,13 @@
     </div>
   </div>
 
+  {% include "_music_panel.html" %}
+  {% include "_video_panel.html" %}
+
   <!-- TAB 18: Kanban (shared task board) -->
   <div class="tab-panel" id="tab-kanban" style="display:none">
     <div class="kb-wrap">
-      <h3 class="panel-h">&#128221; Kanban</h3>
+      <h3 class="panel-h">Kanban</h3>
       <p class="panel-sub">Shared board — you and the agent both add here. Column steers priority: <strong>Backlog</strong> = backlog, <strong>WIP</strong> = active, <strong>Completed</strong> = closed. No WIP limit (yet).</p>
       <div class="kb-bar">
         <button class="btn-primary" id="kb-add" data-tip="Add a task (the agent sees it too)">+ Add task</button>
@@ -596,24 +606,24 @@
       </div>
       <div class="kb-board" id="kb-board">
         <div class="kb-col" data-col="backlog">
-          <div class="kb-col-h">&#9744; Backlog</div>
+          <div class="kb-col-h">Backlog</div>
           <div class="kb-cards" id="kb-backlog"></div>
         </div>
         <div class="kb-col" data-col="wip">
-          <div class="kb-col-h">&#128260; WIP</div>
+          <div class="kb-col-h">In progress</div>
           <div class="kb-cards" id="kb-wip"></div>
         </div>
         <div class="kb-col" data-col="completed">
-          <div class="kb-col-h">&#9989; Completed</div>
+          <div class="kb-col-h">Completed</div>
           <div class="kb-cards" id="kb-completed"></div>
         </div>
       </div>
     </div>
 
     <!-- WIP caution modal: shown when a task is moved INTO In Progress -->
-    <div class="kb-pop" id="kb-wip-caution" style="display:none">
+    <div class="kb-pop" id="kb-wip-caution" role="dialog" aria-modal="true" aria-labelledby="kb-wip-title" style="display:none">
       <div class="kb-pop-box" style="max-width:440px">
-        <h4>Start this task?</h4>
+        <h4 id="kb-wip-title">Start this task?</h4>
         <p class="kb-wip-text">Moving <strong id="kb-wip-msg"></strong> to <strong>In Progress</strong> will tell the agent to begin working on it.</p>
         <div class="kb-pop-acts">
           <button class="btn-ghost" id="kb-wip-no">No — keep it here</button>
@@ -623,12 +633,11 @@
     </div>
     <!-- transient confirmation flash after starting -->
     <div class="kb-wip-flash" id="kb-wip-flash"></div>
-  </div>
 
     <!-- Add-task mini popover -->
-    <div class="kb-pop" id="kb-pop" style="display:none">
+    <div class="kb-pop" id="kb-pop" role="dialog" aria-modal="true" aria-labelledby="kb-pop-title" style="display:none">
       <div class="kb-pop-box">
-        <h4>New task</h4>
+        <h4 id="kb-pop-title">New task</h4>
         <input id="kb-title" class="kb-title" placeholder="Title" autocomplete="off">
         <textarea id="kb-desc" class="kb-desc" placeholder="Description (optional) — a little package the agent can open"></textarea>
         <div class="kb-pop-acts">
@@ -639,13 +648,22 @@
     </div>
   </div>
 
-  <!-- TAB 15: Themes -->
+  <!-- Appearance -->
   <div class="tab-panel" id="tab-settings" style="display:none">
     <div class="theme-wrap">
-      <h3 class="panel-h">&#9881; Themes</h3>
-      <p class="panel-sub">Pick a synthwave palette. Your choice sticks across restarts.</p>
+      <h3 class="panel-h">Appearance</h3>
+      <p class="panel-sub">Choose an accent palette or a full-screen aesthetic. Your preference stays on this device.</p>
       <div class="theme-swatches" id="theme-swatches"></div>
-      <div class="theme-current-line">Active: <strong id="theme-current">Outrun</strong></div>
+      <div class="theme-current-line" aria-live="polite">Active palette: <strong id="theme-current">Graphite</strong></div>
+      <div class="appearance-preferences" aria-label="Appearance preferences">
+        <label class="appearance-toggle-row" for="appearance-music-player-toggle">
+          <span class="appearance-toggle-copy">
+            <strong>Show music mini player</strong>
+            <small>Turn this off when the bottom player gets in the way. Playback continues.</small>
+          </span>
+          <input id="appearance-music-player-toggle" type="checkbox" role="switch" data-music-player-toggle>
+        </label>
+      </div>
     </div>
   </div>
 
@@ -655,7 +673,9 @@
 <script>
   // ---- tab switching (no tab is active on a fresh open) ----
   var _lastTab = null;
+  var _ccTabs = ['home','switches','control','sys','arena','maze','fusion','music','video','visualizer','pomodoro','launchpad','arcade','chat','notes','discord','webhooks','kanban','settings'];
   function showTab(name) {
+    if (_ccTabs.indexOf(name) < 0) name = 'home';
     if (name === _lastTab) return;
     // tell the outgoing tab to stop (visualizer, pomodoro, arcade, chat)
     if (_lastTab === 'visualizer' && window.CCViz) window.CCViz.onHide();
@@ -664,18 +684,32 @@
     if (_lastTab === 'chat' && window.CCChat) window.CCChat.onHide();
     if (_lastTab === 'discord' && window.CCDiscord) window.CCDiscord.onHide();
     _lastTab = name;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
-    ['home','switches','control','sys','arena','maze','fusion','relay','visualizer','pomodoro','launchpad','arcade','chat','notes','discord','webhooks','kanban','settings'].forEach(function (t) {
-      var el = document.getElementById('tab-' + t);
-      if (el) el.style.display = (name === t) ? '' : 'none';
+    window._ccCurrentTab = name;
+    document.querySelectorAll('button.tab-btn[data-tab]').forEach(function (button) {
+      var active = button.dataset.tab === name;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-selected', active ? 'true' : 'false');
+      button.setAttribute('aria-controls', 'tab-' + button.dataset.tab);
+      button.id = button.id || ('cc-tab-' + button.dataset.tab);
+      button.tabIndex = active ? 0 : -1;
     });
-    if (window.CCFX && window.CCFX.whoosh) window.CCFX.whoosh();
+    _ccTabs.forEach(function (t) {
+      var el = document.getElementById('tab-' + t);
+      if (el) {
+        var active = name === t;
+        el.style.display = active ? '' : 'none';
+        el.hidden = !active;
+        el.setAttribute('role', 'tabpanel');
+        el.setAttribute('aria-labelledby', 'cc-tab-' + t);
+      }
+    });
     if (name === 'sys') window.CCSys && window.CCSys.onShow();
     if (name === 'arena' && window.CCArena) window.CCArena.mount();
     if (name === 'maze' && window.CCMaze) window.CCMaze.mount();
     if (name === 'fusion' && window.CCFusion) window.CCFusion.mount();
     if (name === 'control' && window.CCControl) window.CCControl.mount();
-    if (name === 'relay' && window.CCRelayTrace) window.CCRelayTrace.mount();
+    if (name === 'music' && window.CCMusic) window.CCMusic.onShow();
+    if (name === 'video' && window.CCVideo) window.CCVideo.onShow();
     if (name === 'visualizer' && window.CCViz) window.CCViz.onShow();
     if (name === 'pomodoro' && window.CCPomo) window.CCPomo.onShow();
     if (name === 'launchpad' && window.CCLaunch) window.CCLaunch.onShow();
@@ -687,12 +721,14 @@
     if (name === 'webhooks' && window.CCWebhooks) window.CCWebhooks.onShow();
     if (name === 'kanban' && window.CCKanban) window.CCKanban.onShow();
     if (name === 'settings' && window.CCTheme) window.CCTheme.apply((function(){try{return localStorage.getItem('cc_theme')||'outrun';}catch(e){return 'outrun';}})());
+    window.dispatchEvent(new CustomEvent('cc:tabchange', { detail: { name: name } }));
   }
   document.querySelectorAll('.hero-chip').forEach(c => {
     c.onclick = () => showTab(c.dataset.goto);
   });
   // start on the tab named in the URL hash (e.g. /#sys), else BLANK
   var startTab = (location.hash || '').replace('#', '') || 'home';
+  if (_ccTabs.indexOf(startTab) < 0) startTab = 'home';
   showTab(startTab);
 
   // ---- live-reload ping: when the agent edits the app it bumps the
@@ -712,14 +748,12 @@
     }).catch(function () {});
   }
   // remember which tab is active so a reload reopens it
-  var _ccShow = window.showTab;
-  window._ccCurrentTab = startTab;
-  window.showTab = function (name) { window._ccCurrentTab = name; return _ccShow(name); };
+  window.showTab = showTab;
   setInterval(ccLiveCheck, 2000);
 
   // ---- power switch logic ----
   const csrf = "{{ csrf_token() }}";
-  const dotColor = (ok) => ok ? '#39ff14' : '#ff2d55';
+  const dotColor = (ok) => ok ? 'var(--success)' : 'var(--danger)';
   async function refresh() {
     try {
       const r = await fetch('/bot/status');
@@ -776,14 +810,14 @@
   const b_rst = document.getElementById('relay-stop'); if (b_rst) b_rst.onclick = () => postJSON('/bot/stop');
   const b_rsw = document.getElementById('relay-switch'); if (b_rsw) b_rsw.onchange = (e) => postJSON(e.target.checked ? '/bot/start' : '/bot/stop');
   // ---- FIRE DANGER WIDGET ----
-  const FIRE_COLORS = { 1: '#39ff14', 2: '#ffe600', 3: '#ff9f1c', 4: '#ff2d55', 5: '#c1121f' };
+  const FIRE_COLORS = { 1: '#45c486', 2: '#d8bd55', 3: '#e8ad55', 4: '#ed6a74', 5: '#c94f59' };
   function fireUpdate() {
     fetch('/api/fire/status').then(r => r.json()).then(d => {
       const lvl = d.danger_level || 1;
       const fl = document.getElementById('flame-path');
-      if (fl) fl.setAttribute('fill', FIRE_COLORS[lvl] || '#39ff14');
+      if (fl) fl.setAttribute('fill', FIRE_COLORS[lvl] || '#45c486');
       const lbl = document.getElementById('fire-stage-label');
-      if (lbl) { lbl.textContent = d.danger_name || ('Stage ' + lvl); lbl.style.color = FIRE_COLORS[lvl] || '#39ff14'; }
+      if (lbl) { lbl.textContent = d.danger_name || ('Stage ' + lvl); lbl.style.color = FIRE_COLORS[lvl] || '#45c486'; }
       const reg = document.getElementById('fire-region');
       if (reg) reg.textContent = d.region || '';
       const src = document.getElementById('fire-sources');
@@ -808,7 +842,7 @@
     try {
       const r = await fetch('/api/hub/status');
       const s = await r.json();
-      const dot = (ok) => ok ? '#39ff14' : '#ff2d55';
+      const dot = (ok) => ok ? 'var(--success)' : 'var(--danger)';
       const setText = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
       const setDot = (id, ok) => { const el = document.getElementById(id); if (el) el.style.background = dot(!!ok); };
       setDot('dot-hub', true);
@@ -831,13 +865,19 @@
 
   const killModal = document.getElementById('kill-confirm');
   const hubKill = document.getElementById('hub-kill');
-  if (hubKill) hubKill.onclick = () => { if (killModal) killModal.classList.add('on'); };
-  const killNo = document.getElementById('kill-no'); if (killNo) killNo.onclick = () => { if (killModal) killModal.classList.remove('on'); };
+  if (hubKill) hubKill.onclick = () => {
+    if (killModal) killModal.classList.add('on');
+    const cancel = document.getElementById('kill-no'); if (cancel) cancel.focus();
+  };
+  const killNo = document.getElementById('kill-no'); if (killNo) killNo.onclick = () => {
+    if (killModal) killModal.classList.remove('on');
+    if (hubKill) hubKill.focus();
+  };
   const killYes = document.getElementById('kill-yes');
   if (killYes) killYes.onclick = async () => {
     killYes.disabled = true; killYes.textContent = 'Killing…';
     try { await fetch('/api/hub/kill', {method:'POST'}); } catch (e) {}
-    setTimeout(() => { document.body.innerHTML = '<div style="padding:30px;font-family:monospace;color:#ff2d55;">Hub killed. Restart it from <strong>C:\\web\\app.py</strong>.</div>'; }, 1000);
+    setTimeout(() => { document.body.innerHTML = '<div style="padding:30px;font-family:monospace;color:#ff2d55;">Hub killed. Restart it with your Command Center launcher or run <strong>python backend/app.py</strong> from the project folder.</div>'; }, 1000);
   };
 
   // ---- Fire Watch widget ----

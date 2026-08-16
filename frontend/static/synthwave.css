@@ -449,6 +449,10 @@ body {
 .cc-sq {
   position: relative;
   display: flex; align-items: center; justify-content: center;
+  min-width: 0; padding: 0; border: 0; border-radius: 0;
+  appearance: none;
+  color: inherit;
+  font-family: inherit;
   font-size: calc(min(78vmin, 560px) / 11);
   line-height: 1;
   cursor: pointer;
@@ -848,8 +852,46 @@ body.idle .home-hero-title {
 
 /* ---- Visualizer ---- */
 .viz-wrap { padding: 18px; }
+.viz-toolbar { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; }
+.viz-toolbar-label { flex: 0 0 auto; color: var(--muted); font-family: 'Orbitron', sans-serif; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.viz-modes { display: flex; flex-wrap: wrap; gap: 8px; }
+.viz-mode {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 9px 14px; border: 1px solid var(--border); border-radius: 10px;
+  color: var(--muted); background: rgba(10,1,24,0.58); box-shadow: none;
+  font-family: 'Share Tech Mono', monospace; font-size: 0.86rem;
+}
+.viz-mode svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.viz-mode:hover { color: var(--text); border-color: var(--accent-3); background: rgba(53,196,255,0.1); }
+.viz-mode.active, .viz-mode[aria-pressed="true"] {
+  color: #fff; border-color: var(--accent-3);
+  background: linear-gradient(135deg, rgba(255,45,149,0.32), rgba(53,196,255,0.22));
+  box-shadow: 0 0 16px rgba(53,196,255,0.18), inset 0 0 14px rgba(255,45,149,0.12);
+}
 .viz-canvas { width: 100%; height: 340px; display: block; border-radius: 14px; border: 1px solid var(--border); background: rgba(10,1,24,0.5); box-shadow: 0 0 24px rgba(255,45,149,0.2); }
 .viz-foot { margin-top: 10px; color: var(--muted); font-size: 0.85rem; }
+
+@media (max-width: 540px) {
+  .viz-wrap { padding: 12px; }
+  .viz-toolbar { align-items: stretch; flex-direction: column; gap: 7px; }
+  .viz-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .viz-mode { min-width: 0; padding-inline: 9px; }
+  .viz-canvas { height: min(50vh, 310px); min-height: 250px; }
+}
+
+@media (max-width: 350px) {
+  .viz-mode { font-size: 0.78rem; }
+  .viz-mode svg { width: 18px; height: 18px; }
+  .viz-canvas { height: 250px; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .viz-wrap { padding-block: 8px; }
+  .viz-wrap .panel-sub { margin-bottom: 9px; }
+  .viz-toolbar { margin-bottom: 9px; }
+  .viz-canvas { height: 190px; min-height: 0; }
+  .viz-foot { margin-top: 6px; }
+}
 
 /* ---- Pomodoro ---- */
 .pomo-wrap { padding: 18px; text-align: center; }
