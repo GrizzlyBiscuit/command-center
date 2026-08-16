@@ -325,16 +325,16 @@ def install_endpoint():
 # ------------------------------------------------------------------
 # Discord relay control (the "on switch" hub tab)
 # ------------------------------------------------------------------
-RELAY_SCRIPT = _configured_path('RELAY_SCRIPT', r"~\Desktop\Ai\discord_relay.py")
-RELAY_LAUNCHER = _configured_path('RELAY_LAUNCHER', r"~\Desktop\Ai\discord_relay_launcher.bat")
+RELAY_SCRIPT = _configured_path('RELAY_SCRIPT', r"~/Desktop/Ai/discord_relay.py")
+RELAY_LAUNCHER = _configured_path('RELAY_LAUNCHER', r"~/Desktop/Ai/discord_relay_launcher.bat")
 RELAY_VENV_PY = _configured_path(
     'RELAY_VENV_PY',
-    r"~\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe",
+    r"~/AppData/Local/hermes/hermes-agent/venv/Scripts/python.exe",
 )
-RELAY_PIDFILE = _configured_path('RELAY_PIDFILE', r"~\Desktop\Ai\relay.pid")
-RELAY_LOGFILE = _configured_path('RELAY_LOGFILE', r"~\Desktop\Ai\relay_out.txt")
-OLLAMA_EXE = resolve_ollama_executable(r"~\AppData\Local\Programs\Ollama\ollama.exe")
-CRON_JOBS = ["3b56fa6e0b27", "3c17efea16cb"]  # Daily Readiness, Kanban WIP
+RELAY_PIDFILE = _configured_path('RELAY_PIDFILE', r"~/Desktop/Ai/relay.pid")
+RELAY_LOGFILE = _configured_path('RELAY_LOGFILE', r"~/Desktop/Ai/relay_out.txt")
+OLLAMA_EXE = resolve_ollama_executable(r"~/AppData/Local/Programs/Ollama/ollama.exe")
+CRON_JOBS = []  # set to your Hermes cron job ids, e.g. ["<jid1>", "<jid2>"]
 
 CREATE_NEW_PROCESS_GROUP = 0x00000200
 DETACHED_PROCESS = 0x00000008
@@ -490,7 +490,7 @@ def _sync_cron_to_pair(active):
     it disables them. This prevents the earlier deadlock where crons fired
     while the pair was offline and hung on model-cold-start. Best-effort:
     failures are logged but never break the bot start/stop flow."""
-    CRON_JOBS = ["3b56fa6e0b27", "3c17efea16cb"]  # Daily Readiness, Kanban WIP
+    CRON_JOBS = []  # set to your Hermes cron job ids, e.g. ["<jid1>", "<jid2>"]
     action = "resume" if active else "pause"
     try:
         import subprocess as _sp, shutil as _sh
@@ -664,13 +664,13 @@ def _ollama_stop():
 # writes outcomes back to reasoning_log.md (append-only).
 #
 # MEMORY CONSOLIDATION:
-# - Primary memory dir: ~\Desktop\Ai\memory\
-# - Native Hermes memory: ~\AppData\Local\hermes\memories\
+# - Primary memory dir: ~/Desktop/Ai/memory/
+# - Native Hermes memory: ~/AppData/Local/hermes/memories/
 # Both are scanned for markdown files. Native Hermes memory files
 # (MEMORY.md, USER.md) are included first so any agent can locate them.
 # ------------------------------------------------------------------
-MEMORY_DIR = os.path.expanduser(r"~\Desktop\Ai\memory")
-HERMES_MEMORY_DIR = os.path.expanduser(r"~\AppData\Local\hermes\memories")
+MEMORY_DIR = os.path.expanduser(r"~/Desktop/Ai/memory")
+HERMES_MEMORY_DIR = os.path.expanduser(r"~/AppData/Local/hermes/memories")
 REASONING_LOG = os.path.join(MEMORY_DIR, "reasoning_log.md")
 
 
@@ -1220,7 +1220,7 @@ def games_ai_move():
 # /arena/models -> installed models; /arena/round -> same prompt to both
 # (sequential, VRAM-friendly); /arena/vote -> persist result + scoreboard.
 # ------------------------------------------------------------------
-ARENA_SCORES = r"~\Desktop\Ai\arena_scores.json"
+ARENA_SCORES = r"~/Desktop/Ai/arena_scores.json"
 
 
 def _arena_load():
@@ -1711,13 +1711,13 @@ def arena_maze_stream():
 # ------------------------------------------------------------------
 import urllib.request as _ur
 FIRE_STATE = os.path.join(os.path.dirname(__file__), "fire_state.json")
-# Region = [REDACTED_COUNTY] County, OR (ZIP [REDACTED_ZIP]). Edit to your area.
+# Region = UPPERCASE_PLACEHOLDER County, ST (ZIP 00000). EDIT THIS to your area.
 # NWS point lookup is precise to coordinates; fireWeatherZone from api.weather.gov.
-# [REDACTED_TOWN], OR coords ~ [REDACTED_HOME_COORDS]. [REDACTED_TOWN_OFFICE] office (PDT), zone [REDACTED_FIRE_ZONE].
+# Replace the placeholder coords/zone/label with your own before running.
 FIRE_CFG = {
-    "zone": "[REDACTED_FIRE_ZONE]",       # NWS fire-weather zone for [REDACTED_COUNTY] County
-    "point": "[REDACTED_HOME_COORDS]",  # lat,lon for point-based alert lookup
-    "label": "[REDACTED_COUNTY] County, OR",
+    "zone": "EDIT_NWS_ZONE",       # NWS fire-weather zone for your county
+    "point": "00.00,-000.00",      # lat,lon for point-based alert lookup
+    "label": "Your County, ST",
 }
 FIRE_STAGE_NAMES = {1: "Low", 2: "Moderate", 3: "High", 4: "Extreme", 5: "Catastrophic"}
 EVAC_STAGE_NAMES = {0: "None", 1: "Advisory", 2: "Get Ready / Set",
@@ -1821,7 +1821,7 @@ def fire_status():
             sources.append("NWS: unreachable (using last/override)")
         elif cnt and cnt > 0:
             level = 2 + min(sev, 3)
-            sources.append("NWS Red Flag Warnings ([REDACTED_COUNTY]): %d (sev %d)" % (cnt, sev))
+            sources.append("NWS Red Flag Warnings: %d (sev %d)" % (cnt, sev))
         else:
             sources.append("NWS Red Flag Warnings: none active for your area")
         st["danger_level"] = level

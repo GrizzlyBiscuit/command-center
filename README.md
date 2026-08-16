@@ -279,7 +279,7 @@ Key endpoints used by the UI:
 - **Local stack**: CC hub `backend/app.py`, Flask default `FLASK_PORT=5050`, Ollama at `127.0.0.1:11434`.
 - **Default agent runtime**: `tencent/hy3:free` via Nous Portal. Fallback is local `ollama-launch` -> `qwen3:14b-ctx64k` when throttled. Memory folder carries context across provider changes.
 - **Relay**: model pair = Discord bot + chess `/games/ai-move`. Both sides read extended memory before acting and append outcomes to `reasoning_log.md`.
-- **Fire Watch**: [REDACTED_COUNTY] County, OR (`[REDACTED_ZIP]`, zone `[REDACTED_FIRE_ZONE]`, point `[REDACTED_HOME_COORDS]`, NWS [REDACTED_TOWN_OFFICE] PDT). You can override with `POST /api/fire/set`.
+- **Fire Watch**: configurable NWS fire-weather zone + point (edit `FIRE_CFG` in `backend/app.py`). You can override live with `POST /api/fire/set`.
 - **Fusion Core**: pair-size guard — no two models both >14B, total combined size <= 48B. Saved pairs are exposed as `fusion:<id>` in model dropdowns.
 - **Models**: local Ollama set currently has 14 models post-restore. The Hermes desktop dropdown is separate and may disable some locally unrunnable models.
 - **Voice**: prefer mic input with text-only replies.

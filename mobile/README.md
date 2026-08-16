@@ -3,7 +3,7 @@
 Goal: a native-feeling Android app that connects to your local Command Center hub while you’re on the same network or via Tailscale.
 
 ## Project layout
-`~\Desktop\Ai\cc-mobile-app`
+`~/Desktop/Ai/cc-mobile-app`
 - `app/src/main/java/com/commandcenter/app/MainActivity.java`
 - `app/src/main/AndroidManifest.xml`
 - `app/build.gradle`, `settings.gradle`, `build.gradle`
